@@ -1,0 +1,2519 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinematic 3D Aviation, Ship & Realistic Semi-Truck — Hero Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap');
+
+        :root {
+            /* تنظیمات پیش‌فرض فیلتر (سرمه‌ای سینمایی) */
+            --scrim-right: rgba(4, 12, 28, 0.86);
+            --scrim-mid: rgba(7, 22, 48, 0.52);
+            --scrim-left: rgba(10, 28, 58, 0.14);
+            --tint-overlay: linear-gradient(135deg, rgba(14, 165, 233, 0.14) 0%, rgba(245, 158, 11, 0.10) 100%);
+            --canvas-filter: contrast(1.08) saturate(1.15) brightness(0.93);
+            --accent-color: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.45);
+            --gold-accent: #fbbf24;
+        }
+
+        /* مود ۲: غروب طلایی (Golden Sunset) */
+        body.theme-sunset {
+            --scrim-right: rgba(24, 10, 20, 0.86);
+            --scrim-mid: rgba(48, 20, 28, 0.52);
+            --scrim-left: rgba(120, 53, 15, 0.18);
+            --tint-overlay: linear-gradient(135deg, rgba(249, 115, 22, 0.22) 0%, rgba(168, 85, 247, 0.16) 100%);
+            --canvas-filter: contrast(1.12) saturate(1.28) sepia(0.18) brightness(0.92);
+            --accent-color: #fb923c;
+            --accent-glow: rgba(251, 146, 60, 0.45);
+        }
+
+        /* مود ۳: تیره مدرن (Dark Cyber) */
+        body.theme-dark {
+            --scrim-right: rgba(3, 7, 18, 0.92);
+            --scrim-mid: rgba(6, 15, 32, 0.72);
+            --scrim-left: rgba(3, 7, 18, 0.42);
+            --tint-overlay: linear-gradient(135deg, rgba(6, 182, 212, 0.16) 0%, rgba(30, 58, 138, 0.25) 100%);
+            --canvas-filter: contrast(1.16) saturate(0.92) brightness(0.80);
+            --accent-color: #22d3ee;
+            --accent-glow: rgba(34, 211, 238, 0.45);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #061224;
+            color: #ffffff;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* اعمال فیلتر پردازش تصویر مستقیم روی بوم سه‌بعدی */
+        #webgl-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            display: block;
+            filter: var(--canvas-filter);
+            transition: filter 0.6s ease;
+        }
+
+        #cloud-mist {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(219, 234, 254, 0.82) 100%);
+            z-index: 2;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #sun-glow {
+            position: fixed;
+            z-index: 2;
+            pointer-events: none;
+            width: 340px;
+            height: 340px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,247,220,0.65) 0%, rgba(255,225,160,0.18) 35%, rgba(255,210,120,0) 70%);
+            transform: translate(-50%, -50%);
+            opacity: 0.9;
+            mix-blend-mode: screen;
+        }
+
+        /* ============================================================
+           سیستم فیلتر سینمایی ۳ لایه (مخصوص خوانایی متن Hero)
+           ============================================================ */
+        .hero-filter-system {
+            position: fixed;
+            inset: 0;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        /* ۱. لایه گرادینت جهتی (تیره در سمت راست برای متن فارسی، باز در سمت چپ برای دید سه‌بعدی) */
+        .filter-scrim {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(270deg,
+                    var(--scrim-right) 0%,
+                    var(--scrim-right) 24%,
+                    var(--scrim-mid) 56%,
+                    var(--scrim-left) 100%
+                ),
+                linear-gradient(180deg,
+                    rgba(3, 9, 22, 0.68) 0%,
+                    rgba(3, 9, 22, 0.0) 22%,
+                    rgba(3, 9, 22, 0.0) 75%,
+                    rgba(3, 9, 22, 0.82) 100%
+                );
+            transition: background 0.6s ease;
+        }
+
+        /* ۲. لایه اصلاح رنگ سینمایی (Split-Tone Tint) */
+        .filter-color-grade {
+            position: absolute;
+            inset: 0;
+            background: var(--tint-overlay);
+            mix-blend-mode: soft-light;
+        }
+
+        /* ۳. لایه وینیت (Vignette) و بافت ظریف سینمایی */
+        .filter-vignette {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0) 52%, rgba(2, 6, 18, 0.62) 100%);
+            box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.55);
+        }
+
+        /* ============================================================
+           بخش محتوا و متن HERO (قابل ویرایش)
+           ============================================================ */
+        .hero-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 6;
+            pointer-events: none; /* اجازه می‌دهد اسکرول صفحه بدون مانع کار کند */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 28px 6vw 36px;
+        }
+
+        /* نوار بالایی (هدر شیشه‌ای) */
+        .hero-navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            pointer-events: auto;
+            background: rgba(15, 23, 42, 0.42);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 12px 24px;
+            border-radius: 18px;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 900;
+            font-size: 1.25rem;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+        }
+
+        .brand-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            box-shadow: 0 0 12px var(--accent-color);
+        }
+
+        /* دکمه‌های تغییر فیلتر در هدر */
+        .filter-switcher {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .filter-btn.active, .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.16);
+            color: #ffffff;
+        }
+
+        /* محتوای اصلی Hero */
+        .hero-main {
+            max-width: 620px;
+            margin-top: auto;
+            margin-bottom: auto;
+            pointer-events: auto;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(56, 189, 248, 0.14);
+            border: 1px solid rgba(56, 189, 248, 0.38);
+            color: #e0f2fe;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 7px 16px;
+            border-radius: 999px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-badge-pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--gold-accent);
+            box-shadow: 0 0 10px var(--gold-accent);
+        }
+
+        .hero-title {
+            font-size: clamp(2.1rem, 4.2vw, 3.6rem);
+            font-weight: 900;
+            line-height: 1.28;
+            margin-bottom: 18px;
+            color: #ffffff;
+            text-shadow: 0 8px 30px rgba(0, 0, 0, 0.55);
+        }
+
+        .hero-title .highlight {
+            background: linear-gradient(90deg, #ffffff 0%, var(--accent-color) 55%, var(--gold-accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(0.98rem, 1.3vw, 1.15rem);
+            font-weight: 300;
+            line-height: 1.9;
+            color: rgba(241, 245, 249, 0.88);
+            margin-bottom: 30px;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.65);
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-color) 0%, #0284c7 100%);
+            color: #041022;
+            font-family: 'Vazirmatn', sans-serif;
+            font-weight: 800;
+            font-size: 0.98rem;
+            padding: 14px 30px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 28px -6px var(--accent-glow);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 34px -4px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.09);
+            color: #ffffff;
+            font-family: 'Vazirmatn', sans-serif;
+            font-weight: 600;
+            font-size: 0.98rem;
+            padding: 14px 26px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            backdrop-filter: blur(12px);
+            cursor: pointer;
+            transition: background 0.25s ease, border-color 0.25s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* نوار پایین Hero (کارت‌های آمار شیشه‌ای + نشانگر مرحله اسکرول) */
+        .hero-footer {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            pointer-events: auto;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(15, 23, 42, 0.48);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 12px 20px;
+            min-width: 135px;
+        }
+
+        .stat-value {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .stat-label {
+            font-size: 0.78rem;
+            color: rgba(226, 232, 240, 0.75);
+        }
+
+        /* نشانگر هوشمند مرحله فعلی در اسکرول */
+        .stage-pills {
+            display: flex;
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.48);
+            backdrop-filter: blur(12px);
+            padding: 6px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .stage-pill {
+            font-size: 0.8rem;
+            padding: 6px 16px;
+            border-radius: 999px;
+            color: rgba(255, 255, 255, 0.65);
+            transition: all 0.35s ease;
+        }
+
+        .stage-pill.active {
+            background: var(--accent-color);
+            color: #041022;
+            font-weight: 700;
+            box-shadow: 0 0 16px var(--accent-glow);
+        }
+
+        .scroll-wrapper {
+            position: relative;
+            z-index: 3;
+            height: 860vh;
+        }
+
+        .scene-section {
+            height: 100vh;
+            pointer-events: none;
+        }
+
+        .scroll-prompt {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.85);
+            text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+            transition: opacity 0.4s;
+            pointer-events: none;
+        }
+
+        .scroll-line {
+            width: 1.5px;
+            height: 38px;
+            background: linear-gradient(to bottom, #ffffff, transparent);
+            animation: scrollLine 1.8s ease-in-out infinite;
+        }
+
+        @keyframes scrollLine {
+            0%, 100% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+            50%      { transform: scaleY(0.4); transform-origin: top; opacity: 0.4; }
+        }
+
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            background: linear-gradient(180deg, #0b2545 0%, #1d63b8 100%);
+            transition: opacity 0.6s ease;
+        }
+        .loading-screen.hidden { opacity: 0; pointer-events: none; }
+        .loading-screen .spinner {
+            width: 44px; height: 44px;
+            border: 3px solid rgba(255,255,255,0.25);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            .hero-overlay { padding: 18px 5vw 24px; }
+            .filter-scrim {
+                background: linear-gradient(180deg,
+                    rgba(4, 12, 28, 0.82) 0%,
+                    rgba(4, 12, 28, 0.68) 55%,
+                    rgba(4, 12, 28, 0.88) 100%
+                );
+            }
+            .stage-pills { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="loading-screen" id="loadingScreen">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- ۱. بوم سه‌بعدی -->
+    <canvas id="webgl-canvas"></canvas>
+    <div id="cloud-mist"></div>
+    <div id="sun-glow"></div>
+
+    <!-- ۲. فیلتر سینمایی چندلایه (برای جلوه سینمایی و خوانایی ۱۰۰٪ متن) -->
+    <div class="hero-filter-system">
+        <div class="filter-color-grade"></div>
+        <div class="filter-scrim"></div>
+        <div class="filter-vignette"></div>
+    </div>
+
+    <!-- ۳. لایه متن و رابط کاربری HERO (این بخش را به دلخواه خود ویرایش کنید) -->
+    <div class="hero-overlay">
+        <!-- هدر بالای Hero -->
+        <header class="hero-navbar">
+            <div class="brand-logo">
+                <span class="brand-dot"></span>
+                <span>آریا لجستیک</span>
+            </div>
+
+            <!-- دکمه‌های تست تناژ فیلتر -->
+            <div class="filter-switcher">
+                <button class="filter-btn active" onclick="setFilterTheme('')">سرمه‌ای سینمایی</button>
+                <button class="filter-btn" onclick="setFilterTheme('theme-sunset')">غروب طلایی</button>
+                <button class="filter-btn" onclick="setFilterTheme('theme-dark')">تیره مدرن</button>
+            </div>
+        </header>
+
+        <!-- متن اصلی Hero -->
+        <main class="hero-main">
+            <div class="hero-badge">
+                <span class="hero-badge-pulse"></span>
+                <span id="dynamicBadgeText">حمل‌ونقل بین‌المللی هوایی، دریایی و زمینی</span>
+            </div>
+
+            <h1 class="hero-title">
+                فراتر از مرزها؛<br>
+                <span class="highlight">در آسمان، دریا و جاده</span>
+            </h1>
+
+            <p class="hero-subtitle">
+                ما زنجیره تأمین جهانی شما را با ترکیبی از ناوگان هوایی سریع، کشتی‌های کانتینربر اقیانوس‌پیما و ترانزیت جاده‌ای هوشمند، بدون توقف به مقصد می‌رسانیم.
+            </p>
+
+            <div class="hero-actions">
+                <button class="btn-primary">استعلام آنلاین قیمت</button>
+                <button class="btn-secondary">رهگیری مرسوله</button>
+            </div>
+        </main>
+
+        <!-- فوتر اطلاعاتی پایین Hero -->
+        <footer class="hero-footer">
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <div class="stat-value">+۱۲۰</div>
+                    <div class="stat-label">کشور تحت پوشش</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">۹۹.۸٪</div>
+                    <div class="stat-label">تحویل ایمن و به‌موقع</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">۲۴/۷</div>
+                    <div class="stat-label">پشتیبانی اختصاصی</div>
+                </div>
+            </div>
+
+            <div class="stage-pills">
+                <div class="stage-pill active" id="pill-air">✈️ بار هوایی</div>
+                <div class="stage-pill" id="pill-sea">🚢 خطوط دریایی</div>
+                <div class="stage-pill" id="pill-land">🚛 ترانزیت جاده‌ای</div>
+            </div>
+        </footer>
+    </div>
+
+    <div class="scroll-prompt" id="scrollPrompt">
+        <span>اسکرول کنید</span>
+        <div class="scroll-line"></div>
+    </div>
+
+    <div class="scroll-wrapper">
+        <section class="scene-section" style="height: 130vh;"></section>
+        <section class="scene-section" style="height: 160vh;"></section>
+        <section class="scene-section" style="height: 160vh;"></section>
+        <section class="scene-section" style="height: 190vh;"></section>
+        <section class="scene-section" style="height: 220vh;"></section>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+    // تابع تغییر تم فیلتر
+    function setFilterTheme(themeClass) {
+        document.body.className = themeClass;
+        const btns = document.querySelectorAll('.filter-btn');
+        btns.forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    /* ============================================================
+       SECTION 1 — RENDERER, SCENE, CAMERA, LIGHTING (OPTIMIZED)
+       ============================================================ */
+    const canvas = document.getElementById('webgl-canvas');
+    const scene  = new THREE.Scene();
+
+    scene.background = new THREE.Color(0x8ec5ea);
+    scene.fog = new THREE.FogExp2(0x8ec5ea, 0.00010);
+
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1.0, 18000);
+
+    const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        powerPreference: "high-performance",
+        stencil: false
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.08;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const SUN_DIRECTION = new THREE.Vector3(0.55, 0.62, -0.55).normalize();
+
+    const hemiLight = new THREE.HemisphereLight(0xf0f9ff, 0x1e3a5f, 0.92);
+    hemiLight.position.set(0, 2000, 0);
+    scene.add(hemiLight);
+
+    const sunLight = new THREE.DirectionalLight(0xfff6e0, 2.6);
+    sunLight.position.copy(SUN_DIRECTION.clone().multiplyScalar(1800));
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width  = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.camera.near = 200;
+    sunLight.shadow.camera.far  = 3500;
+    const shadowBox = 300;
+    sunLight.shadow.camera.left   = -shadowBox;
+    sunLight.shadow.camera.right  =  shadowBox;
+    sunLight.shadow.camera.top    =  shadowBox;
+    sunLight.shadow.camera.bottom = -shadowBox;
+    sunLight.shadow.bias = -0.00015;
+    scene.add(sunLight);
+
+    const rimLight = new THREE.DirectionalLight(0x93c5fd, 0.55);
+    rimLight.position.set(-SUN_DIRECTION.x, 0.35, -SUN_DIRECTION.z);
+    scene.add(rimLight);
+
+    function freezeStaticGroup(group) {
+        group.updateMatrixWorld(true);
+        group.traverse((obj) => {
+            obj.matrixAutoUpdate = false;
+        });
+    }
+
+    /* ============================================================
+       SECTION 2 — SKY DOME
+       ============================================================ */
+    const skyGeo = new THREE.SphereGeometry(15000, 32, 20);
+    const skyMat = new THREE.ShaderMaterial({
+        side: THREE.BackSide,
+        depthWrite: false,
+        uniforms: {
+            topColor:    { value: new THREE.Color(0x1a5fb8) },
+            middleColor: { value: new THREE.Color(0x60a5fa) },
+            bottomColor: { value: new THREE.Color(0xcfe4f3) },
+            uSunDir:     { value: SUN_DIRECTION.clone() },
+            uSunColor:   { value: new THREE.Color(0xfff2c4) }
+        },
+        vertexShader: `
+            varying vec3 vWorldPosition;
+            void main() {
+                vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+                vWorldPosition = worldPosition.xyz;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+            }
+        `,
+        fragmentShader: `
+            uniform vec3 topColor;
+            uniform vec3 middleColor;
+            uniform vec3 bottomColor;
+            uniform vec3 uSunDir;
+            uniform vec3 uSunColor;
+            varying vec3 vWorldPosition;
+            void main() {
+                vec3 dir = normalize(vWorldPosition);
+                float h = dir.y;
+                vec3 col = mix( bottomColor, middleColor, smoothstep( 0.0, 0.22, h ) );
+                col = mix( col, topColor, smoothstep( 0.22, 0.75, h ) );
+
+                float sunDot = max(dot(dir, normalize(uSunDir)), 0.0);
+                float glow = pow(sunDot, 8.0) * 0.55;
+                float core = pow(sunDot, 350.0) * 0.85;
+                col += uSunColor * (glow + core);
+                gl_FragColor = vec4( col, 1.0 );
+            }
+        `
+    });
+    const skyDome = new THREE.Mesh(skyGeo, skyMat);
+    scene.add(skyDome);
+
+    /* ============================================================
+       SECTION 3 — OCEAN (Optimized Gerstner Shader)
+       ============================================================ */
+    const OCEAN_SIZE = 26000;
+    const OCEAN_SEGMENTS = 240;
+    const oceanGeo = new THREE.PlaneGeometry(OCEAN_SIZE, OCEAN_SIZE, OCEAN_SEGMENTS, OCEAN_SEGMENTS);
+    oceanGeo.rotateX(-Math.PI / 2);
+
+    const oceanMat = new THREE.ShaderMaterial({
+        uniforms: {
+            uTime:         { value: 0.0 },
+            uSunDirection: { value: SUN_DIRECTION.clone() },
+            uSunColor:     { value: new THREE.Color(0xfff3c4) },
+            uDeepColor:    { value: new THREE.Color(0x041e42) },
+            uShallowColor: { value: new THREE.Color(0x0c6e9e) },
+            uSkyColor:     { value: new THREE.Color(0xa9d3ef) },
+            uHorizonColor: { value: new THREE.Color(0xb8d6e8) },
+            uCameraPos:    { value: new THREE.Vector3() },
+            uWaveAmp:      { value: 1.0 }
+        },
+        vertexShader: /* glsl */`
+            uniform float uTime;
+            uniform float uWaveAmp;
+            uniform vec3  uCameraPos;
+
+            varying vec3  vWorldPos;
+            varying vec3  vNormal;
+            varying float vCrest;
+            varying float vDist;
+
+            vec3 gerstner(
+                vec2 dir, float wavelength, float steepness,
+                vec2 pos, inout vec3 tang, inout vec3 binorm, float t
+            ) {
+                float k = 6.28318530718 / wavelength;
+                float c = sqrt(9.8 / k);
+                vec2  d = normalize(dir);
+                float f = k * (dot(d, pos) - c * t);
+                float a = steepness / k;
+
+                tang.x   += -d.x * d.x * steepness * sin(f);
+                tang.y   +=  d.x * steepness * cos(f);
+                tang.z   += -d.x * d.y * steepness * sin(f);
+
+                binorm.x += -d.x * d.y * steepness * sin(f);
+                binorm.y +=  d.y * steepness * cos(f);
+                binorm.z += -d.y * d.y * steepness * sin(f);
+
+                return vec3(d.x * a * cos(f), a * sin(f), d.y * a * cos(f));
+            }
+
+            void main() {
+                vec3 pos = position;
+                vec3 tangent  = vec3(1.0, 0.0, 0.0);
+                vec3 binormal = vec3(0.0, 0.0, 1.0);
+
+                vec3 disp = vec3(0.0);
+                disp += gerstner(vec2( 1.0,  0.25), 900.0, 0.085, pos.xz, tangent, binormal, uTime);
+                disp += gerstner(vec2(-0.45, 1.0),  480.0, 0.055, pos.xz, tangent, binormal, uTime);
+                disp += gerstner(vec2( 0.75,-0.7),  240.0, 0.030, pos.xz, tangent, binormal, uTime);
+                disp += gerstner(vec2( 0.2,  0.95), 120.0, 0.015, pos.xz, tangent, binormal, uTime);
+
+                disp *= uWaveAmp;
+                pos += disp;
+
+                vNormal = normalize(cross(binormal, tangent));
+                vCrest  = clamp((disp.y - 7.0) / 9.0, 0.0, 1.0);
+
+                vec4 worldPos = modelMatrix * vec4(pos, 1.0);
+                vWorldPos = worldPos.xyz;
+                vDist = length(worldPos.xyz - uCameraPos);
+
+                gl_Position = projectionMatrix * viewMatrix * worldPos;
+            }
+        `,
+        fragmentShader: /* glsl */`
+            uniform vec3  uSunDirection;
+            uniform vec3  uSunColor;
+            uniform vec3  uDeepColor;
+            uniform vec3  uShallowColor;
+            uniform vec3  uSkyColor;
+            uniform vec3  uHorizonColor;
+            uniform vec3  uCameraPos;
+            uniform float uTime;
+
+            varying vec3  vWorldPos;
+            varying vec3  vNormal;
+            varying float vCrest;
+            varying float vDist;
+
+            float hash(vec2 p) {
+                return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+            }
+
+            void main() {
+                vec3 viewDir = normalize(uCameraPos - vWorldPos);
+                vec3 n = normalize(vNormal);
+
+                float fresnel = pow(1.0 - max(dot(viewDir, n), 0.0), 4.0);
+                fresnel = mix(0.04, 1.0, fresnel);
+
+                float facing = clamp(dot(n, vec3(0.0, 1.0, 0.0)), 0.0, 1.0);
+                vec3 waterColor = mix(uDeepColor, uShallowColor, pow(facing, 2.0));
+
+                vec3 halfDir = normalize(uSunDirection + viewDir);
+                float specSharp = pow(max(dot(n, halfDir), 0.0), 220.0);
+
+                float specBroad = pow(max(dot(n, halfDir), 0.0), 24.0);
+                float sparkleNoise = hash(floor(vWorldPos.xz * 0.5 + uTime * 0.3));
+                float sparkle = specBroad * step(0.72, sparkleNoise) * 0.7;
+
+                vec3 color = waterColor * (1.0 - fresnel);
+                color += uSkyColor * fresnel;
+                color += uSunColor * specSharp * 2.8;
+                color += uSunColor * sparkle * 1.5;
+
+                float foam = smoothstep(0.55, 1.0, vCrest);
+                color = mix(color, vec3(0.96, 0.98, 1.0), foam * 0.65);
+
+                float fogFactor = clamp(1.0 - exp(-vDist * 0.00045), 0.0, 0.92);
+                color = mix(color, uHorizonColor, fogFactor);
+
+                gl_FragColor = vec4(color, 1.0);
+            }
+        `
+    });
+
+    const oceanMesh = new THREE.Mesh(oceanGeo, oceanMat);
+    oceanMesh.receiveShadow = true;
+    oceanMesh.frustumCulled = false;
+    scene.add(oceanMesh);
+
+    /* ============================================================
+       SHARED PROCEDURAL TEXTURES
+       ============================================================ */
+    function createGlowTexture() {
+        const c = document.createElement('canvas');
+        c.width = 64; c.height = 64;
+        const ctx = c.getContext('2d');
+        const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+        g.addColorStop(0, 'rgba(255,255,255,1)');
+        g.addColorStop(0.4, 'rgba(255,255,255,0.55)');
+        g.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, 64, 64);
+        return new THREE.CanvasTexture(c);
+    }
+    const sharedGlowTex = createGlowTexture();
+
+    function createCorrugatedBumpTexture() {
+        const c = document.createElement('canvas');
+        c.width = 256; c.height = 64;
+        const ctx = c.getContext('2d');
+        for (let x = 0; x < 256; x += 8) {
+            ctx.fillStyle = (x % 16 === 0) ? '#ffffff' : '#334155';
+            ctx.fillRect(x, 0, 6, 64);
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillRect(x + 6, 0, 2, 64);
+        }
+        const t = new THREE.CanvasTexture(c);
+        t.wrapS = t.wrapT = THREE.RepeatWrapping;
+        t.repeat.set(4, 1);
+        return t;
+    }
+    const corrugatedBump = createCorrugatedBumpTexture();
+
+    function createHeroContainerTexture() {
+        const c = document.createElement('canvas');
+        c.width = 1024; c.height = 256;
+        const ctx = c.getContext('2d');
+
+        ctx.fillStyle = '#c2410c';
+        ctx.fillRect(0, 0, 1024, 256);
+
+        for (let x = 32; x < 992; x += 24) {
+            ctx.fillStyle = 'rgba(0,0,0,0.15)';
+            ctx.fillRect(x, 18, 10, 220);
+            ctx.fillStyle = 'rgba(255,255,255,0.08)';
+            ctx.fillRect(x + 10, 18, 6, 220);
+        }
+
+        ctx.fillStyle = '#9a3412';
+        ctx.fillRect(0, 0, 1024, 18);
+        ctx.fillRect(0, 238, 1024, 18);
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = 'bold 72px sans-serif';
+        ctx.fillText('OCEAN LINE', 150, 145);
+
+        ctx.font = 'bold 22px monospace';
+        ctx.fillText('MSCU  948210  5', 740, 65);
+        ctx.fillText('45G1', 740, 95);
+        ctx.font = '15px monospace';
+        ctx.fillText('MAX GROSS  32,500 KG', 740, 130);
+        ctx.fillText('TARE        3,780 KG', 740, 150);
+        ctx.fillText('NET        28,720 KG', 740, 170);
+
+        ctx.fillStyle = '#facc15';
+        ctx.fillRect(48, 40, 42, 65);
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 14px sans-serif';
+        ctx.fillText('2.9m', 52, 65);
+        ctx.fillText('9\'6"', 52, 88);
+
+        const tex = new THREE.CanvasTexture(c);
+        tex.encoding = THREE.sRGBEncoding;
+        return tex;
+    }
+
+    function createAsphaltTexture() {
+        const c = document.createElement('canvas');
+        c.width = 512; c.height = 512;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#1e2430';
+        ctx.fillRect(0, 0, 512, 512);
+
+        for (let i = 0; i < 12000; i++) {
+            const v = 22 + Math.floor(Math.random() * 26);
+            ctx.fillStyle = `rgb(${v},${v + 2},${v + 6})`;
+            ctx.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);
+        }
+        const tex = new THREE.CanvasTexture(c);
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(6, 50);
+        return tex;
+    }
+
+    function createGrilleMeshTexture() {
+        const c = document.createElement('canvas');
+        c.width = 128; c.height = 128;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#070a10';
+        ctx.fillRect(0, 0, 128, 128);
+        ctx.strokeStyle = '#263040';
+        ctx.lineWidth = 2;
+        for (let y = 0; y < 128; y += 8) {
+            for (let x = 0; x < 128; x += 12) {
+                const ox = (y % 16 === 0) ? 0 : 6;
+                ctx.strokeRect(x + ox, y, 8, 6);
+            }
+        }
+        const tex = new THREE.CanvasTexture(c);
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(4, 4);
+        return tex;
+    }
+
+    /* ============================================================
+       SECTION 4 — REALISTIC AIRPLANE
+       ============================================================ */
+    const airplaneGroup = new THREE.Group();
+    scene.add(airplaneGroup);
+
+    const engineFans = [];
+    const navLights = [];
+    const exhaustGlows = [];
+
+    function buildEnhancedAirplane() {
+        const plane = new THREE.Group();
+
+        const bodyWhiteMat = new THREE.MeshPhysicalMaterial({
+            color: 0xf8fafc,
+            roughness: 0.26,
+            metalness: 0.08,
+            clearcoat: 0.85,
+            clearcoatRoughness: 0.14,
+            side: THREE.DoubleSide
+        });
+
+        const radomeMat = new THREE.MeshPhysicalMaterial({
+            color: 0xe2e8f0,
+            roughness: 0.35,
+            metalness: 0.05,
+            clearcoat: 0.6
+        });
+
+        const wingCompositeMat = new THREE.MeshStandardMaterial({
+            color: 0xe5eaf0,
+            roughness: 0.45,
+            metalness: 0.18,
+            side: THREE.DoubleSide
+        });
+
+        const liveryBlueMat = new THREE.MeshStandardMaterial({
+            color: 0x1e40af,
+            roughness: 0.35,
+            metalness: 0.25
+        });
+
+        const chromeMat = new THREE.MeshStandardMaterial({
+            color: 0xdbe4ee,
+            roughness: 0.12,
+            metalness: 0.95
+        });
+
+        const darkChamberMat = new THREE.MeshStandardMaterial({
+            color: 0x090d16,
+            roughness: 0.35,
+            metalness: 0.6,
+            side: THREE.DoubleSide
+        });
+
+        const exhaustMetalMat = new THREE.MeshStandardMaterial({
+            color: 0x475569,
+            roughness: 0.28,
+            metalness: 0.88,
+            side: THREE.DoubleSide
+        });
+
+        const titaniumBladeMat = new THREE.MeshPhysicalMaterial({
+            color: 0x94a3b8,
+            roughness: 0.22,
+            metalness: 0.95,
+            clearcoat: 0.4
+        });
+
+        const cockpitGlassMat = new THREE.MeshPhysicalMaterial({
+            color: 0x050e1a,
+            roughness: 0.04,
+            metalness: 0.2,
+            reflectivity: 1.0,
+            clearcoat: 1.0
+        });
+
+        function createFuselageGeometry() {
+            const lengthSegments = 72;
+            const radialSegments = 48;
+            const positions = [];
+            const uvs = [];
+            const indices = [];
+
+            for (let i = 0; i <= lengthSegments; i++) {
+                const t = i / lengthSegments;
+                const z = -17.2 + t * 36.4;
+
+                let rx = 2.16;
+                let ry = 2.28;
+                let centerY = 0;
+
+                if (z < -10.5) {
+                    const nt = (z + 17.2) / 6.7;
+                    const profile = Math.pow(Math.sin(nt * Math.PI * 0.5), 0.68);
+                    rx = 2.16 * profile;
+                    ry = 2.28 * profile;
+                    centerY = -0.52 * Math.pow(1.0 - nt, 1.75);
+                } else if (z > 6.5) {
+                    const tt = (z - 6.5) / 12.7;
+                    const taper = Math.cos(tt * Math.PI * 0.48);
+                    rx = 2.16 * Math.pow(taper, 1.15);
+                    ry = 2.28 * Math.pow(taper, 0.92);
+                    centerY = 0.88 * Math.pow(tt, 1.65);
+                }
+
+                for (let j = 0; j <= radialSegments; j++) {
+                    const v = j / radialSegments;
+                    const theta = v * Math.PI * 2;
+                    const sinT = Math.sin(theta);
+                    const cosT = Math.cos(theta);
+
+                    let x = rx * cosT;
+                    let y = ry * sinT + centerY;
+
+                    if (z > -6.5 && z < 4.8 && sinT < -0.15) {
+                        const bellyFactor = Math.cos(((z + 0.8) / 5.6) * Math.PI * 0.5);
+                        if (bellyFactor > 0) {
+                            y -= 0.38 * bellyFactor * Math.pow(Math.abs(sinT), 1.5);
+                            x *= (1.0 + 0.09 * bellyFactor);
+                        }
+                    }
+
+                    positions.push(x, y, z);
+                    uvs.push(v, t);
+                }
+            }
+
+            for (let i = 0; i < lengthSegments; i++) {
+                for (let j = 0; j < radialSegments; j++) {
+                    const a = i * (radialSegments + 1) + j;
+                    const b = (i + 1) * (radialSegments + 1) + j;
+                    const c = (i + 1) * (radialSegments + 1) + (j + 1);
+                    const d = i * (radialSegments + 1) + (j + 1);
+                    indices.push(a, b, d, b, c, d);
+                }
+            }
+
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+            geo.setIndex(indices);
+            geo.computeVertexNormals();
+            return geo;
+        }
+
+        const fuselageMesh = new THREE.Mesh(createFuselageGeometry(), bodyWhiteMat);
+        fuselageMesh.castShadow = true;
+        fuselageMesh.receiveShadow = true;
+        plane.add(fuselageMesh);
+
+        const apuCone = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.28, 0.9, 16), exhaustMetalMat);
+        apuCone.rotation.x = Math.PI / 2;
+        apuCone.position.set(0, 0.88, 19.3);
+        plane.add(apuCone);
+
+        for (let side of [-1, 1]) {
+            const arc = 0.28;
+            const start = side === 1 ? (Math.PI / 2 - arc / 2 - 0.55) : (Math.PI / 2 - arc / 2 + 0.55);
+            const geo = new THREE.CylinderGeometry(2.19, 2.19, 14.5, 20, 1, true, start, arc);
+            geo.rotateX(Math.PI / 2);
+            geo.translate(0, 0.05, -2.5);
+            plane.add(new THREE.Mesh(geo, liveryBlueMat));
+        }
+
+        const cockpitGroup = new THREE.Group();
+        const paneGeo = new THREE.BoxGeometry(0.62, 0.48, 0.08);
+        for (let side of [-1, 1]) {
+            const frontPane = new THREE.Mesh(paneGeo, cockpitGlassMat);
+            frontPane.position.set(side * 0.36, 0.58, -13.95);
+            frontPane.rotation.set(-0.42, side * 0.35, -side * 0.12);
+            cockpitGroup.add(frontPane);
+
+            const sidePane = new THREE.Mesh(paneGeo, cockpitGlassMat);
+            sidePane.position.set(side * 0.92, 0.54, -13.45);
+            sidePane.rotation.set(-0.25, side * 0.85, -side * 0.18);
+            cockpitGroup.add(sidePane);
+
+            const aftSidePane = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.44, 0.08), cockpitGlassMat);
+            aftSidePane.position.set(side * 1.28, 0.52, -12.85);
+            aftSidePane.rotation.set(-0.15, side * 1.18, -side * 0.12);
+            cockpitGroup.add(aftSidePane);
+        }
+        plane.add(cockpitGroup);
+
+        const winGeo = new THREE.CircleGeometry(0.09, 10);
+        const winMat = new THREE.MeshBasicMaterial({ color: 0xfff3b0 });
+        const winCountPerSide = 24;
+        const winInstanced = new THREE.InstancedMesh(winGeo, winMat, winCountPerSide * 2);
+        const dummy = new THREE.Object3D();
+        let wIdx = 0;
+        for (let side of [-1, 1]) {
+            for (let i = 0; i < winCountPerSide; i++) {
+                const t = i / (winCountPerSide - 1);
+                const z = -9.8 + t * 14.2;
+                const angle = side * 0.42;
+                const x = Math.sin(angle) * 2.19;
+                const y = Math.cos(angle) * 2.19 + 0.18;
+                dummy.position.set(x, y, z);
+                dummy.lookAt(x * 2, y * 2, z);
+                dummy.updateMatrix();
+                winInstanced.setMatrixAt(wIdx++, dummy.matrix);
+            }
+        }
+        winInstanced.instanceMatrix.needsUpdate = true;
+        plane.add(winInstanced);
+
+        const antGeo = new THREE.BoxGeometry(0.05, 0.42, 0.65);
+        const ant1 = new THREE.Mesh(antGeo, radomeMat);
+        ant1.position.set(0, 2.38, -5.5);
+        ant1.rotation.x = -0.35;
+        plane.add(ant1);
+        const ant2 = ant1.clone();
+        ant2.position.z = 2.5;
+        plane.add(ant2);
+
+        function createAirfoilWingGeometry(side) {
+            const spanSegments = 36;
+            const chordSegments = 28;
+            const positions = [];
+            const uvs = [];
+            const indices = [];
+
+            function getAirfoilPoint(s, thickness) {
+                const angle = s * Math.PI * 2;
+                const xLocal = 0.5 * (1 - Math.cos(angle));
+                const yt = 5 * thickness * (
+                    0.2969 * Math.sqrt(xLocal)
+                  - 0.1260 * xLocal
+                  - 0.3516 * Math.pow(xLocal, 2)
+                  + 0.2843 * Math.pow(xLocal, 3)
+                  - 0.1015 * Math.pow(xLocal, 4)
+                );
+                const camber = 0.025 * (1 - xLocal) * xLocal * 4;
+                const yLocal = (s < 0.5 ? yt : -yt * 0.65) + camber;
+                return { x: xLocal, y: yLocal };
+            }
+
+            for (let i = 0; i <= spanSegments; i++) {
+                const u = i / spanSegments;
+                let spanX, sweepZ, dihedralY, chordLen, thickness, twist;
+
+                if (u <= 0.88) {
+                    const wt = u / 0.88;
+                    spanX = side * (1.85 + wt * 19.5);
+                    sweepZ = -4.8 + wt * 8.2;
+                    dihedralY = -0.55 + wt * 1.65 + Math.pow(wt, 2.2) * 0.45;
+                    chordLen = wt < 0.32 ? (7.2 - wt * 6.5) : (5.12 - (wt - 0.32) * 5.2);
+                    thickness = 0.14 - wt * 0.045;
+                    twist = -wt * 0.045;
+                } else {
+                    const lt = (u - 0.88) / 0.12;
+                    spanX = side * (21.35 + lt * 0.85);
+                    sweepZ = 3.4 + lt * 1.65;
+                    dihedralY = 1.55 + Math.pow(lt, 1.3) * 4.2;
+                    chordLen = 1.58 * (1.0 - lt * 0.55);
+                    thickness = 0.09 * (1.0 - lt * 0.4);
+                    twist = -0.02 + lt * 0.08;
+                }
+
+                for (let j = 0; j <= chordSegments; j++) {
+                    const v = j / chordSegments;
+                    const pt = getAirfoilPoint(v, thickness);
+                    const localZ = pt.x * chordLen;
+                    const localY = pt.y * chordLen;
+                    const rotatedY = localY * Math.cos(twist) - localZ * Math.sin(twist);
+                    const rotatedZ = localY * Math.sin(twist) + localZ * Math.cos(twist);
+
+                    positions.push(spanX, dihedralY + rotatedY, sweepZ + rotatedZ);
+                    uvs.push(u, v);
+                }
+            }
+
+            for (let i = 0; i < spanSegments; i++) {
+                for (let j = 0; j < chordSegments; j++) {
+                    const a = i * (chordSegments + 1) + j;
+                    const b = (i + 1) * (chordSegments + 1) + j;
+                    const c = (i + 1) * (chordSegments + 1) + (j + 1);
+                    const d = i * (chordSegments + 1) + (j + 1);
+                    if (side === 1) {
+                        indices.push(a, b, d, b, c, d);
+                    } else {
+                        indices.push(a, d, b, b, d, c);
+                    }
+                }
+            }
+
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+            geo.setIndex(indices);
+            geo.computeVertexNormals();
+            return geo;
+        }
+
+        const rightWing = new THREE.Mesh(createAirfoilWingGeometry(1), bodyWhiteMat);
+        rightWing.castShadow = true;
+        rightWing.receiveShadow = true;
+        plane.add(rightWing);
+
+        const leftWing = new THREE.Mesh(createAirfoilWingGeometry(-1), wingCompositeMat);
+        leftWing.castShadow = true;
+        leftWing.receiveShadow = true;
+        plane.add(leftWing);
+
+        const canoeGeo = new THREE.ConeGeometry(0.18, 2.1, 12);
+        canoeGeo.rotateX(Math.PI / 2);
+        const flapOffsets = [
+            { x: 4.8, y: -0.35, z: 1.5 },
+            { x: 9.2, y: 0.12,  z: 2.3 },
+            { x: 13.5, y: 0.55, z: 3.1 }
+        ];
+        for (let side of [-1, 1]) {
+            flapOffsets.forEach(fo => {
+                const canoe = new THREE.Mesh(canoeGeo, wingCompositeMat);
+                canoe.position.set(side * fo.x, fo.y, fo.z);
+                canoe.scale.set(0.85, 1.0, 1.0);
+                plane.add(canoe);
+            });
+        }
+
+        function addNavLight(side, colorHex) {
+            const mat = new THREE.MeshBasicMaterial({ color: colorHex });
+            const light = new THREE.Mesh(new THREE.SphereGeometry(0.15, 10, 10), mat);
+            light.position.set(side * 21.3, 1.85, 4.1);
+            plane.add(light);
+
+            const halo = new THREE.Sprite(new THREE.SpriteMaterial({
+                map: sharedGlowTex,
+                color: colorHex,
+                transparent: true,
+                opacity: 0.9,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending
+            }));
+            halo.position.copy(light.position);
+            halo.scale.set(1.6, 1.6, 1.6);
+            plane.add(halo);
+        }
+        addNavLight(-1, 0xff2a2a);
+        addNavLight(1,  0x22ff3a);
+
+        function createModernTurbofanEngine(side) {
+            const engineAssembly = new THREE.Group();
+            engineAssembly.position.set(side * 7.2, -1.35, -3.1);
+
+            const nacelleProfile = [
+                new THREE.Vector2(0.95, -0.8),
+                new THREE.Vector2(1.02, -2.05),
+                new THREE.Vector2(1.16, -2.35),
+                new THREE.Vector2(1.34, -1.75),
+                new THREE.Vector2(1.42, -0.40),
+                new THREE.Vector2(1.36,  1.10),
+                new THREE.Vector2(1.14,  2.45),
+                new THREE.Vector2(0.98,  2.45),
+                new THREE.Vector2(0.98,  1.50)
+            ];
+            const nacelleGeo = new THREE.LatheGeometry(nacelleProfile, 44);
+            nacelleGeo.rotateX(Math.PI / 2);
+
+            const nacelleGroup = new THREE.Group();
+            nacelleGroup.rotation.x = 0.03;
+
+            const nacelleMesh = new THREE.Mesh(nacelleGeo, bodyWhiteMat);
+            nacelleMesh.castShadow = true;
+            nacelleMesh.receiveShadow = true;
+            nacelleGroup.add(nacelleMesh);
+
+            const lipProfile = [
+                new THREE.Vector2(0.98, -1.65),
+                new THREE.Vector2(1.03, -2.18),
+                new THREE.Vector2(1.15, -2.38),
+                new THREE.Vector2(1.26, -2.15),
+                new THREE.Vector2(1.32, -1.75)
+            ];
+            const lipGeo = new THREE.LatheGeometry(lipProfile, 44);
+            lipGeo.rotateX(Math.PI / 2);
+            nacelleGroup.add(new THREE.Mesh(lipGeo, chromeMat));
+
+            const innerTunnelGeo = new THREE.CylinderGeometry(0.96, 0.96, 2.8, 32);
+            innerTunnelGeo.rotateX(Math.PI / 2);
+            const innerTunnel = new THREE.Mesh(innerTunnelGeo, darkChamberMat);
+            innerTunnel.position.z = -0.3;
+            nacelleGroup.add(innerTunnel);
+
+            const fanRotor = new THREE.Group();
+            fanRotor.position.z = -1.15;
+
+            const spinnerGeo = new THREE.ConeGeometry(0.42, 1.1, 24);
+            spinnerGeo.rotateX(-Math.PI / 2);
+            fanRotor.add(new THREE.Mesh(spinnerGeo, darkChamberMat));
+
+            const bladeShape = new THREE.Shape();
+            bladeShape.moveTo(0, -0.04);
+            bladeShape.quadraticCurveTo(0.55, 0.0, 0.88, 0.05);
+            bladeShape.quadraticCurveTo(0.62, 0.10, 0.0, 0.06);
+            bladeShape.closePath();
+            const bladeGeoBase = new THREE.ExtrudeGeometry(bladeShape, { depth: 0.018, bevelEnabled: false });
+            bladeGeoBase.translate(0, 0, -0.009);
+
+            const bladeCount = 24;
+            for (let b = 0; b < bladeCount; b++) {
+                const blade = new THREE.Mesh(bladeGeoBase, titaniumBladeMat);
+                const angle = (b / bladeCount) * Math.PI * 2;
+                blade.position.set(Math.cos(angle) * 0.48, Math.sin(angle) * 0.48, 0);
+                blade.rotation.set(0.18 * Math.sin(angle), 0.62, angle);
+                fanRotor.add(blade);
+            }
+            nacelleGroup.add(fanRotor);
+            engineFans.push(fanRotor);
+
+            const bypassSleeveGeo = new THREE.CylinderGeometry(0.84, 1.02, 1.35, 32);
+            bypassSleeveGeo.rotateX(Math.PI / 2);
+            const bypassSleeve = new THREE.Mesh(bypassSleeveGeo, exhaustMetalMat);
+            bypassSleeve.position.z = 2.65;
+            nacelleGroup.add(bypassSleeve);
+
+            const corePlugGeo = new THREE.ConeGeometry(0.52, 1.6, 24);
+            corePlugGeo.rotateX(Math.PI / 2);
+            const corePlug = new THREE.Mesh(corePlugGeo, darkChamberMat);
+            corePlug.position.z = 3.45;
+            nacelleGroup.add(corePlug);
+
+            const exhaustGlow = new THREE.Mesh(
+                new THREE.RingGeometry(0.18, 0.55, 24),
+                new THREE.MeshBasicMaterial({
+                    color: 0xff7a18,
+                    transparent: true,
+                    opacity: 0.7,
+                    side: THREE.DoubleSide,
+                    blending: THREE.AdditiveBlending,
+                    depthWrite: false
+                })
+            );
+            exhaustGlow.position.z = 3.7;
+            exhaustGlow.rotation.x = Math.PI / 2;
+            nacelleGroup.add(exhaustGlow);
+            exhaustGlows.push(exhaustGlow);
+
+            engineAssembly.add(nacelleGroup);
+
+            const strutGeo = new THREE.BoxGeometry(0.32, 0.95, 3.8);
+            const strutMesh = new THREE.Mesh(strutGeo, wingCompositeMat);
+            strutMesh.position.set(0, 1.05, 0.65);
+            strutMesh.castShadow = true;
+            engineAssembly.add(strutMesh);
+
+            return engineAssembly;
+        }
+
+        plane.add(createModernTurbofanEngine(1));
+        plane.add(createModernTurbofanEngine(-1));
+
+        const tailGroup = new THREE.Group();
+        const vShape = new THREE.Shape();
+        vShape.moveTo(0, 0);
+        vShape.quadraticCurveTo(2.2, 0.4, 3.5, 1.8);
+        vShape.lineTo(7.8, 7.6);
+        vShape.lineTo(10.4, 7.6);
+        vShape.lineTo(8.8, 0);
+        vShape.closePath();
+
+        const vGeo = new THREE.ExtrudeGeometry(vShape, {
+            depth: 0.24, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: 0.12, bevelThickness: 0.12
+        });
+        vGeo.rotateY(-Math.PI / 2);
+        const vFin = new THREE.Mesh(vGeo, bodyWhiteMat);
+        vFin.position.set(0.12, 1.25, 8.8);
+        vFin.castShadow = true;
+        tailGroup.add(vFin);
+
+        for (let side of [-1, 1]) {
+            const hShape = new THREE.Shape();
+            hShape.moveTo(0, 0);
+            hShape.lineTo(side * 7.2, 2.8);
+            hShape.lineTo(side * 7.4, 3.9);
+            hShape.lineTo(0, 3.1);
+            hShape.closePath();
+
+            const hGeo = new THREE.ExtrudeGeometry(hShape, {
+                depth: 0.14, bevelEnabled: true, bevelSegments: 2, steps: 1, bevelSize: 0.08, bevelThickness: 0.08
+            });
+            hGeo.rotateX(Math.PI / 2);
+            const hFin = new THREE.Mesh(hGeo, wingCompositeMat);
+            hFin.position.set(side * 0.85, 1.15, 14.2);
+            hFin.rotation.z = side * 0.075;
+            hFin.castShadow = true;
+            tailGroup.add(hFin);
+        }
+
+        const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        beacon.position.set(0, 8.95, 11.5);
+        tailGroup.add(beacon);
+        navLights.push({ mesh: beacon, isBeacon: true });
+
+        plane.add(tailGroup);
+        return plane;
+    }
+
+    let currentAirplaneMesh = buildEnhancedAirplane();
+    airplaneGroup.add(currentAirplaneMesh);
+    airplaneGroup.position.set(0, 1150, 0);
+    airplaneGroup.rotation.set(0.02, -0.28, -0.06);
+
+    /* ============================================================
+       SECTION 5 — CLOUDS
+       ============================================================ */
+    const cloudsContainer = new THREE.Group();
+    scene.add(cloudsContainer);
+
+    function generateSoftCloudTexture() {
+        const c = document.createElement('canvas');
+        c.width = 256; c.height = 256;
+        const ctx = c.getContext('2d');
+        const lobes = [
+            { x: 128, y: 132, r: 92, a: 0.55 },
+            { x: 90,  y: 120, r: 68, a: 0.45 },
+            { x: 166, y: 122, r: 72, a: 0.45 },
+            { x: 128, y: 94,  r: 64, a: 0.40 },
+            { x: 112, y: 150, r: 62, a: 0.35 }
+        ];
+        lobes.forEach(l => {
+            const g = ctx.createRadialGradient(l.x, l.y - 10, l.r * 0.08, l.x, l.y, l.r);
+            g.addColorStop(0, `rgba(255, 255, 255, ${l.a})`);
+            g.addColorStop(0.55, `rgba(241, 245, 249, ${l.a * 0.65})`);
+            g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(l.x, l.y, l.r, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        return new THREE.CanvasTexture(c);
+    }
+    const cloudTexture = generateSoftCloudTexture();
+
+    for (let i = 0; i < 150; i++) {
+        const cMat = new THREE.SpriteMaterial({
+            map: cloudTexture,
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.44 + Math.random() * 0.35,
+            depthWrite: false
+        });
+        const sprite = new THREE.Sprite(cMat);
+        const spread = i < 55 ? 900 : 4200;
+        sprite.position.set(
+            (Math.random() - 0.5) * spread,
+            430 + (Math.random() - 0.5) * 180,
+            -150 + (Math.random() - 0.5) * spread
+        );
+        const s = 210 + Math.random() * 320;
+        sprite.scale.set(s * 1.7, s, 1);
+        sprite.matrixAutoUpdate = false;
+        sprite.updateMatrix();
+        cloudsContainer.add(sprite);
+    }
+
+    /* ============================================================
+       SECTION 6 — REALISTIC CONTAINER SHIP (InstancedMesh)
+       ============================================================ */
+    const shipGroup = new THREE.Group();
+    scene.add(shipGroup);
+
+    function buildContainerShip() {
+        const vessel = new THREE.Group();
+        const hullNavyMat     = new THREE.MeshStandardMaterial({ color: 0x0f294a, roughness: 0.42, metalness: 0.3 });
+        const hullRedMat      = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.55, metalness: 0.2 });
+        const bootStripeMat   = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4, metalness: 0.1 });
+        const deckMat         = new THREE.MeshStandardMaterial({ color: 0x273549, roughness: 0.72, metalness: 0.3 });
+        const bridgeWhiteMat  = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.32, metalness: 0.12 });
+        const bridgeGlassMat  = new THREE.MeshPhysicalMaterial({ color: 0x061526, roughness: 0.08, metalness: 0.25, clearcoat: 1.0 });
+        const safetyOrangeMat = new THREE.MeshStandardMaterial({ color: 0xea580c, roughness: 0.35, metalness: 0.15 });
+        const steelGreyMat    = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5, metalness: 0.6 });
+
+        const hullShape = new THREE.Shape();
+        hullShape.moveTo(-15.0, -82);
+        hullShape.lineTo(15.0, -82);
+        hullShape.lineTo(16.0, 48);
+        hullShape.quadraticCurveTo(16.0, 74, 0, 92);
+        hullShape.quadraticCurveTo(-16.0, 74, -16.0, 48);
+        hullShape.closePath();
+
+        const hullGeo = new THREE.ExtrudeGeometry(hullShape, {
+            depth: 12.2,
+            bevelEnabled: true,
+            bevelSegments: 4,
+            steps: 2,
+            bevelSize: 1.6,
+            bevelThickness: 2.2
+        });
+        hullGeo.rotateX(Math.PI / 2);
+
+        const hullMesh = new THREE.Mesh(hullGeo, hullNavyMat);
+        hullMesh.position.y = 11.4;
+        hullMesh.castShadow = true;
+        hullMesh.receiveShadow = true;
+        vessel.add(hullMesh);
+
+        const waterline = hullMesh.clone();
+        waterline.material = hullRedMat;
+        waterline.scale.set(1.006, 0.52, 1.005);
+        waterline.position.y = 6.4;
+        vessel.add(waterline);
+
+        const bulbGeo = new THREE.SphereGeometry(4.2, 20, 16);
+        bulbGeo.scale(0.85, 0.95, 2.6);
+        const bulbMesh = new THREE.Mesh(bulbGeo, hullRedMat);
+        bulbMesh.position.set(0, 3.2, 92);
+        vessel.add(bulbMesh);
+
+        const bootStripe = hullMesh.clone();
+        bootStripe.material = bootStripeMat;
+        bootStripe.scale.set(1.009, 0.035, 1.007);
+        bootStripe.position.y = 7.15;
+        vessel.add(bootStripe);
+
+        const bowShield = new THREE.Mesh(new THREE.CylinderGeometry(14.5, 15.8, 3.4, 24, 1, true, -Math.PI * 0.35, Math.PI * 0.7), hullNavyMat);
+        bowShield.position.set(0, 14.2, 72);
+        vessel.add(bowShield);
+
+        const deck = new THREE.Mesh(new THREE.BoxGeometry(30.5, 1.2, 154), deckMat);
+        deck.position.set(0, 12.6, -2);
+        deck.receiveShadow = true;
+        vessel.add(deck);
+
+        const tower = new THREE.Group();
+        for (let f = 0; f < 6; f++) {
+            const w = 26 - f * 0.9;
+            const d = 14.5 - f * 0.5;
+            const block = new THREE.Mesh(new THREE.BoxGeometry(w, 3.1, d), bridgeWhiteMat);
+            block.position.set(0, 14.5 + f * 3.1, -54);
+            block.castShadow = true;
+            block.receiveShadow = true;
+            tower.add(block);
+
+            const winStrip = new THREE.Mesh(new THREE.BoxGeometry(w + 0.15, 0.65, d - 2.5), bridgeGlassMat);
+            winStrip.position.set(0, 14.8 + f * 3.1, -53.2);
+            tower.add(winStrip);
+        }
+
+        const bridgeWing = new THREE.Mesh(new THREE.BoxGeometry(36.5, 3.2, 8.2), bridgeWhiteMat);
+        bridgeWing.position.set(0, 33.1, -51.5);
+        bridgeWing.castShadow = true;
+        tower.add(bridgeWing);
+
+        const bridgeWindows = new THREE.Mesh(new THREE.BoxGeometry(36.7, 1.35, 8.4), bridgeGlassMat);
+        bridgeWindows.position.set(0, 33.4, -51.4);
+        tower.add(bridgeWindows);
+
+        const mastPole = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.7, 11, 12), bridgeWhiteMat);
+        mastPole.position.set(0, 40.2, -51.5);
+        tower.add(mastPole);
+
+        const radarScanner = new THREE.Mesh(new THREE.BoxGeometry(5.5, 0.35, 0.6), bridgeWhiteMat);
+        radarScanner.position.set(0, 44.5, -51.5);
+        tower.add(radarScanner);
+
+        const satDomeL = new THREE.Mesh(new THREE.SphereGeometry(1.1, 14, 12), bridgeWhiteMat);
+        satDomeL.position.set(-6.5, 35.8, -51.5);
+        tower.add(satDomeL);
+        const satDomeR = satDomeL.clone();
+        satDomeR.position.x = 6.5;
+        tower.add(satDomeR);
+
+        const funnelBase = new THREE.Mesh(new THREE.BoxGeometry(7.5, 11.5, 9.5), safetyOrangeMat);
+        funnelBase.position.set(0, 34.5, -62.5);
+        funnelBase.castShadow = true;
+        tower.add(funnelBase);
+
+        const funnelCap = new THREE.Mesh(new THREE.BoxGeometry(7.7, 2.2, 9.7), hullNavyMat);
+        funnelCap.position.set(0, 39.8, -62.5);
+        tower.add(funnelCap);
+
+        for (let side of [-1, 1]) {
+            const lifeboat = new THREE.Mesh(new THREE.ConeGeometry(1.4, 5.2, 12), safetyOrangeMat);
+            lifeboat.rotation.x = Math.PI * 0.35;
+            lifeboat.position.set(side * 14.2, 20.5, -56);
+            tower.add(lifeboat);
+        }
+
+        vessel.add(tower);
+
+        const bays = [-72, -37, -23, -9, 5, 19, 33, 47, 61];
+        bays.forEach(zPos => {
+            const lashingBridge = new THREE.Mesh(new THREE.BoxGeometry(30.0, 5.5, 0.8), steelGreyMat);
+            lashingBridge.position.set(0, 15.5, zPos - 6.8);
+            vessel.add(lashingBridge);
+        });
+
+        const containerGeo = new THREE.BoxGeometry(2.55, 2.65, 12.4);
+        const containerMat = new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            roughness: 0.54,
+            metalness: 0.32,
+            bumpMap: corrugatedBump,
+            bumpScale: 0.09
+        });
+
+        const palette = [
+            new THREE.Color(0xb91c1c),
+            new THREE.Color(0x1e3a8a),
+            new THREE.Color(0x047857),
+            new THREE.Color(0xd97706),
+            new THREE.Color(0x0284c7),
+            new THREE.Color(0x475569),
+            new THREE.Color(0xc2410c)
+        ];
+
+        const transforms = [];
+        bays.forEach((zPos, bIdx) => {
+            for (let col = -5; col <= 5; col++) {
+                if (zPos > 55 && Math.abs(col) > 3) continue;
+                const xPos = col * 2.68;
+                const maxTiers = (zPos > 45) ? 4 : (bIdx % 2 === 0 ? 6 : 5);
+                for (let t = 0; t < maxTiers; t++) {
+                    if (t === maxTiers - 1 && Math.abs(col * 3 + bIdx) % 4 === 0) continue;
+                    const cIdx = Math.abs(bIdx * 5 + col * 3 + t * 2) % palette.length;
+                    transforms.push({
+                        x: xPos,
+                        y: 14.5 + t * 2.68,
+                        z: zPos,
+                        color: palette[cIdx]
+                    });
+                }
+            }
+        });
+
+        const instancedContainers = new THREE.InstancedMesh(containerGeo, containerMat, transforms.length);
+        instancedContainers.castShadow = true;
+        instancedContainers.receiveShadow = true;
+
+        const dummy = new THREE.Object3D();
+        transforms.forEach((tr, i) => {
+            dummy.position.set(tr.x, tr.y, tr.z);
+            dummy.updateMatrix();
+            instancedContainers.setMatrixAt(i, dummy.matrix);
+            instancedContainers.setColorAt(i, tr.color);
+        });
+        instancedContainers.instanceMatrix.needsUpdate = true;
+        instancedContainers.instanceColor.needsUpdate = true;
+        vessel.add(instancedContainers);
+
+        freezeStaticGroup(vessel);
+        return vessel;
+    }
+
+    const cargoVessel = buildContainerShip();
+    shipGroup.add(cargoVessel);
+    shipGroup.position.set(0, 0, -140);
+    shipGroup.rotation.y = 0.36;
+
+    /* ============================================================
+       SECTION 6.5 — COASTAL PORT BOULEVARD & REDESIGNED TRACTOR CAB
+       ============================================================ */
+    const streetWorldGroup = new THREE.Group();
+    streetWorldGroup.position.set(175, 18, -170);
+    scene.add(streetWorldGroup);
+
+    function buildStaticStreetAndRealisticTruck() {
+        const concreteMat     = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.85, metalness: 0.08 });
+        const darkConcreteMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.9,  metalness: 0.1 });
+        const asphaltMat      = new THREE.MeshStandardMaterial({ map: createAsphaltTexture(), roughness: 0.82, metalness: 0.08 });
+        const sidewalkMat     = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.75, metalness: 0.05 });
+        const lineWhiteMat    = new THREE.MeshBasicMaterial({ color: 0xf1f5f9 });
+        const lineYellowMat   = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+        const curbRedMat      = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.6 });
+        const metalPoleMat    = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.35, metalness: 0.8 });
+        const craneRedMat     = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.42, metalness: 0.38 });
+
+        const seawall = new THREE.Mesh(new THREE.BoxGeometry(52, 38, 720), darkConcreteMat);
+        seawall.position.set(5, -19, 0);
+        seawall.receiveShadow = true;
+        streetWorldGroup.add(seawall);
+
+        const urbanGround = new THREE.Mesh(new THREE.BoxGeometry(280, 38, 720), concreteMat);
+        urbanGround.position.set(170, -19.05, 0);
+        urbanGround.receiveShadow = true;
+        streetWorldGroup.add(urbanGround);
+
+        const roadDeck = new THREE.Mesh(new THREE.BoxGeometry(32, 0.3, 720), asphaltMat);
+        roadDeck.receiveShadow = true;
+        streetWorldGroup.add(roadDeck);
+
+        const yellowLine1 = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 720), lineYellowMat);
+        yellowLine1.rotation.x = -Math.PI / 2;
+        yellowLine1.position.set(-0.3, 0.18, 0);
+        streetWorldGroup.add(yellowLine1);
+
+        const yellowLine2 = yellowLine1.clone();
+        yellowLine2.position.x = 0.3;
+        streetWorldGroup.add(yellowLine2);
+
+        const edgeLineL = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 720), lineWhiteMat);
+        edgeLineL.rotation.x = -Math.PI / 2;
+        edgeLineL.position.set(-14.6, 0.18, 0);
+        streetWorldGroup.add(edgeLineL);
+
+        const edgeLineR = edgeLineL.clone();
+        edgeLineR.position.x = 14.6;
+        streetWorldGroup.add(edgeLineR);
+
+        const leftSidewalk = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.65, 720), sidewalkMat);
+        leftSidewalk.position.set(-18.4, 0.32, 0);
+        leftSidewalk.receiveShadow = true;
+        streetWorldGroup.add(leftSidewalk);
+
+        const rightSidewalk = new THREE.Mesh(new THREE.BoxGeometry(9.5, 0.65, 720), sidewalkMat);
+        rightSidewalk.position.set(20.7, 0.32, 0);
+        rightSidewalk.receiveShadow = true;
+        streetWorldGroup.add(rightSidewalk);
+
+        const seaParapet = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.35, 720), concreteMat);
+        seaParapet.position.set(-20.2, 0.9, 0);
+        seaParapet.castShadow = true;
+        streetWorldGroup.add(seaParapet);
+
+        const dashCount = 28;
+        const dashInst = new THREE.InstancedMesh(new THREE.BoxGeometry(0.28, 0.04, 6.0), lineWhiteMat, dashCount * 2);
+        const curbRedInst = new THREE.InstancedMesh(new THREE.BoxGeometry(0.55, 0.7, 4.5), curbRedMat, dashCount * 2);
+        const dummy = new THREE.Object3D();
+        let dIdx = 0;
+        for (let i = 0; i < dashCount; i++) {
+            const z = -240 + i * 18;
+            dummy.position.set(-7.4, 0.17, z);
+            dummy.updateMatrix();
+            dashInst.setMatrixAt(dIdx, dummy.matrix);
+
+            dummy.position.set(-15.7, 0.35, z);
+            dummy.updateMatrix();
+            curbRedInst.setMatrixAt(dIdx++, dummy.matrix);
+
+            dummy.position.set(7.4, 0.17, z);
+            dummy.updateMatrix();
+            dashInst.setMatrixAt(dIdx, dummy.matrix);
+
+            dummy.position.set(15.7, 0.35, z);
+            dummy.updateMatrix();
+            curbRedInst.setMatrixAt(dIdx++, dummy.matrix);
+        }
+        streetWorldGroup.add(dashInst);
+        streetWorldGroup.add(curbRedInst);
+
+        function createPortCrane(zPos) {
+            const crane = new THREE.Group();
+            crane.position.set(-16, 0, zPos);
+            const legGeo = new THREE.BoxGeometry(1.3, 38, 1.3);
+            [[-3, -6], [-3, 6], [5, -6], [5, 6]].forEach(([lx, lz]) => {
+                const leg = new THREE.Mesh(legGeo, craneRedMat);
+                leg.position.set(lx, 19, lz);
+                leg.castShadow = true;
+                crane.add(leg);
+            });
+            const boom = new THREE.Mesh(new THREE.BoxGeometry(58, 2.1, 3.0), craneRedMat);
+            boom.position.set(-18, 36, 0);
+            boom.castShadow = true;
+            crane.add(boom);
+
+            const topHouse = new THREE.Mesh(new THREE.BoxGeometry(8, 3.4, 13), concreteMat);
+            topHouse.position.set(1, 38.4, 0);
+            crane.add(topHouse);
+            return crane;
+        }
+        streetWorldGroup.add(createPortCrane(-52));
+        streetWorldGroup.add(createPortCrane(-125));
+
+        const buildingColors = [0x334155, 0x1e293b, 0x475569, 0x0f172a];
+        for (let i = -5; i <= 5; i++) {
+            const z = i * 36;
+            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.24, 13.5, 10), metalPoleMat);
+            pole.position.set(17.2, 7.0, z);
+            pole.castShadow = true;
+            streetWorldGroup.add(pole);
+
+            const arm = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.2, 0.2), metalPoleMat);
+            arm.position.set(15.1, 13.6, z);
+            streetWorldGroup.add(arm);
+
+            const bH = 22 + (Math.abs(i * 7) % 24);
+            const bMat = new THREE.MeshStandardMaterial({
+                color: buildingColors[Math.abs(i) % buildingColors.length],
+                roughness: 0.5,
+                metalness: 0.3
+            });
+            const bldg = new THREE.Mesh(new THREE.BoxGeometry(24, bH, 28), bMat);
+            bldg.position.set(42, bH * 0.5, z);
+            bldg.castShadow = true;
+            bldg.receiveShadow = true;
+            streetWorldGroup.add(bldg);
+        }
+
+        const truckRoot = new THREE.Group();
+        truckRoot.position.set(-6.8, 0.15, 0);
+        truckRoot.scale.setScalar(1.38);
+        streetWorldGroup.add(truckRoot);
+
+        const cabPaintMat = new THREE.MeshPhysicalMaterial({
+            color: 0x0f2547,
+            roughness: 0.18,
+            metalness: 0.68,
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.07
+        });
+
+        const cabSilverAccentMat = new THREE.MeshStandardMaterial({
+            color: 0xe2e8f0,
+            roughness: 0.22,
+            metalness: 0.85
+        });
+
+        const darkPlasticTrimMat = new THREE.MeshStandardMaterial({
+            color: 0x151921,
+            roughness: 0.62,
+            metalness: 0.18
+        });
+
+        const grilleMeshMat = new THREE.MeshStandardMaterial({
+            map: createGrilleMeshTexture(),
+            roughness: 0.45,
+            metalness: 0.5
+        });
+
+        const chassisSteelMat = new THREE.MeshStandardMaterial({
+            color: 0x1e242d,
+            roughness: 0.58,
+            metalness: 0.52
+        });
+
+        const chromeMat = new THREE.MeshStandardMaterial({
+            color: 0xf8fafc,
+            roughness: 0.06,
+            metalness: 0.98
+        });
+
+        const brushedAluminumMat = new THREE.MeshStandardMaterial({
+            color: 0xcbd5e1,
+            roughness: 0.28,
+            metalness: 0.88
+        });
+
+        const tireRubberMat = new THREE.MeshStandardMaterial({
+            color: 0x111318,
+            roughness: 0.86,
+            metalness: 0.06
+        });
+
+        const cabGlassMat = new THREE.MeshPhysicalMaterial({
+            color: 0x040a14,
+            roughness: 0.03,
+            metalness: 0.15,
+            reflectivity: 1.0,
+            clearcoat: 1.0
+        });
+
+        const twistLockYellowMat = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.4, metalness: 0.3 });
+        const amberLightMat      = new THREE.MeshBasicMaterial({ color: 0xffa000 });
+        const headLightGlowMat   = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const drlIceBlueMat      = new THREE.MeshBasicMaterial({ color: 0xe0f2fe });
+        const tailLightRedMat    = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
+
+        for (let side of [-1, 1]) {
+            const tractorRail = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.34, 8.2), chassisSteelMat);
+            tractorRail.position.set(side * 0.48, 0.92, 4.3);
+            tractorRail.castShadow = true;
+            truckRoot.add(tractorRail);
+        }
+
+        const catwalk = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.06, 2.3), brushedAluminumMat);
+        catwalk.position.set(0, 1.11, 3.85);
+        truckRoot.add(catwalk);
+
+        const fifthWheelPlate = new THREE.Mesh(new THREE.CylinderGeometry(0.54, 0.58, 0.1, 20), darkPlasticTrimMat);
+        fifthWheelPlate.position.set(0, 1.24, 1.95);
+        fifthWheelPlate.rotation.x = 0.05;
+        truckRoot.add(fifthWheelPlate);
+
+        [
+            { x: -0.22, col: 0xdc2626 },
+            { x:  0.00, col: 0x2563eb },
+            { x:  0.22, col: 0xeab308 }
+        ].forEach(c => {
+            const hose = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.028, 0.028, 1.45, 8),
+                new THREE.MeshStandardMaterial({ color: c.col, roughness: 0.4 })
+            );
+            hose.position.set(c.x, 1.75, 4.25);
+            hose.rotation.x = 0.42;
+            truckRoot.add(hose);
+        });
+
+        for (let side of [-1, 1]) {
+            const fuelTank = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.36, 2.05, 24), brushedAluminumMat);
+            fuelTank.rotation.x = Math.PI / 2;
+            fuelTank.position.set(side * 0.94, 0.86, 4.15);
+            fuelTank.castShadow = true;
+            truckRoot.add(fuelTank);
+
+            const sideSkirt = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.64, 2.55), cabPaintMat);
+            sideSkirt.position.set(side * 1.22, 0.82, 4.15);
+            sideSkirt.castShadow = true;
+            truckRoot.add(sideSkirt);
+
+            const skirtTrim = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.045, 2.50), chromeMat);
+            skirtTrim.position.set(side * 1.22, 0.56, 4.15);
+            truckRoot.add(skirtTrim);
+
+            const rearFenderTop = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.06, 2.85), darkPlasticTrimMat);
+            rearFenderTop.position.set(side * 0.98, 1.18, 1.88);
+            truckRoot.add(rearFenderTop);
+        }
+
+        for (let side of [-1, 1]) {
+            const stack = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.095, 3.55, 16), chromeMat);
+            stack.position.set(side * 1.14, 2.75, 4.78);
+            stack.castShadow = true;
+            truckRoot.add(stack);
+
+            const stackHeatShield = new THREE.Mesh(new THREE.CylinderGeometry(0.115, 0.115, 1.8, 16), brushedAluminumMat);
+            stackHeatShield.position.set(side * 1.14, 2.15, 4.78);
+            truckRoot.add(stackHeatShield);
+        }
+
+        const cabGroup = new THREE.Group();
+        truckRoot.add(cabGroup);
+
+        const cabShape = new THREE.Shape();
+        cabShape.moveTo(-1.68, 0.0);
+        cabShape.lineTo( 1.72, 0.0);
+        cabShape.lineTo( 1.76, 1.18);
+        cabShape.lineTo( 1.44, 2.34);
+        cabShape.quadraticCurveTo(1.22, 2.98, 0.45, 3.12);
+        cabShape.lineTo(-1.62, 3.06);
+        cabShape.lineTo(-1.68, 2.70);
+        cabShape.closePath();
+
+        const cabWidth = 2.34;
+        const cabGeo = new THREE.ExtrudeGeometry(cabShape, {
+            depth: cabWidth,
+            bevelEnabled: true,
+            bevelSegments: 5,
+            steps: 1,
+            bevelSize: 0.08,
+            bevelThickness: 0.08
+        });
+        cabGeo.translate(0, 0, -cabWidth / 2);
+        cabGeo.rotateY(-Math.PI / 2);
+
+        const cabShell = new THREE.Mesh(cabGeo, cabPaintMat);
+        cabShell.position.set(0, 1.15, 6.75);
+        cabShell.castShadow = true;
+        cabShell.receiveShadow = true;
+        cabGroup.add(cabShell);
+
+        for (let side of [-1, 1]) {
+            const sideExtender = new THREE.Mesh(new THREE.BoxGeometry(0.08, 3.08, 0.58), cabPaintMat);
+            sideExtender.position.set(side * 1.21, 2.68, 4.82);
+            sideExtender.castShadow = true;
+            cabGroup.add(sideExtender);
+        }
+
+        const spoilerShape = new THREE.Shape();
+        spoilerShape.moveTo(-1.62, 3.04);
+        spoilerShape.lineTo( 0.25, 3.08);
+        spoilerShape.quadraticCurveTo(-0.55, 3.55, -1.68, 3.65);
+        spoilerShape.closePath();
+        const spoilerGeo = new THREE.ExtrudeGeometry(spoilerShape, {
+            depth: 2.26,
+            bevelEnabled: true,
+            bevelSegments: 2,
+            bevelSize: 0.03,
+            bevelThickness: 0.03
+        });
+        spoilerGeo.translate(0, 0, -1.13);
+        spoilerGeo.rotateY(-Math.PI / 2);
+        const roofSpoiler = new THREE.Mesh(spoilerGeo, cabPaintMat);
+        roofSpoiler.position.set(0, 1.15, 6.75);
+        roofSpoiler.castShadow = true;
+        cabGroup.add(roofSpoiler);
+
+        const windshield = new THREE.Mesh(new THREE.BoxGeometry(2.24, 1.08, 0.08), cabGlassMat);
+        windshield.position.set(0, 2.94, 8.33);
+        windshield.rotation.x = -0.27;
+        cabGroup.add(windshield);
+
+        const wiperCowl = new THREE.Mesh(new THREE.BoxGeometry(2.28, 0.16, 0.12), darkPlasticTrimMat);
+        wiperCowl.position.set(0, 2.38, 8.48);
+        cabGroup.add(wiperCowl);
+
+        for (let wx of [-0.52, 0.45]) {
+            const wiperBlade = new THREE.Mesh(new THREE.BoxGeometry(0.74, 0.035, 0.04), darkPlasticTrimMat);
+            wiperBlade.position.set(wx, 2.48, 8.53);
+            wiperBlade.rotation.z = -0.09;
+            cabGroup.add(wiperBlade);
+        }
+
+        const sunVisor = new THREE.Mesh(new THREE.BoxGeometry(2.42, 0.25, 0.18), darkPlasticTrimMat);
+        sunVisor.position.set(0, 3.55, 8.18);
+        sunVisor.rotation.x = 0.18;
+        sunVisor.castShadow = true;
+        cabGroup.add(sunVisor);
+
+        const visorChrome = new THREE.Mesh(new THREE.BoxGeometry(2.44, 0.04, 0.19), chromeMat);
+        visorChrome.position.set(0, 3.44, 8.20);
+        cabGroup.add(visorChrome);
+
+        for (let m = -2; m <= 2; m++) {
+            const markerLed = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.05, 0.04), amberLightMat);
+            markerLed.position.set(m * 0.46, 3.56, 8.27);
+            cabGroup.add(markerLed);
+        }
+
+        const lightBarPipe = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 2.1, 12), chromeMat);
+        lightBarPipe.rotation.z = Math.PI / 2;
+        lightBarPipe.position.set(0, 4.18, 7.65);
+        cabGroup.add(lightBarPipe);
+
+        [-0.72, -0.25, 0.25, 0.72].forEach(lx => {
+            const spotHousing = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.09, 0.14, 16), chromeMat);
+            spotHousing.rotation.x = Math.PI / 2;
+            spotHousing.position.set(lx, 4.26, 7.68);
+            cabGroup.add(spotHousing);
+
+            const spotLens = new THREE.Mesh(new THREE.CircleGeometry(0.095, 14), headLightGlowMat);
+            spotLens.position.set(lx, 4.26, 7.76);
+            cabGroup.add(spotLens);
+        });
+
+        for (let side of [-1, 1]) {
+            const airHorn = new THREE.Mesh(new THREE.ConeGeometry(0.075, 0.72, 14), chromeMat);
+            airHorn.rotation.x = -Math.PI / 2;
+            airHorn.position.set(side * 0.96, 4.24, 7.25);
+            cabGroup.add(airHorn);
+        }
+
+        const upperGrilleFrame = new THREE.Mesh(new THREE.BoxGeometry(1.88, 1.12, 0.10), cabSilverAccentMat);
+        upperGrilleFrame.position.set(0, 1.76, 8.51);
+        cabGroup.add(upperGrilleFrame);
+
+        const upperGrilleMesh = new THREE.Mesh(new THREE.BoxGeometry(1.76, 1.02, 0.12), grilleMeshMat);
+        upperGrilleMesh.position.set(0, 1.76, 8.52);
+        cabGroup.add(upperGrilleMesh);
+
+        for (let r = 0; r < 4; r++) {
+            const barW = 1.72 - r * 0.06;
+            const rib = new THREE.Mesh(new THREE.BoxGeometry(barW, 0.075, 0.15), chromeMat);
+            rib.position.set(0, 2.12 - r * 0.24, 8.53);
+            cabGroup.add(rib);
+        }
+
+        const centerBadge = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.16, 6), chromeMat);
+        centerBadge.rotation.x = Math.PI / 2;
+        centerBadge.position.set(0, 2.02, 8.54);
+        cabGroup.add(centerBadge);
+
+        for (let side of [-1, 1]) {
+            const cornerVane = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.08, 0.16), cabPaintMat);
+            cornerVane.position.set(side * 1.12, 1.76, 8.48);
+            cornerVane.rotation.y = side * 0.25;
+            cabGroup.add(cornerVane);
+        }
+
+        const bumperCenter = new THREE.Mesh(new THREE.BoxGeometry(2.50, 0.64, 0.42), cabPaintMat);
+        bumperCenter.position.set(0, 0.85, 8.46);
+        bumperCenter.castShadow = true;
+        cabGroup.add(bumperCenter);
+
+        const lowerIntake = new THREE.Mesh(new THREE.BoxGeometry(1.52, 0.42, 0.10), grilleMeshMat);
+        lowerIntake.position.set(0, 0.84, 8.64);
+        cabGroup.add(lowerIntake);
+
+        for (let lr of [-0.08, 0.10]) {
+            const lRib = new THREE.Mesh(new THREE.BoxGeometry(1.46, 0.055, 0.12), chromeMat);
+            lRib.position.set(0, 0.84 + lr, 8.65);
+            cabGroup.add(lRib);
+        }
+
+        const chinSkidPlate = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.12, 0.40), brushedAluminumMat);
+        chinSkidPlate.position.set(0, 0.50, 8.48);
+        cabGroup.add(chinSkidPlate);
+
+        const licensePlate = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.12, 0.04), new THREE.MeshBasicMaterial({ color: 0xfef08a }));
+        licensePlate.position.set(0, 0.58, 8.68);
+        cabGroup.add(licensePlate);
+
+        for (let side of [-1, 1]) {
+            const hlHousing = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.28, 0.14), darkPlasticTrimMat);
+            hlHousing.position.set(side * 0.99, 0.94, 8.62);
+            cabGroup.add(hlHousing);
+
+            const hlLens = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.15, 0.06), headLightGlowMat);
+            hlLens.position.set(side * 0.96, 0.95, 8.67);
+            cabGroup.add(hlLens);
+
+            const drlBottom = new THREE.Mesh(new THREE.BoxGeometry(0.40, 0.035, 0.07), drlIceBlueMat);
+            drlBottom.position.set(side * 0.99, 0.83, 8.67);
+            cabGroup.add(drlBottom);
+
+            const drlOuter = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.24, 0.07), drlIceBlueMat);
+            drlOuter.position.set(side * 1.18, 0.94, 8.67);
+            cabGroup.add(drlOuter);
+
+            const turnBar = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.035, 0.07), amberLightMat);
+            turnBar.position.set(side * 0.96, 1.05, 8.67);
+            cabGroup.add(turnBar);
+
+            const fogLamp = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.06, 14), headLightGlowMat);
+            fogLamp.rotation.x = Math.PI / 2;
+            fogLamp.position.set(side * 0.96, 0.64, 8.66);
+            cabGroup.add(fogLamp);
+
+            const hlHalo = new THREE.Sprite(new THREE.SpriteMaterial({
+                map: sharedGlowTex,
+                color: 0xe0f2fe,
+                transparent: true,
+                opacity: 0.82,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            }));
+            hlHalo.position.set(side * 0.98, 0.92, 8.78);
+            hlHalo.scale.set(1.8, 1.8, 1.8);
+            cabGroup.add(hlHalo);
+        }
+
+        for (let side of [-1, 1]) {
+            const sideWin = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.92, 1.38), cabGlassMat);
+            sideWin.position.set(side * 1.22, 2.86, 7.38);
+            cabGroup.add(sideWin);
+
+            const winSillChrome = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.04, 1.44), chromeMat);
+            winSillChrome.position.set(side * 1.23, 2.38, 7.36);
+            cabGroup.add(winSillChrome);
+
+            const sleeperWin = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.55, 0.68), cabGlassMat);
+            sleeperWin.position.set(side * 1.22, 3.05, 5.85);
+            cabGroup.add(sleeperWin);
+
+            const doorPocket = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.12, 0.30), darkPlasticTrimMat);
+            doorPocket.position.set(side * 1.24, 1.92, 6.85);
+            cabGroup.add(doorPocket);
+
+            const doorHandle = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.045, 0.26), chromeMat);
+            doorHandle.position.set(side * 1.26, 1.92, 6.85);
+            cabGroup.add(doorHandle);
+
+            const fenderArch = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.74, 0.74, 0.36, 20, 1, false, 0, Math.PI),
+                darkPlasticTrimMat
+            );
+            fenderArch.rotation.z = Math.PI / 2;
+            fenderArch.rotation.y = Math.PI / 2;
+            fenderArch.position.set(side * 1.12, 0.58, 6.55);
+            cabGroup.add(fenderArch);
+
+            for (let st = 0; st < 3; st++) {
+                const stepBox = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.045, 0.52), brushedAluminumMat);
+                stepBox.position.set(side * 1.16, 0.62 + st * 0.24, 7.75);
+                cabGroup.add(stepBox);
+            }
+
+            const mainMirrorShell = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.62, 0.24), cabPaintMat);
+            mainMirrorShell.position.set(side * 1.48, 2.92, 7.92);
+            mainMirrorShell.castShadow = true;
+            cabGroup.add(mainMirrorShell);
+
+            const mainMirrorGlass = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.56, 0.03), chromeMat);
+            mainMirrorGlass.position.set(side * 1.48, 2.92, 7.80);
+            cabGroup.add(mainMirrorGlass);
+
+            const convexMirrorShell = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.24, 0.20), darkPlasticTrimMat);
+            convexMirrorShell.position.set(side * 1.48, 2.44, 7.92);
+            cabGroup.add(convexMirrorShell);
+
+            const mirrorArmUpper = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.045, 0.05), darkPlasticTrimMat);
+            mirrorArmUpper.position.set(side * 1.34, 3.18, 7.98);
+            cabGroup.add(mirrorArmUpper);
+
+            const mirrorArmLower = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.045, 0.05), darkPlasticTrimMat);
+            mirrorArmLower.position.set(side * 1.34, 2.34, 7.98);
+            cabGroup.add(mirrorArmLower);
+        }
+
+        const blindSpotArm = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.35, 8), darkPlasticTrimMat);
+        blindSpotArm.rotation.x = Math.PI / 3;
+        blindSpotArm.position.set(-0.92, 3.55, 8.35);
+        cabGroup.add(blindSpotArm);
+
+        const blindSpotMirror = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 10), darkPlasticTrimMat);
+        blindSpotMirror.scale.set(1.2, 0.8, 0.6);
+        blindSpotMirror.position.set(-0.92, 3.48, 8.52);
+        cabGroup.add(blindSpotMirror);
+
+        const trailerGroup = new THREE.Group();
+        truckRoot.add(trailerGroup);
+
+        for (let side of [-1, 1]) {
+            const trailerBeam = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.36, 12.6), chassisSteelMat);
+            trailerBeam.position.set(side * 0.52, 1.18, -3.8);
+            trailerBeam.castShadow = true;
+            trailerGroup.add(trailerBeam);
+        }
+
+        [-9.95, 2.35].forEach(zBolster => {
+            const bolster = new THREE.Mesh(new THREE.BoxGeometry(2.58, 0.18, 0.26), chassisSteelMat);
+            bolster.position.set(0, 1.28, zBolster);
+            bolster.castShadow = true;
+            trailerGroup.add(bolster);
+
+            for (let side of [-1, 1]) {
+                const twistLockHousing = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.22, 0.28), twistLockYellowMat);
+                twistLockHousing.position.set(side * 1.18, 1.30, zBolster);
+                trailerGroup.add(twistLockHousing);
+            }
+        });
+
+        for (let side of [-1, 1]) {
+            const legUpper = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.78, 0.18), chassisSteelMat);
+            legUpper.position.set(side * 0.82, 0.78, -0.35);
+            legUpper.castShadow = true;
+            trailerGroup.add(legUpper);
+
+            const footPad = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.06, 0.38), chassisSteelMat);
+            footPad.position.set(side * 0.82, 0.38, -0.35);
+            trailerGroup.add(footPad);
+
+            for (let barY of [0.68, 0.92]) {
+                const sideGuard = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.08, 4.2), brushedAluminumMat);
+                sideGuard.position.set(side * 1.18, barY, -3.2);
+                trailerGroup.add(sideGuard);
+            }
+        }
+
+        const rearBumper = new THREE.Mesh(new THREE.BoxGeometry(2.52, 0.24, 0.18), brushedAluminumMat);
+        rearBumper.position.set(0, 0.62, -10.05);
+        rearBumper.castShadow = true;
+        trailerGroup.add(rearBumper);
+
+        for (let side of [-1, 1]) {
+            const bumperPost = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.55, 0.14), chassisSteelMat);
+            bumperPost.position.set(side * 0.95, 0.92, -10.02);
+            trailerGroup.add(bumperPost);
+
+            const tailLight = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.14, 0.08), tailLightRedMat);
+            tailLight.position.set(side * 0.92, 0.62, -10.12);
+            trailerGroup.add(tailLight);
+
+            const mudflap = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.65, 0.04), tireRubberMat);
+            mudflap.position.set(side * 0.95, 0.48, -9.85);
+            trailerGroup.add(mudflap);
+        }
+
+        const heroContainerGroup = new THREE.Group();
+        heroContainerGroup.position.set(0, 2.72, -3.8);
+        trailerGroup.add(heroContainerGroup);
+
+        const heroContainerTex = createHeroContainerTexture();
+        const heroSideMat = new THREE.MeshStandardMaterial({
+            map: heroContainerTex,
+            bumpMap: corrugatedBump,
+            bumpScale: 0.08,
+            roughness: 0.48,
+            metalness: 0.28
+        });
+        const heroPlainOrangeMat = new THREE.MeshStandardMaterial({
+            color: 0xc2410c,
+            bumpMap: corrugatedBump,
+            bumpScale: 0.08,
+            roughness: 0.52,
+            metalness: 0.3
+        });
+
+        const containerMats = [
+            heroSideMat,
+            heroSideMat,
+            heroPlainOrangeMat,
+            heroPlainOrangeMat,
+            heroPlainOrangeMat,
+            heroPlainOrangeMat
+        ];
+        const containerBody = new THREE.Mesh(new THREE.BoxGeometry(2.54, 2.68, 12.38), containerMats);
+        containerBody.castShadow = true;
+        containerBody.receiveShadow = true;
+        heroContainerGroup.add(containerBody);
+
+        const castingGeo = new THREE.BoxGeometry(0.24, 0.24, 0.26);
+        const castingMat = new THREE.MeshStandardMaterial({ color: 0x7c2d12, roughness: 0.6, metalness: 0.5 });
+        for (let cx of [-1.18, 1.18]) {
+            for (let cy of [-1.25, 1.25]) {
+                for (let cz of [-6.08, 6.08]) {
+                    const casting = new THREE.Mesh(castingGeo, castingMat);
+                    casting.position.set(cx, cy, cz);
+                    heroContainerGroup.add(casting);
+                }
+            }
+        }
+
+        const doorGasket = new THREE.Mesh(new THREE.BoxGeometry(2.42, 2.48, 0.04), tireRubberMat);
+        doorGasket.position.set(0, 0, -6.19);
+        heroContainerGroup.add(doorGasket);
+
+        for (let side of [-1, 1]) {
+            const doorPanel = new THREE.Mesh(new THREE.BoxGeometry(1.16, 2.40, 0.06), heroPlainOrangeMat);
+            doorPanel.position.set(side * 0.59, 0, -6.21);
+            heroContainerGroup.add(doorPanel);
+        }
+
+        [-0.85, -0.32, 0.32, 0.85].forEach(lx => {
+            const lockRod = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.024, 2.44, 10), chromeMat);
+            lockRod.position.set(lx, 0, -6.26);
+            heroContainerGroup.add(lockRod);
+        });
+
+        const tireGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.31, 28);
+        tireGeo.rotateZ(Math.PI / 2);
+
+        const sidewallGeo = new THREE.CylinderGeometry(0.56, 0.56, 0.26, 28);
+        sidewallGeo.rotateZ(Math.PI / 2);
+
+        const rimOuterGeo = new THREE.CylinderGeometry(0.33, 0.33, 0.32, 24);
+        rimOuterGeo.rotateZ(Math.PI / 2);
+
+        const hubCapGeo = new THREE.CylinderGeometry(0.14, 0.16, 0.35, 16);
+        hubCapGeo.rotateZ(Math.PI / 2);
+
+        const lugNutGeo = new THREE.CylinderGeometry(0.022, 0.022, 0.34, 6);
+        lugNutGeo.rotateZ(Math.PI / 2);
+
+        function createRealisticWheelUnit(isDual) {
+            const wheelGroup = new THREE.Group();
+            const offsets = isDual ? [-0.18, 0.18] : [0];
+            offsets.forEach(ox => {
+                const tire = new THREE.Mesh(tireGeo, tireRubberMat);
+                tire.position.x = ox;
+                tire.castShadow = true;
+                wheelGroup.add(tire);
+
+                const bulge = new THREE.Mesh(sidewallGeo, tireRubberMat);
+                bulge.position.x = ox;
+                wheelGroup.add(bulge);
+
+                const rim = new THREE.Mesh(rimOuterGeo, brushedAluminumMat);
+                rim.position.x = ox;
+                wheelGroup.add(rim);
+            });
+
+            const outerX = isDual ? 0.18 : 0;
+            const hub = new THREE.Mesh(hubCapGeo, chassisSteelMat);
+            hub.position.x = outerX;
+            wheelGroup.add(hub);
+
+            for (let n = 0; n < 10; n++) {
+                const ang = (n / 10) * Math.PI * 2;
+                const lug = new THREE.Mesh(lugNutGeo, chromeMat);
+                lug.position.set(outerX, Math.cos(ang) * 0.23, Math.sin(ang) * 0.23);
+                wheelGroup.add(lug);
+            }
+            return wheelGroup;
+        }
+
+        const axleSpecs = [
+            { z:  6.55, dual: false },
+            { z:  2.55, dual: true  },
+            { z:  1.22, dual: true  },
+            { z: -6.45, dual: true  },
+            { z: -7.75, dual: true  },
+            { z: -9.05, dual: true  }
+        ];
+
+        axleSpecs.forEach(ax => {
+            const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.1, 12), chassisSteelMat);
+            shaft.rotation.z = Math.PI / 2;
+            shaft.position.set(0, 0.55, ax.z);
+            truckRoot.add(shaft);
+
+            for (let side of [-1, 1]) {
+                const wUnit = createRealisticWheelUnit(ax.dual);
+                wUnit.position.set(side * (ax.dual ? 0.98 : 1.08), 0.55, ax.z);
+                if (side === -1) wUnit.rotation.y = Math.PI;
+                truckRoot.add(wUnit);
+            }
+        });
+
+        freezeStaticGroup(streetWorldGroup);
+    }
+
+    buildStaticStreetAndRealisticTruck();
+
+    /* ============================================================
+       SECTION 7 — SMOOTH CONTINUOUS CAMERA CHOREOGRAPHY
+       ============================================================ */
+    const camLookTarget = { x: 0, y: 1142, z: -45 };
+    camera.position.set(24, 1162, 38);
+    camera.lookAt(camLookTarget.x, camLookTarget.y, camLookTarget.z);
+
+    const sunGlowEl = document.getElementById('sun-glow');
+    const tmpSunVec = new THREE.Vector3().copy(SUN_DIRECTION).multiplyScalar(12000);
+
+    function updateSunGlow() {
+        const projected = tmpSunVec.clone().project(camera);
+        const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
+        const y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
+        sunGlowEl.style.left = x + 'px';
+        sunGlowEl.style.top  = y + 'px';
+        sunGlowEl.style.opacity = projected.y > -1 ? 0.9 : 0;
+    }
+
+    const pillAir  = document.getElementById('pill-air');
+    const pillSea  = document.getElementById('pill-sea');
+    const pillLand = document.getElementById('pill-land');
+
+    const tl = gsap.timeline({
+        scrollTrigger: {
+            trigger: ".scroll-wrapper",
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 1.4,
+            onUpdate: (self) => {
+                gsap.set("#scrollPrompt", { opacity: self.progress > 0.04 ? 0 : 1 });
+
+                // به‌روزرسانی نشانگر مرحله در پایین Hero متناسب با اسکرول
+                const p = self.progress;
+                pillAir.classList.toggle('active', p < 0.36);
+                pillSea.classList.toggle('active', p >= 0.36 && p < 0.74);
+                pillLand.classList.toggle('active', p >= 0.74);
+            }
+        }
+    });
+
+    // STAGE 1: Airplane bank & initial descent
+    tl.to(airplaneGroup.position, { x: -52, y: 770, z: -155, ease: "power1.inOut", duration: 3.5 }, 0)
+      .to(airplaneGroup.rotation, { x: -0.26, y: 0.45, z: 0.55, ease: "power1.inOut", duration: 3.5 }, 0)
+      .to(camera.position, { x: -22, y: 810, z: -35, ease: "power1.inOut", duration: 3.5 }, 0)
+      .to(camLookTarget, { x: -35, y: 670, z: -175, ease: "power1.inOut", duration: 3.5 }, 0)
+
+    // STAGE 2: Diving through the cloud deck toward the ocean
+      .to(airplaneGroup.position, { x: -230, y: 410, z: -500, ease: "none", duration: 3.3 }, 3.5)
+      .to(airplaneGroup.rotation, { x: -0.04, y: 0.72, z: 0.14, ease: "power1.out", duration: 3.3 }, 3.5)
+      .to(camera.position, { x: 62, y: 230, z: -12, ease: "none", duration: 3.3 }, 3.5)
+      .to(camLookTarget, { x: 10, y: 42, z: -140, ease: "none", duration: 3.3 }, 3.5)
+      .to("#cloud-mist", { opacity: 0.85, duration: 1.1, ease: "power2.in" }, 3.8)
+      .to("#cloud-mist", { opacity: 0, duration: 1.4, ease: "power2.out" }, 4.9)
+
+    // STAGE 3: Showcasing the Container Ship on the ocean
+      .to(airplaneGroup.position, { x: -520, y: 330, z: -1050, ease: "none", duration: 3.2 }, 6.8)
+      .to(camera.position, { x: 68, y: 25, z: -60, ease: "power2.out", duration: 3.2 }, 6.8)
+      .to(camLookTarget, { x: 0, y: 16, z: -140, ease: "power2.out", duration: 3.2 }, 6.8)
+
+    // STAGE 4: Smooth Drone Arc rising slightly over the channel from Ship toward the Port Pier & Truck
+      .to(camera.position, { x: 122, y: 31, z: -105, ease: "sine.inOut", duration: 2.3 }, 10.0)
+      .to(camLookTarget, { x: 162, y: 22.5, z: -162, ease: "sine.inOut", duration: 2.3 }, 10.0)
+
+    // STAGE 5: Seamless Glide onto the Boulevard into a Low-Angle 3/4 Front Hero Shot of the Tractor Cab & Container
+      .to(camera.position, { x: 155.2, y: 21.3, z: -144.8, ease: "power2.out", duration: 2.8 }, 12.3)
+      .to(camLookTarget, { x: 168.4, y: 21.1, z: -165.5, ease: "power2.out", duration: 2.8 }, 12.3);
+
+    /* ============================================================
+       SECTION 8 — LIGHTWEIGHT RENDER LOOP
+       ============================================================ */
+    const clock = new THREE.Clock();
+
+    function animate() {
+        requestAnimationFrame(animate);
+        const delta   = clock.getDelta();
+        const elapsed = clock.getElapsedTime();
+
+        oceanMat.uniforms.uTime.value = elapsed * 1.45;
+        oceanMat.uniforms.uCameraPos.value.copy(camera.position);
+
+        if (camera.position.y > 120) {
+            engineFans.forEach(fan => { fan.rotation.z += delta * 28; });
+            exhaustGlows.forEach((g, i) => {
+                g.material.opacity = 0.55 + 0.25 * Math.sin(elapsed * 18 + i * 1.5);
+            });
+            currentAirplaneMesh.position.y = Math.sin(elapsed * 1.6) * 0.35;
+            currentAirplaneMesh.rotation.z = Math.cos(elapsed * 1.1) * 0.012;
+        }
+
+        shipGroup.position.y = Math.sin(elapsed * 1.0) * 0.22 - 0.25;
+        shipGroup.rotation.z = Math.sin(elapsed * 0.6) * 0.010;
+
+        skyDome.position.copy(camera.position);
+        updateSunGlow();
+
+        camera.lookAt(camLookTarget.x, camLookTarget.y, camLookTarget.z);
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    /* ============================================================
+       SECTION 9 — RESIZE & BOOTSTRAP
+       ============================================================ */
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    requestAnimationFrame(() => {
+        setTimeout(() => {
+            const ls = document.getElementById('loadingScreen');
+            ls.classList.add('hidden');
+            setTimeout(() => ls.style.display = 'none', 700);
+        }, 400);
+    });
+    </script>
+</body>
+</html>
