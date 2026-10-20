@@ -32,6 +32,7 @@ export type PencilGrade = "HB" | "2B" | "6B";
 
 export function useHeroScene() {
   const canvasContainerRef = useRef<HTMLDivElement | null>(null);
+  const heroStageRef = useRef<HTMLDivElement | null>(null);
   const sunGlowRef = useRef<HTMLDivElement | null>(null);
   const cloudMistRef = useRef<HTMLDivElement | null>(null);
   const scrollPromptRef = useRef<HTMLDivElement | null>(null);
@@ -40,6 +41,8 @@ export function useHeroScene() {
 
   const [pencilGrade, setPencilGradeState] = useState<PencilGrade>("2B");
   const [isAutoPlaying, setIsAutoPlaying] = useState<boolean>(false);
+  const [activePhase, setActivePhase] = useState<1 | 2 | 3>(1);
+  const [scrollProgress, setScrollProgress] = useState<number>(0);
 
   // References to graphite shader material and auto-play state for animation callbacks
   const graphiteMatRef = useRef<THREE.ShaderMaterial | null>(null);
@@ -66,6 +69,25 @@ export function useHeroScene() {
       const next = !prev;
       autoPlayRef.current = next;
       return next;
+    });
+  }, []);
+
+  const scrollToPhase = useCallback((phase: 1 | 2 | 3) => {
+    const wrapper = scrollWrapperRef.current;
+    if (!wrapper) return;
+    const rect = wrapper.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const wrapperTop = rect.top + scrollTop;
+    const scrollableDistance = wrapper.offsetHeight - window.innerHeight;
+
+    let targetProgress = 0.05;
+    if (phase === 2) targetProgress = 0.52;
+    if (phase === 3) targetProgress = 0.88;
+
+    const targetY = wrapperTop + targetProgress * scrollableDistance;
+    window.scrollTo({
+      top: targetY,
+      behavior: "smooth",
     });
   }, []);
 
@@ -325,11 +347,21 @@ export function useHeroScene() {
           trigger: scrollWrapperEl || ".scroll-wrapper",
           start: "top top",
           end: "bottom bottom",
-          scrub: 1.4,
+          scrub: 1.2,
           onUpdate: (self) => {
+            const p = self.progress;
+            setScrollProgress(p);
+            if (p < 0.35) {
+              setActivePhase(1);
+            } else if (p < 0.70) {
+              setActivePhase(2);
+            } else {
+              setActivePhase(3);
+            }
+
             if (scrollPromptEl) {
               gsap.set(scrollPromptEl, {
-                opacity: self.progress > 0.04 ? 0 : 1,
+                opacity: p > 0.05 ? 0 : 1,
               });
             }
           },
@@ -448,16 +480,18 @@ export function useHeroScene() {
       const delta = clock.getDelta();
       const elapsed = clock.getElapsedTime();
 
-      // Auto-play scroll progress when enabled
-      if (autoPlayRef.current) {
-        const maxScroll =
-          document.documentElement.scrollHeight - window.innerHeight;
-        if (maxScroll > 0) {
-          if (window.scrollY >= maxScroll - 6) {
-            window.scrollTo({ top: 0, behavior: "auto" });
-          } else {
-            window.scrollBy(0, 2.5);
-          }
+      // Auto-play scroll progress when enabled (within the Hero section)
+      if (autoPlayRef.current && scrollWrapperRef.current) {
+        const wrapper = scrollWrapperRef.current;
+        const rect = wrapper.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const wrapperTop = rect.top + scrollTop;
+        const maxHeroScroll = wrapperTop + wrapper.offsetHeight - window.innerHeight;
+
+        if (window.scrollY >= maxHeroScroll - 8) {
+          window.scrollTo({ top: wrapperTop, behavior: "auto" });
+        } else {
+          window.scrollBy(0, 3.2);
         }
       }
 
@@ -515,6 +549,7 @@ export function useHeroScene() {
     };
 
     window.addEventListener("resize", handleResize);
+    handleResize();
 
     const loadingTimeout1 = setTimeout(() => {
       const ls = loadingScreenRef.current;
@@ -555,6 +590,7 @@ export function useHeroScene() {
 
   return {
     canvasContainerRef,
+    heroStageRef,
     sunGlowRef,
     cloudMistRef,
     scrollPromptRef,
@@ -564,5 +600,8 @@ export function useHeroScene() {
     setPencilGrade,
     isAutoPlaying,
     toggleAutoPlay,
+    activePhase,
+    scrollProgress,
+    scrollToPhase,
   };
 }

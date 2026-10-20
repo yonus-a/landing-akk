@@ -120,9 +120,8 @@ export const graphiteFragmentShader = /* glsl */ `
     // Soft graphite powder smudge
     float smudge = (1.0 - luma) * (0.32 + 0.28 * leadGrain);
 
-    // 4. Sketchbook paper fiber & tone
-    float paperFiber = (noise(p * 0.55) * 0.6 + noise(p * 2.4) * 0.4) - 0.5;
-    vec3 paperColor  = vec3(0.965, 0.958, 0.945) + paperFiber * 0.038;
+    // 4. Sketchbook paper fiber & tone (calibrated for pure white #ffffff blending)
+    vec3 paperColor  = vec3(1.0, 1.0, 1.0);
     vec3 graphiteInk = vec3(0.12, 0.115, 0.11);
 
     // Total graphite darkness accumulated
@@ -133,15 +132,10 @@ export const graphiteFragmentShader = /* glsl */ `
 
     vec3 finalSketch = mix(paperColor, graphiteInk, totalGraphite);
 
-    // 5. Very subtle paper focus vignette
-    float distFromCenter = length(vUv - 0.5);
-    float vignette = smoothstep(0.42, 0.78, distFromCenter);
-    finalSketch *= (1.0 - vignette * 0.15);
-
-    // 6. Seamless edge feather to pure white (#ffffff)
-    // Ensures NO visible borders whatsoever — blends invisibly into white backgrounds
-    float edgeX = smoothstep(0.0, 0.10, vUv.x) * smoothstep(0.0, 0.10, 1.0 - vUv.x);
-    float edgeY = smoothstep(0.0, 0.10, vUv.y) * smoothstep(0.0, 0.10, 1.0 - vUv.y);
+    // 5. Seamless edge feather to pure white (#ffffff)
+    // Ensures NO visible borders whatsoever — blends 100% invisibly into white backgrounds
+    float edgeX = smoothstep(0.0, 0.12, vUv.x) * smoothstep(0.0, 0.12, 1.0 - vUv.x);
+    float edgeY = smoothstep(0.0, 0.12, vUv.y) * smoothstep(0.0, 0.12, 1.0 - vUv.y);
     float edgeFade = edgeX * edgeY;
 
     finalSketch = mix(vec3(1.0, 1.0, 1.0), finalSketch, edgeFade);

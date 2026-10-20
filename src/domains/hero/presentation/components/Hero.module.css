@@ -1,26 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap');
 
-.heroContainer {
+.heroWrapper {
   font-family: 'Vazirmatn', sans-serif;
   background-color: #ffffff;
   color: #18181b;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
   position: relative;
   direction: rtl;
 }
 
-/* 500x500 Sketch Frame — Positioned on the left side of the screen with ZERO visible borders */
+/* Large Sketch Frame — Zero visible borders, blending 100% seamlessly into pure white */
 .sketchStage {
-  position: fixed;
-  top: 50%;
-  left: clamp(20px, 5vw, 80px);
-  transform: translateY(-50%);
-  width: 500px;
-  height: 500px;
-  max-width: 92vw;
-  max-height: 92vw;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 720px;
+  max-height: 720px;
   aspect-ratio: 1 / 1;
   z-index: 2;
   background: transparent;
@@ -28,11 +24,9 @@
   outline: none;
   box-shadow: none;
   overflow: visible;
-  pointer-events: auto;
-
-  /* Feathered radial edge mask blending seamlessly into the white background */
-  mask-image: radial-gradient(circle at center, black 65%, transparent 100%);
-  -webkit-mask-image: radial-gradient(circle at center, black 65%, transparent 100%);
+  pointer-events: none;
+  mask-image: radial-gradient(circle at center, black 72%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle at center, black 72%, transparent 100%);
 }
 
 .webglCanvas {
@@ -41,124 +35,23 @@
   display: block;
   border: none;
   outline: none;
-}
-
-.cinematicOverlay {
-  display: none;
+  pointer-events: none;
 }
 
 .cloudMist {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   background: radial-gradient(circle, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0) 100%);
-  z-index: 3;
+  z-index: 5;
   opacity: 0;
   pointer-events: none;
 }
 
+.cinematicOverlay,
 .sunGlow {
   display: none;
-}
-
-/* Interactive Graphite Controls Toolbar */
-.sketchControls {
-  position: fixed;
-  bottom: 24px;
-  left: clamp(20px, 5vw, 80px);
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(39, 39, 42, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
-  font-size: 0.78rem;
-  direction: rtl;
-  user-select: none;
-}
-
-.ctrlBtn {
-  background: transparent;
-  border: none;
-  color: #a1a1aa;
-  font-family: inherit;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 5px 12px;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.ctrlBtn:hover {
-  color: #ffffff;
-}
-
-.ctrlBtn.active {
-  background: #f4f1ea;
-  color: #18181b;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.ctrlDivider {
-  width: 1px;
-  height: 16px;
-  background: rgba(255, 255, 255, 0.2);
-  margin: 0 2px;
-}
-
-.scrollWrapper {
-  position: relative;
-  z-index: 1;
-  height: 860vh;
-}
-
-.sceneSection {
-  height: 100vh;
-  pointer-events: none;
-}
-
-.scrollPrompt {
-  position: fixed;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.82rem;
-  color: #27272a;
-  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
-  transition: opacity 0.4s;
-}
-
-.scrollLine {
-  width: 1.5px;
-  height: 40px;
-  background: linear-gradient(to bottom, #27272a, transparent);
-  animation: scrollLine 1.8s ease-in-out infinite;
-}
-
-@keyframes scrollLine {
-  0%, 100% {
-    transform: scaleY(1);
-    transform-origin: top;
-    opacity: 1;
-  }
-  50% {
-    transform: scaleY(0.4);
-    transform-origin: top;
-    opacity: 0.4;
-  }
 }
 
 .loadingScreen {
@@ -171,7 +64,7 @@
   justify-content: center;
   gap: 16px;
   background: #ffffff;
-  color: #27272a;
+  color: #18181b;
   font-size: 0.9rem;
   font-weight: 600;
   transition: opacity 0.6s ease;
@@ -185,8 +78,8 @@
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid rgba(39, 39, 42, 0.18);
-  border-top-color: #27272a;
+  border: 3px solid rgba(24, 24, 27, 0.15);
+  border-top-color: #18181b;
   border-radius: 50%;
   animation: spin 0.9s linear infinite;
 }
@@ -194,19 +87,5 @@
 @keyframes spin {
   to {
     transform: rotate(360deg);
-  }
-}
-
-@media (max-width: 640px) {
-  .sketchStage {
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 88vw;
-    height: 88vw;
-  }
-  .sketchControls {
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 16px;
   }
 }
