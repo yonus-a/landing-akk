@@ -8,13 +8,18 @@ export const ScrollWrapper = forwardRef<HTMLDivElement>((_, ref) => {
   return (
     <div
       ref={ref}
-      className={`${styles.scrollWrapper} scroll-wrapper`}
+      className={`${styles.scrollWrapper || ""} scroll-wrapper`}
+      style={{
+        position: "relative",
+        zIndex: 1,
+        height: "860vh",
+      }}
     >
       {SCENE_SECTION_HEIGHTS.map((height, index) => (
         <section
           key={index}
-          className={`${styles.sceneSection} scene-section`}
-          style={{ height }}
+          className={`${styles.sceneSection || ""} scene-section`}
+          style={{ height, pointerEvents: "none" }}
         />
       ))}
     </div>
@@ -22,4 +27,3 @@ export const ScrollWrapper = forwardRef<HTMLDivElement>((_, ref) => {
 });
 
 ScrollWrapper.displayName = "ScrollWrapper";
-

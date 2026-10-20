@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -11,6 +11,10 @@ import {
 } from "../../domain/constants";
 import { createSkyMaterial } from "../../domain/shaders/skyShader";
 import { createOceanMaterial } from "../../domain/shaders/oceanShader";
+import {
+  graphiteVertexShader,
+  graphiteFragmentShader,
+} from "../../domain/shaders/graphiteShader";
 import {
   createGlowTexture,
   createCorrugatedBumpTexture,
@@ -24,6 +28,8 @@ import { buildClouds } from "../../infrastructure/builders/buildClouds";
 import { buildContainerShip } from "../../infrastructure/builders/buildShip";
 import { buildStaticStreetAndRealisticTruck } from "../../infrastructure/builders/buildStreetAndTruck";
 
+export type PencilGrade = "HB" | "2B" | "6B";
+
 export function useHeroScene() {
   const canvasContainerRef = useRef<HTMLDivElement | null>(null);
   const sunGlowRef = useRef<HTMLDivElement | null>(null);
@@ -31,6 +37,37 @@ export function useHeroScene() {
   const scrollPromptRef = useRef<HTMLDivElement | null>(null);
   const loadingScreenRef = useRef<HTMLDivElement | null>(null);
   const scrollWrapperRef = useRef<HTMLDivElement | null>(null);
+
+  const [pencilGrade, setPencilGradeState] = useState<PencilGrade>("2B");
+  const [isAutoPlaying, setIsAutoPlaying] = useState<boolean>(false);
+
+  // References to graphite shader material and auto-play state for animation callbacks
+  const graphiteMatRef = useRef<THREE.ShaderMaterial | null>(null);
+  const autoPlayRef = useRef<boolean>(false);
+
+  const setPencilGrade = useCallback((grade: PencilGrade) => {
+    setPencilGradeState(grade);
+    const mat = graphiteMatRef.current;
+    if (!mat) return;
+    if (grade === "HB") {
+      mat.uniforms.uEdgeWeight.value = 0.75;
+      mat.uniforms.uShadeDensity.value = 0.85;
+    } else if (grade === "2B") {
+      mat.uniforms.uEdgeWeight.value = 1.0;
+      mat.uniforms.uShadeDensity.value = 1.0;
+    } else if (grade === "6B") {
+      mat.uniforms.uEdgeWeight.value = 1.38;
+      mat.uniforms.uShadeDensity.value = 1.28;
+    }
+  }, []);
+
+  const toggleAutoPlay = useCallback(() => {
+    setIsAutoPlaying((prev) => {
+      const next = !prev;
+      autoPlayRef.current = next;
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     const container = canvasContainerRef.current;
@@ -41,16 +78,17 @@ export function useHeroScene() {
       container.removeChild(container.firstChild);
     }
 
+    // 500x500 box dimensions with responsive support
+    const targetWidth = container.clientWidth || 500;
+    const targetHeight = container.clientHeight || 500;
+
     const canvas = document.createElement("canvas");
     canvas.id = "webgl-canvas";
     canvas.className = "webgl-canvas";
-    canvas.style.position = "fixed";
-    canvas.style.top = "0";
-    canvas.style.left = "0";
-    canvas.style.width = "100vw";
-    canvas.style.height = "100vh";
-    canvas.style.zIndex = "1";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
     canvas.style.display = "block";
+    canvas.style.pointerEvents = "none";
     container.appendChild(canvas);
 
     // Acquire and guard WebGL context
@@ -71,7 +109,6 @@ export function useHeroScene() {
       return;
     }
 
-    // Defensive guard against null return from getShaderPrecisionFormat
     if (gl.getShaderPrecisionFormat) {
       const origPrecisionFormat = gl.getShaderPrecisionFormat.bind(gl);
       gl.getShaderPrecisionFormat = (
@@ -93,13 +130,16 @@ export function useHeroScene() {
     /* ============================================================
        SECTION 1 — RENDERER, SCENE, CAMERA, LIGHTING
        ============================================================ */
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x8ec5ea);
-    scene.fog = new THREE.FogExp2(0x8ec5ea, 0.0001);
+    const DPR = Math.min(window.devicePixelRatio || 1, 2);
 
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xdbe3ec);
+    scene.fog = new THREE.FogExp2(0xdbe3ec, 0.0001);
+
+    // Camera calibrated for 1:1 500x500 square framing
     const camera = new THREE.PerspectiveCamera(
-      INITIAL_CAMERA.fov,
-      window.innerWidth / window.innerHeight,
+      46,
+      targetWidth / targetHeight,
       INITIAL_CAMERA.near,
       INITIAL_CAMERA.far
     );
@@ -112,29 +152,68 @@ export function useHeroScene() {
         antialias: true,
         powerPreference: "high-performance",
         stencil: false,
+        alpha: false,
       });
     } catch {
       renderer = new THREE.WebGLRenderer({
         canvas,
-        context: gl,
         antialias: true,
         stencil: false,
       });
     }
 
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+    renderer.setSize(targetWidth, targetHeight);
+    renderer.setPixelRatio(DPR);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.08;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    const hemiLight = new THREE.HemisphereLight(0xf0f9ff, 0x1e3a5f, 0.92);
+    /* ============================================================
+       SECTION 1.5 — GRAPHITE DRAWING POST-PROCESSING PIPELINE
+       ============================================================ */
+    let rtWidth = Math.floor(targetWidth * DPR);
+    let rtHeight = Math.floor(targetHeight * DPR);
+
+    const sceneRenderTarget = new THREE.WebGLRenderTarget(rtWidth, rtHeight, {
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
+      format: THREE.RGBAFormat,
+    });
+
+    const postScene = new THREE.Scene();
+    const postCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+    const graphiteShaderMat = new THREE.ShaderMaterial({
+      uniforms: {
+        tDiffuse: { value: sceneRenderTarget.texture },
+        uResolution: { value: new THREE.Vector2(rtWidth, rtHeight) },
+        uTime: { value: 0.0 },
+        uEdgeWeight: { value: 1.0 },
+        uShadeDensity: { value: 1.0 },
+      },
+      vertexShader: graphiteVertexShader,
+      fragmentShader: graphiteFragmentShader,
+      depthWrite: false,
+      depthTest: false,
+    });
+    graphiteMatRef.current = graphiteShaderMat;
+
+    const postQuad = new THREE.Mesh(
+      new THREE.PlaneGeometry(2, 2),
+      graphiteShaderMat
+    );
+    postScene.add(postQuad);
+
+    /* ============================================================
+       LIGHTING (Clean high-contrast lighting for crisp pencil strokes)
+       ============================================================ */
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x1e293b, 0.95);
     hemiLight.position.set(0, 2000, 0);
     scene.add(hemiLight);
 
-    const sunLight = new THREE.DirectionalLight(0xfff6e0, 2.6);
+    const sunLight = new THREE.DirectionalLight(0xffffff, 2.8);
     sunLight.position.copy(SUN_DIRECTION.clone().multiplyScalar(1800));
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 2048;
@@ -149,7 +228,7 @@ export function useHeroScene() {
     sunLight.shadow.bias = -0.00015;
     scene.add(sunLight);
 
-    const rimLight = new THREE.DirectionalLight(0x93c5fd, 0.55);
+    const rimLight = new THREE.DirectionalLight(0xffffff, 0.65);
     rimLight.position.set(-SUN_DIRECTION.x, 0.35, -SUN_DIRECTION.z);
     scene.add(rimLight);
 
@@ -198,7 +277,7 @@ export function useHeroScene() {
     scene.add(airplaneGroup);
 
     /* ============================================================
-       SECTION 5 — CLOUDS
+       SECTION 5 — ORGANIC GRAPHITE-SHADED CLOUDS
        ============================================================ */
     const cloudsContainer = buildClouds();
     scene.add(cloudsContainer);
@@ -222,7 +301,7 @@ export function useHeroScene() {
     scene.add(streetWorldGroup);
 
     /* ============================================================
-       SECTION 7 — SMOOTH CONTINUOUS CAMERA CHOREOGRAPHY
+       SECTION 7 — SMOOTH CAMERA CHOREOGRAPHY VIA GSAP
        ============================================================ */
     const camLookTarget = {
       x: INITIAL_CAMERA.lookTarget.x,
@@ -236,21 +315,9 @@ export function useHeroScene() {
     );
     camera.lookAt(camLookTarget.x, camLookTarget.y, camLookTarget.z);
 
-    const sunGlowEl = sunGlowRef.current;
     const cloudMistEl = cloudMistRef.current;
     const scrollPromptEl = scrollPromptRef.current;
     const scrollWrapperEl = scrollWrapperRef.current;
-    const tmpSunVec = new THREE.Vector3().copy(SUN_DIRECTION).multiplyScalar(12000);
-
-    function updateSunGlow() {
-      if (!sunGlowEl) return;
-      const projected = tmpSunVec.clone().project(camera);
-      const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
-      const y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
-      sunGlowEl.style.left = x + "px";
-      sunGlowEl.style.top = y + "px";
-      sunGlowEl.style.opacity = projected.y > -1 ? "0.9" : "0";
-    }
 
     const gsapCtx = gsap.context(() => {
       const tl = gsap.timeline({
@@ -340,7 +407,7 @@ export function useHeroScene() {
           6.8
         )
 
-        // STAGE 4: Smooth Drone Arc rising slightly over the channel from Ship toward the Port Pier & Truck
+        // STAGE 4: Smooth Drone Arc rising slightly over the channel toward the Truck
         .to(
           camera.position,
           { x: 122, y: 31, z: -105, ease: "sine.inOut", duration: 2.3 },
@@ -352,7 +419,7 @@ export function useHeroScene() {
           10.0
         )
 
-        // STAGE 5: Seamless Glide onto the Boulevard into a Low-Angle 3/4 Front Hero Shot
+        // STAGE 5: Seamless Glide onto the Boulevard into a Low-Angle Hero Shot
         .to(
           camera.position,
           { x: 155.2, y: 21.3, z: -144.8, ease: "power2.out", duration: 2.8 },
@@ -365,8 +432,13 @@ export function useHeroScene() {
         );
     });
 
+    ScrollTrigger.refresh();
+    const refreshTimer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 120);
+
     /* ============================================================
-       SECTION 8 — LIGHTWEIGHT RENDER LOOP
+       SECTION 8 — TWO-PASS RENDER LOOP (Scene -> RT -> Graphite)
        ============================================================ */
     const clock = new THREE.Clock();
     let animationFrameId: number;
@@ -375,6 +447,19 @@ export function useHeroScene() {
       animationFrameId = requestAnimationFrame(animate);
       const delta = clock.getDelta();
       const elapsed = clock.getElapsedTime();
+
+      // Auto-play scroll progress when enabled
+      if (autoPlayRef.current) {
+        const maxScroll =
+          document.documentElement.scrollHeight - window.innerHeight;
+        if (maxScroll > 0) {
+          if (window.scrollY >= maxScroll - 6) {
+            window.scrollTo({ top: 0, behavior: "auto" });
+          } else {
+            window.scrollBy(0, 2.5);
+          }
+        }
+      }
 
       oceanMat.uniforms.uTime.value = elapsed * OCEAN_CONFIG.timeMultiplier;
       oceanMat.uniforms.uCameraPos.value.copy(camera.position);
@@ -395,10 +480,16 @@ export function useHeroScene() {
       shipGroup.rotation.z = Math.sin(elapsed * 0.6) * 0.01;
 
       skyDome.position.copy(camera.position);
-      updateSunGlow();
-
       camera.lookAt(camLookTarget.x, camLookTarget.y, camLookTarget.z);
+
+      // Pass 1: Render 3D Scene into off-screen high-res render target
+      renderer.setRenderTarget(sceneRenderTarget);
       renderer.render(scene, camera);
+
+      // Pass 2: Apply Graphite Post-Processing Shader Quad to screen
+      graphiteShaderMat.uniforms.uTime.value = elapsed;
+      renderer.setRenderTarget(null);
+      renderer.render(postScene, postCamera);
     }
     animate();
 
@@ -406,9 +497,20 @@ export function useHeroScene() {
        SECTION 9 — RESIZE & BOOTSTRAP
        ============================================================ */
     const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
+      const curContainer = canvasContainerRef.current;
+      const w = curContainer?.clientWidth || 500;
+      const h = curContainer?.clientHeight || 500;
+
+      camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setSize(w, h);
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      rtWidth = Math.floor(w * dpr);
+      rtHeight = Math.floor(h * dpr);
+      sceneRenderTarget.setSize(rtWidth, rtHeight);
+      graphiteShaderMat.uniforms.uResolution.value.set(rtWidth, rtHeight);
+
       ScrollTrigger.refresh();
     };
 
@@ -430,11 +532,14 @@ export function useHeroScene() {
        ============================================================ */
     return () => {
       clearTimeout(loadingTimeout1);
+      clearTimeout(refreshTimer);
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(animationFrameId);
       gsapCtx.revert();
 
       disposeObject3D(scene);
+      disposeObject3D(postScene);
+      sceneRenderTarget.dispose();
       sharedGlowTex.dispose();
       corrugatedBump.dispose();
       heroContainerTex.dispose();
@@ -455,5 +560,9 @@ export function useHeroScene() {
     scrollPromptRef,
     loadingScreenRef,
     scrollWrapperRef,
+    pencilGrade,
+    setPencilGrade,
+    isAutoPlaying,
+    toggleAutoPlay,
   };
 }
