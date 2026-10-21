@@ -156,6 +156,7 @@ export function WorkflowSection() {
         </motion.div>
 
         {/* Step Navigation Pill Bar with Pulse Animation for Active Step */}
+        {/* Step Navigation Pill Bar with Delayed Smooth Spring Animation */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-10">
           {steps.map((s, idx) => {
             const isActive = activeStep === idx;
@@ -164,9 +165,19 @@ export function WorkflowSection() {
                 key={s.step}
                 type="button"
                 onClick={() => setActiveStep(idx)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`p-4 rounded-2xl text-right transition-all duration-300 cursor-pointer flex flex-col justify-between border relative overflow-hidden ${
+                initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ 
+                  type: "spring",
+                  stiffness: 220,
+                  damping: 25,
+                  // 0.2 ثانیه تاخیر اولیه + تاخیر پله‌ای برای هر دکمه
+                  delay: 0.2 + (idx * 0.1) 
+                }}
+                whileHover={{ scale: 1.03, y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                className={`p-4 rounded-2xl text-right transition-colors duration-300 cursor-pointer flex flex-col justify-between border relative overflow-hidden ${
                   isActive
                     ? "bg-zinc-900 border-amber-500/60 shadow-lg shadow-amber-500/10"
                     : "bg-zinc-900/40 border-zinc-800/80 hover:bg-zinc-900/70 hover:border-zinc-700 text-zinc-400"

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SmoothScroll } from "@/components/SmoothScroll";
 
 export const metadata: Metadata = {
   title: "بازرگانی آریان خودرو | پیشرو در تجارت بین‌الملل، واردات خودرو و ترخیص کالا",
@@ -23,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fa" dir="rtl" className="antialiased scroll-smooth" suppressHydrationWarning>
+    <html lang="fa" dir="rtl" className="antialiased" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -44,6 +45,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 selection:bg-zinc-900 selection:text-white transition-colors duration-300">
+        <SmoothScroll />
         {children}
       </body>
     </html>

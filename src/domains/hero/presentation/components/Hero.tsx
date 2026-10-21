@@ -18,6 +18,7 @@ interface LogisticsModeContent {
   id: 1 | 2 | 3;
   mode: "air" | "sea" | "land";
   label: string;
+  shortLabel: string;
   badge: string;
   headline: string;
   subtitle: string;
@@ -32,6 +33,7 @@ const LOGISTICS_MODES: Record<1 | 2 | 3, LogisticsModeContent> = {
     id: 1,
     mode: "air",
     label: "باربری هوایی",
+    shortLabel: "هوایی",
     badge: "کارگو هوایی و ترانزیت اکسپرس بین‌المللی",
     headline: "کارگو هوایی سریع، ترخیص فوری و واردات قطعات حساس",
     subtitle:
@@ -49,6 +51,7 @@ const LOGISTICS_MODES: Record<1 | 2 | 3, LogisticsModeContent> = {
     id: 2,
     mode: "sea",
     label: "کشتیرانی دریایی",
+    shortLabel: "دریایی",
     badge: "کشتیرانی بین‌المللی و خطوط کانتینری مستقیم",
     headline: "کشتیرانی اقیانوسی، کانتینرهای دربست و خرده‌بار تجمیعی",
     subtitle:
@@ -66,6 +69,7 @@ const LOGISTICS_MODES: Record<1 | 2 | 3, LogisticsModeContent> = {
     id: 3,
     mode: "land",
     label: "ترانزیت زمینی",
+    shortLabel: "زمینی",
     badge: "ناوگان سنگین جاده‌ای و ترانزیت تحت کارنه تیر (TIR)",
     headline: "ترانزیت جاده‌ای TIR، ترخیص تخصصی و تحویل سراسری کالا",
     subtitle:
@@ -89,7 +93,6 @@ export function Hero() {
     loadingScreenRef,
     scrollWrapperRef,
     activePhase,
-    scrollToPhase,
   } = useHeroScene();
 
   // Active displayed mode (synced with 3D camera progression: 1=Air, 2=Sea, 3=Land)
@@ -101,7 +104,6 @@ export function Hero() {
 
   // Refs for kinetic entrance & mode transition
   const heroContentRef = useRef<HTMLDivElement | null>(null);
-  const modeSwitcherRef = useRef<HTMLDivElement | null>(null);
   const badgeRef = useRef<HTMLDivElement | null>(null);
   const headlineRef = useRef<HTMLHeadingElement | null>(null);
   const subtitleRef = useRef<HTMLParagraphElement | null>(null);
@@ -114,16 +116,10 @@ export function Hero() {
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
       tl.fromTo(
-        modeSwitcherRef.current,
-        { opacity: 0, y: -15, scale: 0.95 },
+        badgeRef.current,
+        { opacity: 0, y: 15, scale: 0.96 },
         { opacity: 1, y: 0, scale: 1, duration: 0.7, delay: 0.1 }
       )
-        .fromTo(
-          badgeRef.current,
-          { opacity: 0, y: 15, scale: 0.96 },
-          { opacity: 1, y: 0, scale: 1, duration: 0.7 },
-          "-=0.4"
-        )
         .fromTo(
           headlineRef.current,
           { opacity: 0, y: 25 },
@@ -205,20 +201,22 @@ export function Hero() {
       <div
         ref={heroStageRef}
         onMouseMove={handleMouseMove}
-        className="sticky top-0 h-screen w-full flex items-center overflow-hidden bg-white dark:bg-zinc-950 z-10 transition-colors duration-300"
+        className="sticky top-0 h-screen h-[100dvh] w-full flex flex-col lg:flex-row items-center justify-between lg:justify-start overflow-hidden bg-white dark:bg-zinc-950 z-10 transition-colors duration-300 pt-14 pb-3 sm:pt-18 sm:pb-5 lg:py-0"
       >
         {/* 3D GRAPHITE ANIMATION LAYER */}
         <div
           ref={canvasContainerRef}
           id="canvas-container"
-          className="absolute inset-y-0 left-0 w-full lg:w-[72%] h-full flex items-center justify-center pointer-events-none z-0 overflow-hidden"
+          className="relative lg:absolute lg:inset-y-0 lg:left-0 w-full h-[40dvh] sm:h-[46dvh] lg:h-full lg:w-[72%] flex items-center justify-center pointer-events-none z-0 overflow-hidden shrink-0"
           style={{
             background: "transparent",
             border: "none",
             outline: "none",
             boxShadow: "none",
-            maskImage: "radial-gradient(circle at center, black 75%, transparent 100%)",
-            WebkitMaskImage: "radial-gradient(circle at center, black 75%, transparent 100%)",
+            maskImage:
+              "radial-gradient(circle at center, black 72%, transparent 100%)",
+            WebkitMaskImage:
+              "radial-gradient(circle at center, black 72%, transparent 100%)",
           }}
         />
 
@@ -234,54 +232,29 @@ export function Hero() {
         />
 
         {/* FOREGROUND HERO CONTENT: Pure, Borderless, Box-Free Right-Aligned Typography */}
-        <div className="relative z-10 w-full max-w-[1360px] mx-auto px-5 sm:px-8 lg:px-12 h-full flex items-center justify-start">
+        <div className="relative z-10 w-full max-w-[1360px] mx-auto px-4 sm:px-8 lg:px-12 flex-1 flex flex-col justify-end lg:justify-center items-start lg:h-full pointer-events-none pb-2 sm:pb-4 lg:pb-0">
           
           <div
             ref={heroContentRef}
-            className="w-full max-w-lg lg:max-w-[500px] xl:max-w-[540px] flex flex-col items-start text-right space-y-4 sm:space-y-5 transition-all duration-300 my-auto"
+            className="w-full max-w-lg lg:max-w-[500px] xl:max-w-[540px] flex flex-col items-start text-right space-y-2.5 sm:space-y-4 lg:space-y-5 transition-all duration-300 pointer-events-auto bg-gradient-to-t from-white via-white/95 to-transparent dark:from-zinc-950 dark:via-zinc-950/95 dark:to-transparent lg:bg-none pt-3 sm:pt-4 lg:pt-0"
           >
-            {/* Interactive Logistics Mode Tabs (Air / Sea / Land) */}
-            <div
-              ref={modeSwitcherRef}
-              className="inline-flex items-center p-1 rounded-full bg-zinc-100/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800 shadow-2xs"
-            >
-              {([1, 2, 3] as const).map((modeId) => {
-                const item = LOGISTICS_MODES[modeId];
-                const TabIcon = item.icon;
-                const isActive = activePhase === modeId;
-                return (
-                  <button
-                    key={modeId}
-                    type="button"
-                    onClick={() => scrollToPhase(modeId)}
-                    aria-label={`انتقال به بخش ${item.label}`}
-                    className={`relative inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-300 cursor-pointer ${
-                      isActive
-                        ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 shadow-sm scale-102"
-                        : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
-                    }`}
-                  >
-                    <TabIcon className="w-3.5 h-3.5" strokeWidth={isActive ? 2.4 : 1.8} />
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
             {/* Dynamic Logistics Mode Badge */}
             <div
               ref={badgeRef}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-100/90 dark:bg-zinc-900/90 border border-transparent dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 text-xs font-semibold tracking-wide shadow-2xs"
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-zinc-100/90 dark:bg-zinc-900/90 border border-transparent dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 text-[11px] sm:text-xs font-semibold tracking-wide shadow-2xs"
             >
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-500 animate-pulse" />
               <span>{currentMode.badge}</span>
-              <CurrentIcon className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500" strokeWidth={2} />
+              <CurrentIcon
+                className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-zinc-400 dark:text-zinc-500"
+                strokeWidth={2}
+              />
             </div>
 
             {/* Dynamic High-Contrast Bold Headline */}
             <h1
               ref={headlineRef}
-              className="text-3xl sm:text-4xl lg:text-[42px] font-black text-zinc-950 dark:text-white leading-[1.26] tracking-tight min-h-[78px] sm:min-h-[106px] flex items-center"
+              className="text-xl sm:text-2xl md:text-3xl lg:text-[42px] font-black text-zinc-950 dark:text-white leading-tight lg:leading-[1.26] tracking-tight min-h-[48px] sm:min-h-[68px] lg:min-h-[106px] flex items-center"
             >
               {currentMode.headline}
             </h1>
@@ -289,24 +262,24 @@ export function Hero() {
             {/* Dynamic Crisp & Legible Subtitle */}
             <p
               ref={subtitleRef}
-              className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal min-h-[64px] sm:min-h-[72px]"
+              className="text-xs sm:text-sm lg:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal line-clamp-2 sm:line-clamp-3 lg:line-clamp-none min-h-[36px] sm:min-h-[48px] lg:min-h-[72px]"
             >
               {currentMode.subtitle}
             </p>
 
             {/* Dynamic CTAs */}
-            <div ref={ctaGroupRef} className="flex flex-wrap items-center gap-3 pt-1">
+            <div ref={ctaGroupRef} className="flex flex-wrap items-center gap-2 sm:gap-3 pt-0.5 sm:pt-1">
               <a
                 href={currentMode.ctaLink}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-zinc-950 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-950 text-xs sm:text-sm font-bold shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-zinc-950 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-950 text-xs sm:text-sm font-bold shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
               >
                 <span>{currentMode.ctaText}</span>
-                <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
+                <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={1.75} />
               </a>
 
               <a
                 href="#services"
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-zinc-100 hover:bg-zinc-200/80 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-transparent dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-3 rounded-full bg-zinc-100 hover:bg-zinc-200/80 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-transparent dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer"
               >
                 <span>مشاهده خدمات</span>
               </a>
@@ -315,13 +288,15 @@ export function Hero() {
             {/* Dynamic Mode-Specific Key Stats */}
             <div
               ref={statsGroupRef}
-              className="flex items-center gap-4 sm:gap-5 pt-3 text-xs text-zinc-400 dark:text-zinc-500 font-medium flex-wrap"
+              className="flex items-center gap-2.5 sm:gap-4 lg:gap-5 pt-1 sm:pt-3 text-[10px] sm:text-xs text-zinc-400 dark:text-zinc-500 font-medium flex-wrap"
             >
               {currentMode.stats.map((stat, sIdx) => (
                 <React.Fragment key={stat.label}>
-                  {sIdx > 0 && <span className="text-zinc-300 dark:text-zinc-700">•</span>}
+                  {sIdx > 0 && (
+                    <span className="text-zinc-300 dark:text-zinc-700">•</span>
+                  )}
                   <div>
-                    <span className="font-bold text-zinc-900 dark:text-white font-mono text-sm ml-1">
+                    <span className="font-bold text-zinc-900 dark:text-white font-mono text-xs sm:text-sm ml-1">
                       {stat.value}
                     </span>
                     <span>{stat.label}</span>

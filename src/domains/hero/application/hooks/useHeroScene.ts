@@ -85,10 +85,14 @@ export function useHeroScene() {
     if (phase === 3) targetProgress = 0.88;
 
     const targetY = wrapperTop + targetProgress * scrollableDistance;
-    window.scrollTo({
-      top: targetY,
-      behavior: "smooth",
-    });
+    if (typeof window !== "undefined" && (window as unknown as { __lenis?: { scrollTo: (y: number, opts?: Record<string, unknown>) => void } }).__lenis) {
+      (window as unknown as { __lenis: { scrollTo: (y: number, opts?: Record<string, unknown>) => void } }).__lenis.scrollTo(targetY, { duration: 1.3 });
+    } else {
+      window.scrollTo({
+        top: targetY,
+        behavior: "smooth",
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -148,6 +152,7 @@ export function useHeroScene() {
     }
 
     gsap.registerPlugin(ScrollTrigger);
+    ScrollTrigger.config({ ignoreMobileResize: true });
 
     /* ============================================================
        SECTION 1 — RENDERER, SCENE, CAMERA, LIGHTING
@@ -158,10 +163,15 @@ export function useHeroScene() {
     scene.background = new THREE.Color(0xdbe3ec);
     scene.fog = new THREE.FogExp2(0xdbe3ec, 0.0001);
 
-    // Camera calibrated for 1:1 500x500 square framing
+    // Responsive camera framing: adapts FOV on portrait screens so models don't get clipped
+    const initialAspect = targetWidth / targetHeight;
+    const initialFov =
+      initialAspect < 1.0
+        ? Math.min(62, 46 / Math.pow(initialAspect, 0.55))
+        : 46;
     const camera = new THREE.PerspectiveCamera(
-      46,
-      targetWidth / targetHeight,
+      initialFov,
+      initialAspect,
       INITIAL_CAMERA.near,
       INITIAL_CAMERA.far
     );
@@ -533,13 +543,23 @@ export function useHeroScene() {
     /* ============================================================
        SECTION 9 — RESIZE & BOOTSTRAP
        ============================================================ */
+    let lastWidth = typeof window !== "undefined" ? window.innerWidth : 500;
     const handleResize = () => {
       const curContainer = canvasContainerRef.current;
-      const w = curContainer?.clientWidth || 500;
-      const h = curContainer?.clientHeight || 500;
+      const w = curContainer?.clientWidth || (typeof window !== "undefined" ? window.innerWidth : 500);
+      const h = curContainer?.clientHeight || (typeof window !== "undefined" ? window.innerHeight : 500);
 
-      camera.aspect = w / h;
+      const aspect = w / h;
+      camera.aspect = aspect;
+
+      // Adapt FOV on mobile/portrait screens so models (airplane, ship, truck) are fully framed without clipping
+      if (aspect < 1.0) {
+        camera.fov = Math.min(62, 46 / Math.pow(aspect, 0.55));
+      } else {
+        camera.fov = 46;
+      }
       camera.updateProjectionMatrix();
+
       renderer.setSize(w, h);
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -548,7 +568,12 @@ export function useHeroScene() {
       sceneRenderTarget.setSize(rtWidth, rtHeight);
       graphiteShaderMat.uniforms.uResolution.value.set(rtWidth, rtHeight);
 
-      ScrollTrigger.refresh();
+      // Only refresh ScrollTrigger when width changes (rotation/resize), avoiding mobile URL bar jitter
+      const curW = typeof window !== "undefined" ? window.innerWidth : w;
+      if (Math.abs(curW - lastWidth) > 10) {
+        lastWidth = curW;
+        ScrollTrigger.refresh();
+      }
     };
 
     const handleThemeChange = () => {

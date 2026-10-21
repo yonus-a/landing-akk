@@ -116,76 +116,80 @@ export function ServicesSection() {
 
   useGSAP(
     () => {
-      // تنظیمات اولیه کارت‌های ردیف دوم (پایین صفحه و حالت زاویه‌دار)
-      gsap.set(row2CardsRef.current, {
-        yPercent: 120,
-        rotationX: -40,
-        z: 120,
-        scale: 0.85,
-        opacity: 0,
-        transformOrigin: "bottom center",
-      });
+      const mm = gsap.matchMedia();
 
-      gsap.set(row1CardsRef.current, {
-        transformOrigin: "top center",
-      });
+      mm.add("(min-width: 1024px)", () => {
+        // Desktop 3D peel flip animation with pin
+        gsap.set(row2CardsRef.current, {
+          yPercent: 120,
+          rotationX: -40,
+          z: 120,
+          scale: 0.85,
+          opacity: 0,
+          transformOrigin: "bottom center",
+        });
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: "+=1800", // افزایش مسافت اسکرول برای کندتر و نرم‌تر شدن عمل جایگزینی
-          scrub: 1.2,    // افزایش اینرسی برای روانی بیشتر حرکت
-          pin: true,
-          anticipatePin: 1,
-          onUpdate: (self) => {
-            setActiveRow(self.progress > 0.5 ? 2 : 1);
+        gsap.set(row1CardsRef.current, {
+          transformOrigin: "top center",
+        });
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top top",
+            end: "+=1800",
+            scrub: 1.2,
+            pin: true,
+            anticipatePin: 1,
+            onUpdate: (self) => {
+              setActiveRow(self.progress > 0.5 ? 2 : 1);
+            },
           },
-        },
-      });
+        });
 
-      // ۱. عقب رفتن، تار شدن و محو کامل کارت‌های ردیف اول پس از اتمام جایگزینی
-      tl.to(
-        row1CardsRef.current,
-        {
-          yPercent: -20,
-          rotationX: 25,
-          z: -200,
-          scale: 0.88,
-          opacity: 0,     // محو کامل پس از جایگزینی
-          filter: "blur(6px)",
-          stagger: 0.04,
-          ease: "power2.inOut",
-          duration: 1,
-        },
-        0
-      );
-
-      // ۲. بالا آمدن و ورق خوردن کارت‌های ردیف دوم
-      tl.to(
-        row2CardsRef.current,
-        {
-          yPercent: 0,
-          rotationX: 0,
-          z: 0,
-          scale: 1,
-          opacity: 1,
-          stagger: 0.06,
-          ease: "power3.out",
-          duration: 1,
-        },
-        0.1
-      );
-
-      // ۳. نوار پیشرفت
-      if (progressBarRef.current) {
-        tl.fromTo(
-          progressBarRef.current,
-          { scaleX: 0.5 },
-          { scaleX: 1, ease: "none", duration: 1 },
+        // ۱. عقب رفتن، تار شدن و محو کامل کارت‌های ردیف اول پس از اتمام جایگزینی
+        tl.to(
+          row1CardsRef.current,
+          {
+            yPercent: -20,
+            rotationX: 25,
+            z: -200,
+            scale: 0.88,
+            opacity: 0,
+            filter: "blur(6px)",
+            stagger: 0.04,
+            ease: "power2.inOut",
+            duration: 1,
+          },
           0
         );
-      }
+
+        // ۲. بالا آمدن و ورق خوردن کارت‌های ردیف دوم
+        tl.to(
+          row2CardsRef.current,
+          {
+            yPercent: 0,
+            rotationX: 0,
+            z: 0,
+            scale: 1,
+            opacity: 1,
+            stagger: 0.06,
+            ease: "power3.out",
+            duration: 1,
+          },
+          0.1
+        );
+
+        // ۳. نوار پیشرفت
+        if (progressBarRef.current) {
+          tl.fromTo(
+            progressBarRef.current,
+            { scaleX: 0.5 },
+            { scaleX: 1, ease: "none", duration: 1 },
+            0
+          );
+        }
+      });
     },
     { scope: sectionRef }
   );
@@ -194,7 +198,7 @@ export function ServicesSection() {
     <section
       ref={sectionRef}
       id="services"
-      className="relative w-full h-screen flex flex-col justify-center overflow-hidden bg-white dark:bg-zinc-950 transition-colors duration-300"
+      className="relative w-full h-auto min-h-screen py-16 sm:py-24 lg:py-0 lg:h-screen flex flex-col justify-center overflow-hidden bg-white dark:bg-zinc-950 transition-colors duration-300"
       dir="rtl"
     >
       <div className="max-w-[1320px] w-full mx-auto px-4 sm:px-6 lg:px-8">
@@ -239,8 +243,64 @@ export function ServicesSection() {
           </div>
         </div>
 
-        {/* 3D Perspective Stage */}
-        <div className="relative w-full min-h-[410px] my-4 [perspective:1400px] [transform-style:preserve-3d]">
+        {/* Mobile & Tablet Flow Grid (Displays all 6 cards seamlessly without clipping) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:hidden gap-5 sm:gap-6 my-4">
+          {services.map((service) => {
+            const Icon = service.icon;
+            return (
+              <div
+                key={service.code}
+                className="bg-zinc-50/95 dark:bg-zinc-900/95 p-6 rounded-2xl flex flex-col justify-between shadow-sm border border-zinc-200/80 dark:border-zinc-800"
+              >
+                <div>
+                  <div className="flex items-center justify-between pb-3">
+                    <span className="font-mono text-2xl font-black text-zinc-300 dark:text-zinc-700">
+                      {service.code}
+                    </span>
+                    <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs">
+                      <Icon className="w-5 h-5" strokeWidth={1.5} />
+                    </div>
+                  </div>
+                  <div className="font-mono text-[10px] text-zinc-400 tracking-wider">
+                    {service.tag}
+                  </div>
+                  <h3 className="text-base font-bold text-zinc-950 dark:text-white mt-1 mb-2">
+                    {service.title}
+                  </h3>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                    {service.description}
+                  </p>
+                  <ul className="mt-4 space-y-1.5 pt-2 border-t border-zinc-200/60 dark:border-zinc-800 text-xs text-zinc-700 dark:text-zinc-300">
+                    {service.highlights.slice(0, 3).map((highlight, idx) => (
+                      <li key={idx} className="flex items-center gap-2">
+                        <CheckCircle2
+                          className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0"
+                          strokeWidth={1.75}
+                        />
+                        <span className="line-clamp-1">{highlight}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="mt-4 pt-3 flex items-center justify-between border-t border-zinc-200/60 dark:border-zinc-800">
+                  <a
+                    href="#estimator"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-900 dark:text-zinc-200 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+                  >
+                    <span>استعلام و مشاوره</span>
+                    <ArrowUpLeft className="w-3.5 h-3.5" />
+                  </a>
+                  <span className="font-mono text-[10px] text-zinc-400">
+                    ARCH-SERIES
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop 3D Perspective Stage */}
+        <div className="hidden lg:block relative w-full min-h-[410px] my-4 [perspective:1400px] [transform-style:preserve-3d]">
           {/* Row 1 */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 absolute inset-x-0 top-0 [transform-style:preserve-3d]">
             {row1Services.map((service, index) => {
