@@ -360,109 +360,126 @@ export function createGrilleMeshTexture(): THREE.CanvasTexture {
 
 export function createShipContainerTexture(): THREE.CanvasTexture {
   const c = document.createElement("canvas");
-  c.width = 512;
-  c.height = 256;
+  c.width = 1024;
+  c.height = 512;
   const ctx = c.getContext("2d")!;
 
   // 1. Off-white / light neutral base (so instance colors tint it vibrantly)
-  ctx.fillStyle = "#f8fafc";
-  ctx.fillRect(0, 0, 512, 256);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, 1024, 512);
 
   // 2. High-contrast vertical corrugation flutes (trapezoidal shadow/highlight ribs)
-  for (let x = 20; x < 492; x += 16) {
+  // 36 rhythmic flutes across the container side
+  for (let x = 36; x < 988; x += 26) {
     // Deep graphite shadow flute
-    ctx.fillStyle = "#1e293b";
-    ctx.fillRect(x, 14, 5, 228);
-    // Bevel transition
-    ctx.fillStyle = "#64748b";
-    ctx.fillRect(x + 5, 14, 3, 228);
+    ctx.fillStyle = "#090d16";
+    ctx.fillRect(x, 24, 7, 464);
+    // Midtone transition
+    ctx.fillStyle = "#475569";
+    ctx.fillRect(x + 7, 24, 5, 464);
     // Face plate
-    ctx.fillStyle = "#f1f5f9";
-    ctx.fillRect(x + 8, 14, 6, 228);
+    ctx.fillStyle = "#f8fafc";
+    ctx.fillRect(x + 12, 24, 11, 464);
     // Specular highlight crest
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(x + 14, 14, 2, 228);
+    ctx.fillRect(x + 23, 24, 3, 464);
   }
 
   // 3. Heavy steel perimeter frame (corner posts, top/bottom rails)
-  ctx.fillStyle = "#0f172a";
-  ctx.fillRect(0, 0, 512, 14); // Top rail
-  ctx.fillRect(0, 242, 512, 14); // Bottom rail
-  ctx.fillRect(0, 0, 20, 256); // Left corner post
-  ctx.fillRect(492, 0, 20, 256); // Right corner post
+  ctx.fillStyle = "#090d16";
+  ctx.fillRect(0, 0, 1024, 24); // Top rail
+  ctx.fillRect(0, 488, 1024, 24); // Bottom rail
+  ctx.fillRect(0, 0, 32, 512); // Left corner post
+  ctx.fillRect(992, 0, 32, 512); // Right corner post
 
   // Silver inner bevel outline
-  ctx.strokeStyle = "#cbd5e1";
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(18, 13, 476, 230);
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2.0;
+  ctx.strokeRect(30, 22, 964, 468);
 
   // 4. ISO Corner Castings (all 4 corners) with twistlock aperture holes
   const corners = [
-    { x: 2, y: 2 },
-    { x: 486, y: 2 },
-    { x: 2, y: 232 },
-    { x: 486, y: 232 },
+    { x: 4, y: 4 },
+    { x: 978, y: 4 },
+    { x: 4, y: 468 },
+    { x: 978, y: 468 },
   ];
   corners.forEach(({ x, y }) => {
     ctx.fillStyle = "#020617";
-    ctx.fillRect(x, y, 24, 22);
-    // Twistlock hole (oval)
-    ctx.fillStyle = "#ffffff";
-    ctx.beginPath();
-    ctx.ellipse(x + 12, y + 11, 6, 4, 0, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillRect(x, y, 42, 40);
+    // Silver contour rim
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(x + 2, y + 2, 38, 36);
+    // Twistlock oval hole
     ctx.fillStyle = "#000000";
     ctx.beginPath();
-    ctx.ellipse(x + 12, y + 11, 4.5, 3, 0, 0, Math.PI * 2);
+    ctx.ellipse(x + 21, y + 20, 10, 7, 0, 0, Math.PI * 2);
     ctx.fill();
   });
 
-  // 5. Stenciled Shipping Line Markings (high-contrast black/white)
+  // 5. High-Visibility DOT-C2 Reflective Conspicuity Tape (Alternating Red/White along bottom rail)
+  for (let rx = 36; rx < 988; rx += 64) {
+    ctx.fillStyle = "#dc2626";
+    ctx.fillRect(rx, 492, 32, 16);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(rx + 32, 492, 32, 16);
+  }
+
+  // 6. Stenciled Shipping Line Markings (high-contrast black/white)
   // Branding plaque in upper-center
-  ctx.fillStyle = "#0f172a";
-  ctx.fillRect(160, 24, 192, 42);
+  ctx.fillStyle = "#090d16";
+  ctx.fillRect(340, 40, 344, 76);
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(344, 44, 336, 68);
+
   ctx.fillStyle = "#ffffff";
-  ctx.font = "900 24px monospace";
+  ctx.font = "900 36px monospace";
   ctx.textAlign = "center";
-  ctx.fillText("ARIAN 45G1", 256, 52);
+  ctx.fillText("ARIAN 45G1", 512, 88);
 
   // Container specifications in upper right
-  ctx.fillStyle = "#0f172a";
-  ctx.font = "bold 13px monospace";
+  ctx.fillStyle = "#090d16";
+  ctx.fillRect(720, 40, 250, 150);
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(724, 44, 242, 142);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 20px monospace";
   ctx.textAlign = "left";
-  ctx.fillText("MAX.WT. 32,500 KG", 360, 42);
-  ctx.fillText("TARE     3,840 KG", 360, 58);
-  ctx.fillText("PAYLOAD 28,660 KG", 360, 74);
+  ctx.fillText("AKME  948210  5", 736, 75);
+  ctx.fillStyle = "#facc15";
+  ctx.font = "bold 17px monospace";
+  ctx.fillText("45G1  HIGH CUBE", 736, 105);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "14px monospace";
+  ctx.fillText("MAX GROSS  32,500 KG", 736, 135);
+  ctx.fillText("PAYLOAD    28,660 KG", 736, 160);
 
-  // Height warning sticker (yellow patch)
+  // Height warning sticker (yellow patch on left)
   ctx.fillStyle = "#eab308";
-  ctx.fillRect(28, 28, 44, 38);
+  ctx.fillRect(52, 48, 76, 76);
+  ctx.strokeStyle = "#000000";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(54, 50, 72, 72);
   ctx.fillStyle = "#000000";
-  ctx.font = "900 13px sans-serif";
+  ctx.font = "900 22px sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("9'6\"", 50, 46);
-  ctx.fillText("HIGH", 50, 60);
+  ctx.fillText("2.9m", 90, 80);
+  ctx.fillText("9'6\"", 90, 108);
 
-  // CSC safety plate
-  ctx.fillStyle = "#94a3b8";
-  ctx.fillRect(28, 190, 52, 34);
-  ctx.fillStyle = "#0f172a";
-  ctx.fillRect(32, 194, 44, 2);
-  ctx.fillRect(32, 200, 44, 2);
-  ctx.fillRect(32, 206, 44, 2);
-  ctx.fillRect(32, 212, 44, 2);
-
-  // End door lock rods (2 vertical steel locking bars)
-  ctx.fillStyle = "#334155";
-  ctx.fillRect(240, 14, 5, 228);
-  ctx.fillRect(268, 14, 5, 228);
-  // Cam lock handles
-  ctx.fillStyle = "#020617";
-  ctx.fillRect(236, 140, 13, 8);
-  ctx.fillRect(264, 140, 13, 8);
+  // Blue TIR Carnet Badge
+  ctx.fillStyle = "#1e40af";
+  ctx.fillRect(52, 140, 76, 44);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "900 24px sans-serif";
+  ctx.fillText("TIR", 90, 172);
 
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
   return tex;
 }
 

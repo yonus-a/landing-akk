@@ -354,9 +354,9 @@ export function useHeroScene() {
           onUpdate: (self) => {
             const p = self.progress;
             setScrollProgress(p);
-            if (p < 0.35) {
+            if (p < 0.36) {
               setActivePhase(1);
-            } else if (p < 0.70) {
+            } else if (p < 0.68) {
               setActivePhase(2);
             } else {
               setActivePhase(3);

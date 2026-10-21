@@ -551,6 +551,130 @@ export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
   vessel.add(instancedContainers);
 
   /* ============================================================
+     6.5. ARCHITECTURAL 3D CONTAINER OUTLINE LINES & CORRUGATIONS
+     Draws crisp, razor-sharp structural wireframe lines around EVERY
+     individual container, plus transverse roof ribs, flank flutes,
+     and end-door lock rods. Makes every container instantly readable.
+     ============================================================ */
+  const linePositions: number[] = [];
+  const hw = 2.36 / 2; // 1.18
+  const hh = 2.44 / 2; // 1.22
+  const hl = 12.0 / 2; // 6.0
+
+  transforms.forEach((tr) => {
+    const { x, y, z } = tr;
+
+    const addLine = (
+      x1: number,
+      y1: number,
+      z1: number,
+      x2: number,
+      y2: number,
+      z2: number
+    ) => {
+      linePositions.push(x1, y1, z1, x2, y2, z2);
+    };
+
+    // 1. 12 Outer Structural Edges of the Container Box
+    // Bottom perimeter rail
+    addLine(x - hw, y - hh, z - hl, x + hw, y - hh, z - hl);
+    addLine(x + hw, y - hh, z - hl, x + hw, y - hh, z + hl);
+    addLine(x + hw, y - hh, z + hl, x - hw, y - hh, z + hl);
+    addLine(x - hw, y - hh, z + hl, x - hw, y - hh, z - hl);
+
+    // Top perimeter rail (Roof edge)
+    addLine(x - hw, y + hh, z - hl, x + hw, y + hh, z - hl);
+    addLine(x + hw, y + hh, z - hl, x + hw, y + hh, z + hl);
+    addLine(x + hw, y + hh, z + hl, x - hw, y + hh, z + hl);
+    addLine(x - hw, y + hh, z + hl, x - hw, y + hh, z - hl);
+
+    // 4 Vertical corner posts
+    addLine(x - hw, y - hh, z - hl, x - hw, y + hh, z - hl);
+    addLine(x + hw, y - hh, z - hl, x + hw, y + hh, z - hl);
+    addLine(x + hw, y - hh, z + hl, x + hw, y + hh, z + hl);
+    addLine(x - hw, y - hh, z + hl, x - hw, y + hh, z + hl);
+
+    // 2. Transverse Roof Rib Lines (Prominent from elevated 3/4 aerial view)
+    for (let r = 1; r <= 7; r++) {
+      const rz = z - hl + (r * 12.0) / 8;
+      addLine(x - hw + 0.04, y + hh + 0.015, rz, x + hw - 0.04, y + hh + 0.015, rz);
+    }
+
+    // 3. Side Corrugation Flutes (Vertical lines on container flanks)
+    for (let r = 1; r <= 9; r++) {
+      const rz = z - hl + (r * 12.0) / 10;
+      // Right flank (+X)
+      addLine(x + hw + 0.015, y - hh + 0.05, rz, x + hw + 0.015, y + hh - 0.05, rz);
+      // Left flank (-X)
+      addLine(x - hw - 0.015, y - hh + 0.05, rz, x - hw - 0.015, y + hh - 0.05, rz);
+    }
+
+    // 4. End Door Frame Lines & Vertical Lock Rods (Forward and Aft ends)
+    for (const endZ of [z + hl + 0.015, z - hl - 0.015]) {
+      // Center split seam between doors
+      addLine(x, y - hh + 0.05, endZ, x, y + hh - 0.05, endZ);
+      // Dual vertical lock rods
+      addLine(x - 0.42, y - hh + 0.05, endZ, x - 0.42, y + hh - 0.05, endZ);
+      addLine(x + 0.42, y - hh + 0.05, endZ, x + 0.42, y + hh - 0.05, endZ);
+    }
+  });
+
+  const containerLinesGeo = new THREE.BufferGeometry();
+  containerLinesGeo.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(linePositions, 3)
+  );
+
+  const containerLinesMat = new THREE.LineBasicMaterial({
+    color: 0x090d16, // High-contrast deep architectural ink line
+    transparent: true,
+    opacity: 0.95,
+  });
+
+  const containerLinesMesh = new THREE.LineSegments(
+    containerLinesGeo,
+    containerLinesMat
+  );
+  vessel.add(containerLinesMesh);
+
+  // 3D ISO 1161 Steel Corner Castings on all containers
+  const castingGeo = new THREE.BoxGeometry(0.24, 0.24, 0.26);
+  const castingMat = new THREE.MeshStandardMaterial({
+    color: 0x090d16,
+    roughness: 0.4,
+    metalness: 0.8,
+  });
+
+  const totalCastings = transforms.length * 8;
+  const instancedCastings = new THREE.InstancedMesh(
+    castingGeo,
+    castingMat,
+    totalCastings
+  );
+  instancedCastings.castShadow = true;
+  instancedCastings.receiveShadow = true;
+
+  const castingDummy = new THREE.Object3D();
+  let castIdx = 0;
+  transforms.forEach((tr) => {
+    for (const sx of [-1, 1]) {
+      for (const sy of [-1, 1]) {
+        for (const sz of [-1, 1]) {
+          castingDummy.position.set(
+            tr.x + sx * (hw - 0.06),
+            tr.y + sy * (hh - 0.06),
+            tr.z + sz * (hl - 0.06)
+          );
+          castingDummy.updateMatrix();
+          instancedCastings.setMatrixAt(castIdx++, castingDummy.matrix);
+        }
+      }
+    }
+  });
+  instancedCastings.instanceMatrix.needsUpdate = true;
+  vessel.add(instancedCastings);
+
+  /* ============================================================
      7. ICONIC DIAGONAL CRISS-CROSS LASHING RODS ("X" BRACING)
      The universal visual hallmark of a modern container ship!
      ============================================================ */
@@ -558,31 +682,27 @@ export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
   const rodGeo = new THREE.CylinderGeometry(0.06, 0.06, 5.8, 4);
   rodGeo.rotateZ(Math.PI / 4);
 
-  // Add X-shaped lashing rods across exposed container faces
-  const exposedFaces = [
-    { z: 67.1, cols: [-3, -1, 1, 3] }, // Forward face of Bay 61
-    { z: 54.9, cols: [-4, -2, 0, 2, 4] },
-    { z: -15.1, cols: [-4, -2, 0, 2, 4] },
-    { z: -43.1, cols: [-4, -2, 0, 2, 4] },
-    { z: -78.1, cols: [-3, -1, 1, 3] }, // Aft face of Bay -72
-  ];
+  // Add X-shaped lashing rods across all container bay faces
+  bays.forEach((zPos) => {
+    for (const endOffset of [-6.05, 6.05]) {
+      const zFace = zPos + endOffset;
+      const cols = [-4, -2, 0, 2, 4];
+      cols.forEach((colX) => {
+        const centerX = colX * 2.7;
 
-  exposedFaces.forEach(({ z, cols }) => {
-    cols.forEach((colX) => {
-      const centerX = colX * 2.7;
+        // Positive diagonal (\)
+        const rod1 = new THREE.Mesh(rodGeo, lashingRodMat);
+        rod1.position.set(centerX, 16.8, zFace);
+        rod1.rotation.y = 0;
+        lashingGroup.add(rod1);
 
-      // Positive diagonal (\)
-      const rod1 = new THREE.Mesh(rodGeo, lashingRodMat);
-      rod1.position.set(centerX, 16.8, z);
-      rod1.rotation.y = 0;
-      lashingGroup.add(rod1);
-
-      // Negative diagonal (/)
-      const rod2 = new THREE.Mesh(rodGeo, lashingRodMat);
-      rod2.position.set(centerX, 16.8, z);
-      rod2.rotation.z = -Math.PI / 2;
-      lashingGroup.add(rod2);
-    });
+        // Negative diagonal (/)
+        const rod2 = new THREE.Mesh(rodGeo, lashingRodMat);
+        rod2.position.set(centerX, 16.8, zFace);
+        rod2.rotation.z = -Math.PI / 2;
+        lashingGroup.add(rod2);
+      });
+    }
   });
   vessel.add(lashingGroup);
 
