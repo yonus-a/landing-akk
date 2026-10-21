@@ -17,6 +17,7 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "swiper": "^14.3.0",
+    "thinking-orbs": "^0.3.2",
     "three": "^0.186.1"
   },
   "devDependencies": {

@@ -109,29 +109,29 @@ export function createHeroContainerTexture(): THREE.CanvasTexture {
 
   // Plaque Base Plate in Deep Midnight Charcoal Slate
   const plaqueGrad = ctx.createLinearGradient(304, 66, 304, 346);
-  plaqueGrad.addColorStop(0, "#0b121e");
-  plaqueGrad.addColorStop(0.5, "#151e2e");
-  plaqueGrad.addColorStop(1, "#0b121e");
+  plaqueGrad.addColorStop(0, "#080c14");
+  plaqueGrad.addColorStop(0.5, "#0f172a");
+  plaqueGrad.addColorStop(1, "#080c14");
   ctx.fillStyle = plaqueGrad;
   ctx.beginPath();
   ctx.roundRect(304, 66, 1440, 280, 16);
   ctx.fill();
   ctx.restore();
 
-  // Fine Gold & Platinum Perimeter Bezel
+  // Fine Platinum/White Perimeter Bezel
   ctx.save();
-  ctx.strokeStyle = "#f59e0b";
+  ctx.strokeStyle = "#ffffff";
   ctx.lineWidth = 3.5;
   ctx.beginPath();
   ctx.roundRect(304, 66, 1440, 280, 16);
   ctx.stroke();
 
   // Inner subtle silver pinstripe
-  ctx.strokeStyle = "rgba(226, 232, 240, 0.35)";
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
   ctx.lineWidth = 1.5;
   ctx.strokeRect(316, 76, 1416, 260);
 
-  // Precision Industrial Corner Rivets in Warm Gold
+  // Precision Industrial Corner Rivets in Pure White
   const plaqueRivets = [
     { x: 326, y: 86 },
     { x: 1722, y: 86 },
@@ -139,7 +139,7 @@ export function createHeroContainerTexture(): THREE.CanvasTexture {
     { x: 1722, y: 326 },
   ];
   plaqueRivets.forEach(({ x, y }) => {
-    ctx.fillStyle = "#f59e0b";
+    ctx.fillStyle = "#ffffff";
     ctx.beginPath();
     ctx.arc(x, y, 6, 0, Math.PI * 2);
     ctx.fill();
@@ -150,40 +150,36 @@ export function createHeroContainerTexture(): THREE.CanvasTexture {
   });
   ctx.restore();
 
-  // Main Persian Headline: "آریان خودرو خاورمیانه" in PURE CRISP ARCTIC WHITE FONT (#FFFFFF)
+  // Main Persian Headline: "آریان خودرو خاورمیانه" in 100% PURE WHITE (#FFFFFF / #FFF)
   ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.font = "900 96px 'Vazirmatn', Tahoma, sans-serif";
-  // Micro drop-shadow for 3D raised metal lettering
-  ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
-  ctx.shadowBlur = 10;
-  ctx.shadowOffsetX = 2;
-  ctx.shadowOffsetY = 4;
-  ctx.fillStyle = "#ffffff"; // Pure White Font requested by user
+  ctx.shadowColor = "transparent";
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = "#ffffff"; // Pure White Font #FFF
   ctx.fillText("آریان خودرو خاورمیانه", 1024, 150);
   ctx.restore();
 
-  // Fine Gold Micro-Rule under headline
-  ctx.fillStyle = "#f59e0b";
+  // Fine Pure White Micro-Rule under headline
+  ctx.fillStyle = "#ffffff";
   ctx.fillRect(700, 198, 648, 3.5);
 
-  // English Subtitle: "ARIAN KHODRO MIDDLE EAST" in Warm Amber Gold & White
+  // English Subtitle: "ARYAN KHODRO KHAVAR-MIYANEH" in 100% Pure White (#FFFFFF / #FFF)
   ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.font = "900 38px 'Vazirmatn', sans-serif";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
-  ctx.shadowBlur = 6;
-  ctx.shadowOffsetY = 2;
-  ctx.fillStyle = "#facc15"; // Warm Amber Gold
-  ctx.fillText("ARIAN KHODRO MIDDLE EAST", 1024, 238);
+  ctx.shadowColor = "transparent";
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText("ARYAN KHODRO KHAVAR-MIYANEH", 1024, 238);
   ctx.restore();
 
-  // Operational Subtitle in Crisp Bright Platinum White
+  // Operational Subtitle in 100% Pure White (#FFFFFF / #FFF)
   ctx.textAlign = "center";
   ctx.font = "bold 20px monospace";
-  ctx.fillStyle = "#f1f5f9";
+  ctx.fillStyle = "#ffffff";
   ctx.fillText("INTERNATIONAL TRANSIT • AUTOMOTIVE LOGISTICS • TIR CARNET", 1024, 290);
 
   // 7. Left Side Decals (Yellow Height Hazard & Customs TIR)

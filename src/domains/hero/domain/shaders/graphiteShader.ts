@@ -125,13 +125,22 @@ export const graphiteFragmentShader = /* glsl */ `
     float smudge = (1.0 - luma) * (0.32 + 0.28 * leadGrain);
 
     // ── 4A. LIGHT MODE SKETCHBOOK COMPOSITION ──────────────────
+    // Sample un-jittered center pixel from tDiffuse to protect branding text & specular highlights (#ffffff)
+    vec3 centerCol = texture2D(tDiffuse, vUv).rgb;
+    float centerLuma = dot(centerCol, vec3(0.299, 0.587, 0.114));
+    float whiteMask = smoothstep(0.65, 0.88, centerLuma);
+    float lightOutline = pencilOutline * (1.0 - whiteMask);
+
     float totalLightGraphite = clamp(
-      smudge + hatch1 + hatch2 + hatch3 + pencilOutline * 0.92,
+      smudge + hatch1 + hatch2 + hatch3 + lightOutline * 0.92,
       0.0, 0.96
     );
+    totalLightGraphite *= (1.0 - whiteMask);
+
     vec3 lightPaper = vec3(1.0, 1.0, 1.0);
     vec3 lightInk   = vec3(0.12, 0.115, 0.11);
     vec3 lightResult = mix(lightPaper, lightInk, totalLightGraphite);
+    lightResult = mix(lightResult, vec3(1.0, 1.0, 1.0), whiteMask);
 
     // ── 4B. DARK MODE ARCHITECTURAL BLUEPRINT COMPOSITION ──────
     // Base paper: Deep obsidian matching zinc-950 #09090b
@@ -144,11 +153,12 @@ export const graphiteFragmentShader = /* glsl */ `
     float shadeFactor = clamp(smudge + hatch1 + hatch2 + hatch3, 0.0, 0.85);
 
     // Clean highlight for bright white container, rims, wave crests
-    float whiteHighlight = smoothstep(0.85, 0.99, mc) * 0.30;
+    float whiteHighlight = smoothstep(0.70, 0.95, centerLuma) * 0.30;
 
     vec3 darkResult = mix(darkPaper, shadeChalk, shadeFactor);
     darkResult += vec3(whiteHighlight);
-    darkResult = mix(darkResult, lineChalk, pencilOutline);
+    darkResult = mix(darkResult, lineChalk, pencilOutline * (1.0 - whiteMask));
+    darkResult = mix(darkResult, vec3(1.0, 1.0, 1.0), whiteMask);
 
     // ── 5. SEAMLESS THEME BLEND & PERIMETER FEATHERING ─────────
     vec3 finalSketch = mix(lightResult, darkResult, uDark);

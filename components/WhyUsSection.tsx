@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Building2,
   Receipt,
@@ -9,220 +9,308 @@ import {
   ShieldCheck,
   Check,
   X,
-  Sparkles,
-  ArrowLeft,
+  ArrowUpLeft,
 } from "lucide-react";
+
+interface PillarItem {
+  id: string;
+  code: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  icon: React.ElementType;
+  metricValue: string;
+  metricLabel: string;
+  comparison: {
+    arian: string;
+    traditional: string;
+  }[];
+}
 
 export function WhyUsSection() {
   const [activeTab, setActiveTab] = useState<number>(0);
 
-  const pillars = [
+  const pillars: PillarItem[] = [
     {
-      title: "حضور مستقیم در مبدأ تجارت",
-      description:
-        "دفاتر رسمی و انبارهای اختصاصی تجمیع بار در دبی (جبل‌علی)، چین (گوانجو، ایوو و شنژن) و ترکیه (استانبول). حذف دلال‌ها.",
-      icon: Building2,
+      id: "origin",
       code: "01",
+      title: "حضور مستقیم در مبدأ تجارت",
+      subtitle: "حذف کامل واسطه‌ها در چین، دبی و ترکیه",
+      description:
+        "استقرار دفاتر رسمی و انبارهای اختصاصی تجمیع بار در جبل‌علی دبی، گوانجو، ایوو، شنژن و استانبول؛ خرید، بازرسی و حمل مستقیم توسط تیم مقیم آریان خودرو انجام می‌شود.",
+      icon: Building2,
+      metricValue: "۳ هاب",
+      metricLabel: "دفتر و انبار عملیاتی فعال",
+      comparison: [
+        {
+          arian: "دفاتر و انبارهای اختصاصی با کارشناسان مقیم در مبدأ",
+          traditional: "واگذاری بار به واسطه‌های دست دوم و سوم محلی",
+        },
+        {
+          arian: "گزارش‌دهی مستمر آنلاین و پشتیبان اختصاصی محموله",
+          traditional: "پیگیری‌های تلفنی نامنظم و بی‌اطلاعی از موقعیت بار",
+        },
+      ],
     },
     {
-      title: "شفافیت مالی و تضمین هزینه",
-      description:
-        "ارائه Cost Sheet تفصیلی پیش از خرید، تعیین ریالی کارمزد و هزینه‌های گمرکی، بدون تحمیل هزینه‌های پنهان.",
-      icon: Receipt,
+      id: "finance",
       code: "02",
+      title: "شفافیت مالی و تضمین هزینه",
+      subtitle: "تعیین دقیق بهای تمام‌شده پیش از خرید",
+      description:
+        "ارائه Cost Sheet تفصیلی پیش از ثبت سفارش، محاسبه دقیق حقوق ورودی، کارمزد و هزینه‌های لجستیک به صورت مکتوب و بدون تحمیل هزینه‌های پنهان در میانه مسیر.",
+      icon: Receipt,
+      metricValue: "۰٪",
+      metricLabel: "هزینه پنهان یا مابه‌التفاوت",
+      comparison: [
+        {
+          arian: "پیش‌فاکتور دقیق ریالی و تعهد کامل به ارقام قرارداد",
+          traditional: "افزایش مداوم هزینه‌های دموراژ و مابه‌التفاوت‌های غیرمنتظره",
+        },
+        {
+          arian: "حواله رسمی ارزی با کمترین نرخ کارمزد از صرافی مجاز",
+          traditional: "نرخ‌های مبهم تبدیل ارز و تاخیر در انتقال وجه به فروشنده",
+        },
+      ],
     },
     {
-      title: "تسلط کامل بر قوانین گمرکی",
-      description:
-        "بهره‌گیری از کارگزاران رسمی، شناخت به‌روز ردیف تعرفه‌ها (HS Code) جهت عبور سریع از مسیرهای گمرکی.",
-      icon: Scale,
+      id: "customs",
       code: "03",
+      title: "تسلط کامل بر قوانین گمرکی",
+      subtitle: "عبور سریع و کم‌ریسک از مسیرهای گمرکی",
+      description:
+        "بهره‌گیری از کارگزاران رسمی گمرک، تعیین دقیق کد تعرفه (HS Code) پیش از حمل و اخذ صفر تا صد مجوزهای استاندارد، محیط زیست و ثبت سفارش در سامانه جامع تجارت.",
+      icon: Scale,
+      metricValue: "۵ تا ۱۰",
+      metricLabel: "روز کاری میانگین زمان ترخیص",
+      comparison: [
+        {
+          arian: "ترخیص ۵ الی ۱۰ روزه با آماده‌سازی اسناد پیش از رسیدن بار",
+          traditional: "۲۰ الی ۴۵ روز رسوب کالا در بندر و معطلی اسناد",
+        },
+        {
+          arian: "اخذ صفر تا صد مجوزهای NTSW، استاندارد و دفاع در کمیسیون",
+          traditional: "ارجاع کارفرما به سازمان‌ها جهت رفع نقص و گیر مدارک",
+        },
+      ],
     },
     {
-      title: "پوشش بیمه‌ای ۱۰۰٪ محموله‌ها",
-      description:
-        "تضمین تمام‌خطر (All Risks) برای انواع خودرو، کشنده‌ها و قطعات حساس از مبدأ تا انبار مشتری در ایران.",
-      icon: ShieldCheck,
+      id: "insurance",
       code: "04",
+      title: "پوشش بیمه‌ای ۱۰۰٪ محموله‌ها",
+      subtitle: "تضمین سرمایه شما از کارخانه مبدأ تا انبار مقصد",
+      description:
+        "تمامی محموله‌های خودرویی، کشنده‌های سنگین و قطعات حساس تحت پوشش بیمه‌نامه رسمی تمام‌خطر (All Risks - کلوز A) از لحظه تحویل در مبدأ تا تخلیه در ایران قرار می‌گیرند.",
+      icon: ShieldCheck,
+      metricValue: "۱۰۰٪",
+      metricLabel: "تضمین سرمایه با بیمه کلوز A",
+      comparison: [
+        {
+          arian: "بیمه‌نامه رسمی تمام‌خطر (کلوز A) بین‌المللی به ارزش واقعی",
+          traditional: "حمل بدون بیمه یا با حداقل بیمه باربری پایه و سقف محدود",
+        },
+        {
+          arian: "بازرسی فیزیکی و فنی سلامت کالا پیش از بارگیری در مبدأ",
+          traditional: "عدم کنترل کیفی در مبدأ و کشف خسارت پس از ترخیص",
+        },
+      ],
     },
   ];
 
-  const comparisons = [
-    {
-      metric: "سرعت ترخیص از بنادر",
-      arian: "۵ الی ۱۰ روز کاری (برنامه‌ریزی پیش‌از‌رسیدن)",
-      traditional: "۲۰ الی ۴۵ روز (رسوب کالا و معطلی اسناد)",
-    },
-    {
-      metric: "شفافیت مالی و قرارداد",
-      arian: "پیش‌فاکتور دقیق ریالی بدون تغییر و هزینه پنهان",
-      traditional: "افزایش مداوم هزینه‌های دموراژ و مابه‌التفاوت",
-    },
-    {
-      metric: "حضور مستقیم در چین و دبی",
-      arian: "دفاتر و انبارهای اختصاصی فعال با کارشناسان مقیم",
-      traditional: "واگذاری به واسطه‌های دست دوم و سوم محلی",
-    },
-    {
-      metric: "پوشش بیمه‌ای کالا",
-      arian: "بیمه‌نامه رسمی تمام‌خطر (کلوز A) بین‌المللی",
-      traditional: "بدون بیمه یا حداقل بیمه باربری پایه",
-    },
-    {
-      metric: "سامانه رهگیری محموله",
-      arian: "گزارش‌دهی مستمر الکترونیکی و پشتیبان اختصاصی",
-      traditional: "پیگیری‌های تلفنی نامنظم و عدم اطلاع از موقعیت",
-    },
-    {
-      metric: "مجوزهای استاندارد و صمت",
-      arian: "اخذ صفر تا صد مجوزهای NTSW و دفاع در کمیسیون",
-      traditional: "ارجاع کارفرما به نهادها جهت رفع گیر مدارک",
-    },
-  ];
+  const current = pillars[activeTab];
 
   return (
-    <section id="why-us" className="relative w-full py-20 bg-zinc-950 text-white overflow-hidden" dir="rtl">
-      {/* Background Glow Elements */}
-      <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 left-10 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+    <section
+      id="why-us"
+      className="relative w-full py-16 sm:py-20 bg-zinc-950 text-white overflow-hidden"
+      dir="rtl"
+    >
+      {/* Minimal Ambient Glow */}
+      <div className="pointer-events-none absolute top-0 right-1/3 w-[500px] h-[300px] bg-amber-500/[0.05] rounded-full blur-[120px]" />
 
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Section Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center max-w-2xl mx-auto space-y-3 mb-14"
-        >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-mono text-amber-400 shadow-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-            <span>{"// 03 — COMPETITIVE ADVANTAGES"}</span>
+        {/* Clean Minimal Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+          <div className="space-y-2.5">
+            <div className="inline-flex items-center gap-2 text-xs font-mono text-amber-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span dir="ltr">{"// 03 — WHY ARIAN KHODRO"}</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              تمایز اجرایی ما در بازرگانی و ترخیص
+            </h2>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            چرا بازرگانان و صنعتگران آریان خودرو را انتخاب می‌کنند؟
-          </h2>
-          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
-            ترکیب سابقه ۱۵ ساله، دفاتر عملیاتی در کشورهای مبدأ، و تسلط عمیق بر رویه‌های گمرکی ایران.
-          </p>
-        </motion.div>
+          <a
+            href="#estimator"
+            className="inline-flex items-center gap-2 text-xs font-bold text-zinc-300 hover:text-amber-400 transition-colors group self-start sm:self-auto"
+          >
+            <span>درخواست استعلام و آنالیز هزینه</span>
+            <span className="w-7 h-7 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center group-hover:border-amber-400/50 group-hover:bg-amber-400/10 transition-all">
+              <ArrowUpLeft className="w-3.5 h-3.5" />
+            </span>
+          </a>
+        </div>
 
-        {/* Main Grid: 4 Pillars & Comparison */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Unified Architectural Frame */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 rounded-3xl bg-zinc-900/30 border border-white/[0.07] backdrop-blur-sm overflow-hidden">
           
-          {/* Left Column: Interactive Pillars (5 cols) */}
-          <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3.5">
-            {pillars.map((pillar, idx) => {
-              const Icon = pillar.icon;
+          {/* Right Column: Sleek Navigation List (4 Cols) */}
+          <div className="lg:col-span-4 p-3 sm:p-4 border-b lg:border-b-0 lg:border-l border-white/[0.07] flex flex-col justify-between gap-1.5 bg-zinc-900/20">
+            {pillars.map((item, idx) => {
+              const Icon = item.icon;
               const isActive = activeTab === idx;
+
               return (
-                <motion.div
-                  key={pillar.code}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: idx * 0.1 }}
+                <button
+                  key={item.id}
+                  type="button"
                   onClick={() => setActiveTab(idx)}
-                  className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 border relative overflow-hidden group ${
-                    isActive 
-                      ? "bg-zinc-900/90 border-amber-500/50 shadow-lg shadow-amber-500/5" 
-                      : "bg-zinc-900/40 border-zinc-800/80 hover:bg-zinc-900/70 hover:border-zinc-700"
-                  }`}
+                  className="relative w-full p-4 rounded-2xl text-right transition-colors cursor-pointer group flex items-center gap-3.5"
                 >
-                  <div className="flex items-start gap-4">
-                    <div className={`p-2.5 rounded-xl transition-colors duration-300 ${
-                      isActive ? "bg-amber-500 text-zinc-950 font-bold" : "bg-zinc-800 text-amber-400 group-hover:bg-zinc-700"
-                    }`}>
-                      <Icon className="w-5 h-5" strokeWidth={1.75} />
-                    </div>
-                    <div className="space-y-1 flex-1">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-xs sm:text-sm font-bold text-white group-hover:text-amber-300 transition-colors">
-                          {pillar.title}
-                        </h3>
-                        <span className="font-mono text-[10px] text-zinc-500">
-                          {pillar.code}
-                        </span>
-                      </div>
-                      <p className="text-[11px] sm:text-xs text-zinc-400 leading-relaxed line-clamp-2">
-                        {pillar.description}
-                      </p>
-                    </div>
+                  {/* Animated Active Background */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeWhyUsTab"
+                      transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+                      className="absolute inset-0 rounded-2xl bg-zinc-900 border border-white/[0.08] shadow-sm"
+                    />
+                  )}
+
+                  {/* Active Indicator Line */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeWhyUsLine"
+                      className="absolute right-0 top-3.5 bottom-3.5 w-1 rounded-l-full bg-amber-400"
+                    />
+                  )}
+
+                  <div
+                    className={`relative z-10 w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                      isActive
+                        ? "bg-amber-400 text-zinc-950"
+                        : "bg-zinc-900/80 text-zinc-400 group-hover:text-zinc-200 border border-white/[0.05]"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" strokeWidth={2} />
                   </div>
-                </motion.div>
+
+                  <div className="relative z-10 flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h3
+                        className={`text-xs sm:text-sm font-bold truncate transition-colors ${
+                          isActive
+                            ? "text-white"
+                            : "text-zinc-400 group-hover:text-zinc-200"
+                        }`}
+                      >
+                        {item.title}
+                      </h3>
+                      <span
+                        className={`font-mono text-[10px] ${
+                          isActive ? "text-amber-400" : "text-zinc-600"
+                        }`}
+                      >
+                        {item.code}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-500 truncate mt-0.5">
+                      {item.subtitle}
+                    </p>
+                  </div>
+                </button>
               );
             })}
           </div>
 
-          {/* Right Column: Comparison Matrix (7 cols) */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.98 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="lg:col-span-7 bg-zinc-900/60 border border-zinc-800/80 rounded-3xl p-6 sm:p-8 backdrop-blur-md shadow-xl"
-          >
-            <div className="flex items-center justify-between pb-6 border-b border-zinc-800/80">
-              <div className="space-y-1">
-                <span className="font-mono text-[10px] text-amber-400 tracking-wider font-bold">
-                  COMPARISON BENCHMARK
-                </span>
-                <h3 className="text-sm sm:text-base font-bold text-white">
-                  مقایسه شیوه اجرایی آریان خودرو با روش‌های سنتی
-                </h3>
-              </div>
-              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-800/80 border border-zinc-700/50 text-[11px] font-mono text-zinc-300">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>ISO CERTIFIED</span>
-              </div>
-            </div>
-
-            {/* Comparison Rows */}
-            <div className="mt-4 space-y-3">
-              {comparisons.map((c, idx) => (
-                <motion.div 
-                  key={idx} 
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.3, delay: idx * 0.05 }}
-                  className="p-3.5 rounded-xl bg-zinc-950/50 border border-zinc-800/50 grid grid-cols-12 gap-3 items-center hover:border-zinc-700 transition-all"
-                >
-                  <div className="col-span-12 sm:col-span-4 font-semibold text-xs text-zinc-200">
-                    {c.metric}
-                  </div>
-
-                  <div className="col-span-12 sm:col-span-4 bg-emerald-950/30 border border-emerald-500/20 p-2.5 rounded-lg text-emerald-300 text-[11px] font-medium flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" strokeWidth={2.5} />
-                    <span className="leading-snug">{c.arian}</span>
-                  </div>
-
-                  <div className="col-span-12 sm:col-span-4 bg-zinc-900/60 border border-zinc-800 p-2.5 rounded-lg text-zinc-400 text-[11px] flex items-center gap-2">
-                    <X className="w-3.5 h-3.5 text-zinc-500 shrink-0" strokeWidth={2} />
-                    <span className="leading-snug">{c.traditional}</span>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Bottom Footer Note */}
-            <div className="mt-6 pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-400">
-              <span className="text-[11px]">گزارش ماهانه شاخص‌های کیفی با ۹۹.۸٪ رضایت تجار و صنعتگران</span>
-              <a
-                href="#estimator"
-                className="font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1.5 transition-colors group text-xs"
+          {/* Left Column: Spacious Spotlight Panel (8 Cols) */}
+          <div className="lg:col-span-8 p-6 sm:p-8 lg:p-10 flex flex-col justify-between relative min-h-[340px]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={current.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="flex flex-col justify-between h-full gap-8"
               >
-                <span>ثبت استعلام محموله شما</span>
-                <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-              </a>
-            </div>
+                {/* Top Info & Big Stat */}
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
+                  <div className="space-y-3 max-w-lg">
+                    <div className="inline-flex items-center gap-2 text-[11px] font-medium text-amber-400/90">
+                      <span>مزیت رقابتی {current.code}</span>
+                      <span className="text-zinc-700">•</span>
+                      <span className="text-zinc-400">{current.subtitle}</span>
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-extrabold text-white">
+                      {current.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+                      {current.description}
+                    </p>
+                  </div>
 
-          </motion.div>
+                  {/* Minimalist Typographic KPI */}
+                  <div className="sm:text-left shrink-0 px-5 py-3.5 rounded-2xl bg-zinc-900/70 border border-white/[0.06]">
+                    <div className="text-2xl sm:text-3xl font-black text-amber-400 tracking-tight">
+                      {current.metricValue}
+                    </div>
+                    <div className="text-[11px] text-zinc-400 mt-0.5">
+                      {current.metricLabel}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Clean Comparison Split (Arian vs Traditional) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-6 border-t border-white/[0.06]">
+                  {/* Arian Standard */}
+                  <div className="p-4 rounded-2xl bg-emerald-500/[0.04] border border-emerald-500/20 space-y-2.5">
+                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
+                      <span className="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                        <Check className="w-2.5 h-2.5" strokeWidth={3} />
+                      </span>
+                      <span>استاندارد آریان خودرو</span>
+                    </div>
+                    <ul className="space-y-2">
+                      {current.comparison.map((row, i) => (
+                        <li
+                          key={i}
+                          className="text-xs text-zinc-200 leading-relaxed flex items-start gap-2"
+                        >
+                          <span className="w-1 h-1 rounded-full bg-emerald-400 mt-2 shrink-0" />
+                          <span>{row.arian}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Traditional Method */}
+                  <div className="p-4 rounded-2xl bg-zinc-900/40 border border-white/[0.05] space-y-2.5">
+                    <div className="flex items-center gap-2 text-xs font-bold text-zinc-500">
+                      <span className="w-4 h-4 rounded-full bg-zinc-800 flex items-center justify-center">
+                        <X className="w-2.5 h-2.5 text-zinc-400" strokeWidth={2.5} />
+                      </span>
+                      <span>روش‌های سنتی و واسطه‌ای</span>
+                    </div>
+                    <ul className="space-y-2">
+                      {current.comparison.map((row, i) => (
+                        <li
+                          key={i}
+                          className="text-xs text-zinc-500 leading-relaxed flex items-start gap-2"
+                        >
+                          <span className="w-1 h-1 rounded-full bg-zinc-700 mt-2 shrink-0" />
+                          <span>{row.traditional}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
         </div>
-
       </div>
     </section>
   );
