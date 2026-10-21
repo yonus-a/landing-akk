@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useState } from "react";
 import {
   Globe2,
   Car,
@@ -11,8 +11,19 @@ import {
   ArrowUpLeft,
   CheckCircle2,
 } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export function ServicesSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const row1CardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const row2CardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const [activeRow, setActiveRow] = useState(1);
+
   const services = [
     {
       code: "01",
@@ -100,31 +111,127 @@ export function ServicesSection() {
     },
   ];
 
+  const row1Services = services.slice(0, 3);
+  const row2Services = services.slice(3, 6);
+
+  useGSAP(
+    () => {
+      // تنظیمات اولیه کارت‌های ردیف دوم (پایین صفحه و حالت زاویه‌دار)
+      gsap.set(row2CardsRef.current, {
+        yPercent: 120,
+        rotationX: -40,
+        z: 120,
+        scale: 0.85,
+        opacity: 0,
+        transformOrigin: "bottom center",
+      });
+
+      gsap.set(row1CardsRef.current, {
+        transformOrigin: "top center",
+      });
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "+=1800", // افزایش مسافت اسکرول برای کندتر و نرم‌تر شدن عمل جایگزینی
+          scrub: 1.2,    // افزایش اینرسی برای روانی بیشتر حرکت
+          pin: true,
+          anticipatePin: 1,
+          onUpdate: (self) => {
+            setActiveRow(self.progress > 0.5 ? 2 : 1);
+          },
+        },
+      });
+
+      // ۱. عقب رفتن، تار شدن و محو کامل کارت‌های ردیف اول پس از اتمام جایگزینی
+      tl.to(
+        row1CardsRef.current,
+        {
+          yPercent: -20,
+          rotationX: 25,
+          z: -200,
+          scale: 0.88,
+          opacity: 0,     // محو کامل پس از جایگزینی
+          filter: "blur(6px)",
+          stagger: 0.04,
+          ease: "power2.inOut",
+          duration: 1,
+        },
+        0
+      );
+
+      // ۲. بالا آمدن و ورق خوردن کارت‌های ردیف دوم
+      tl.to(
+        row2CardsRef.current,
+        {
+          yPercent: 0,
+          rotationX: 0,
+          z: 0,
+          scale: 1,
+          opacity: 1,
+          stagger: 0.06,
+          ease: "power3.out",
+          duration: 1,
+        },
+        0.1
+      );
+
+      // ۳. نوار پیشرفت
+      if (progressBarRef.current) {
+        tl.fromTo(
+          progressBarRef.current,
+          { scaleX: 0.5 },
+          { scaleX: 1, ease: "none", duration: 1 },
+          0
+        );
+      }
+    },
+    { scope: sectionRef }
+  );
+
   return (
-    <section id="services" className="relative w-full py-24 sm:py-32 bg-white" dir="rtl">
-      <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8">
-        
+    <section
+      ref={sectionRef}
+      id="services"
+      className="relative w-full h-screen flex flex-col justify-center overflow-hidden bg-white dark:bg-zinc-950 transition-colors duration-300"
+      dir="rtl"
+    >
+      <div className="max-w-[1320px] w-full mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-12 sm:pb-16">
-          <div className="space-y-3">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-8">
+          <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-zinc-900" />
-              <span className="font-mono text-xs text-zinc-500 tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-zinc-900 dark:bg-amber-400" />
+              <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-wider">
                 {"// 01 — COMMERCIAL & LOGISTICS SPECS"}
               </span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-950 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-950 dark:text-white tracking-tight">
               خدمات جامع بازرگانی و ترخیص آریان خودرو
             </h2>
-            <p className="text-sm sm:text-base text-zinc-600 max-w-2xl leading-relaxed">
+            <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
               ارائه زنجیره کامل و یکپارچه خدمات بازرگانی خارجی؛ از ارزیابی تأمین‌کننده در مبدأ تا ترخیص و تحویل کالا درب انبار مشتری.
             </p>
           </div>
 
-          <div className="flex items-center gap-3 self-start md:self-end">
+          <div className="flex items-center gap-4 self-start md:self-end">
+            <div className="hidden sm:flex items-center gap-2.5 bg-zinc-100 dark:bg-zinc-900 px-3.5 py-2 rounded-full border border-zinc-200/70 dark:border-zinc-800">
+              <span className="font-mono text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                0{activeRow}
+              </span>
+              <div className="w-12 h-1 bg-zinc-300 dark:bg-zinc-700 rounded-full overflow-hidden">
+                <div
+                  ref={progressBarRef}
+                  className="w-full h-full bg-zinc-950 dark:bg-amber-400 origin-right"
+                />
+              </div>
+              <span className="font-mono text-xs text-zinc-400">02</span>
+            </div>
+
             <a
               href="#estimator"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-zinc-950 hover:bg-zinc-800 text-white text-xs sm:text-sm font-bold transition-all duration-200 shadow-sm"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-zinc-950 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-950 text-xs sm:text-sm font-bold transition-all duration-200 shadow-sm"
             >
               <span>درخواست استعلام قیمت خدمات</span>
               <ArrowUpLeft className="w-4 h-4" strokeWidth={1.75} />
@@ -132,89 +239,143 @@ export function ServicesSection() {
           </div>
         </div>
 
-        {/* 6-Card Soft Architectural Bento Grid (NO borders) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 my-10">
-          {services.map((service) => {
-            const Icon = service.icon;
-
-            return (
-              <div
-                key={service.code}
-                className="group relative bg-zinc-50/80 hover:bg-zinc-100/90 p-7 sm:p-8 rounded-2xl flex flex-col justify-between transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.05)] hover:-translate-y-1"
-              >
-                <div>
-                  {/* Top Header of Card */}
-                  <div className="flex items-center justify-between pb-4">
-                    <span className="font-mono text-2xl font-black text-zinc-300 group-hover:text-zinc-900 transition-colors">
-                      {service.code}
-                    </span>
-                    <div className="p-3 rounded-xl bg-white text-zinc-900 shadow-2xs group-hover:bg-zinc-950 group-hover:text-white transition-colors">
-                      <Icon className="w-5 h-5" strokeWidth={1.5} />
+        {/* 3D Perspective Stage */}
+        <div className="relative w-full min-h-[410px] my-4 [perspective:1400px] [transform-style:preserve-3d]">
+          {/* Row 1 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 absolute inset-x-0 top-0 [transform-style:preserve-3d]">
+            {row1Services.map((service, index) => {
+              const Icon = service.icon;
+              return (
+                <div
+                  key={service.code}
+                  ref={(el) => {
+                    row1CardsRef.current[index] = el;
+                  }}
+                  className="group relative bg-zinc-50/95 dark:bg-zinc-900/95 p-6 rounded-2xl flex flex-col justify-between shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)] border border-zinc-200/80 dark:border-zinc-800 will-change-transform"
+                >
+                  <div>
+                    <div className="flex items-center justify-between pb-3">
+                      <span className="font-mono text-2xl font-black text-zinc-300 dark:text-zinc-700 group-hover:text-zinc-900 dark:group-hover:text-amber-400 transition-colors">
+                        {service.code}
+                      </span>
+                      <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs group-hover:bg-zinc-950 dark:group-hover:bg-amber-500 group-hover:text-white dark:group-hover:text-zinc-950 transition-colors">
+                        <Icon className="w-5 h-5" strokeWidth={1.5} />
+                      </div>
                     </div>
+                    <div className="font-mono text-[10px] text-zinc-400 tracking-wider">
+                      {service.tag}
+                    </div>
+                    <h3 className="text-base font-bold text-zinc-950 dark:text-white mt-1 mb-2">
+                      {service.title}
+                    </h3>
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed line-clamp-2">
+                      {service.description}
+                    </p>
+                    <ul className="mt-4 space-y-1.5 pt-2 border-t border-zinc-200/60 dark:border-zinc-800 text-xs text-zinc-700 dark:text-zinc-300">
+                      {service.highlights.slice(0, 3).map((highlight, idx) => (
+                        <li key={idx} className="flex items-center gap-2">
+                          <CheckCircle2
+                            className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0"
+                            strokeWidth={1.75}
+                          />
+                          <span className="line-clamp-1">{highlight}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-
-                  {/* Technical Sub-Tag */}
-                  <div className="font-mono text-[10px] text-zinc-400 mt-2 tracking-wider">
-                    {service.tag}
+                  <div className="mt-4 pt-3 flex items-center justify-between border-t border-zinc-200/60 dark:border-zinc-800">
+                    <a
+                      href="#estimator"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-900 dark:text-zinc-200 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+                    >
+                      <span>استعلام و مشاوره</span>
+                      <ArrowUpLeft className="w-3.5 h-3.5" />
+                    </a>
+                    <span className="font-mono text-[10px] text-zinc-400">
+                      ARCH-SERIES
+                    </span>
                   </div>
-
-                  {/* Title & Description */}
-                  <h3 className="text-lg font-bold text-zinc-950 mt-1 mb-2.5">
-                    {service.title}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed font-normal">
-                    {service.description}
-                  </p>
-
-                  {/* Key Highlights Bullet List */}
-                  <ul className="mt-5 space-y-2 pt-3 text-xs text-zinc-700">
-                    {service.highlights.map((highlight, idx) => (
-                      <li key={idx} className="flex items-center gap-2">
-                        <CheckCircle2
-                          className="w-3.5 h-3.5 text-emerald-600 shrink-0"
-                          strokeWidth={1.75}
-                        />
-                        <span className="line-clamp-1">{highlight}</span>
-                      </li>
-                    ))}
-                  </ul>
                 </div>
+              );
+            })}
+          </div>
 
-                {/* Bottom Action Link */}
-                <div className="mt-6 pt-4 flex items-center justify-between">
-                  <a
-                    href="#estimator"
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-900 group-hover:text-amber-700 transition-colors"
-                  >
-                    <span>استعلام و مشاوره تخصصی</span>
-                    <ArrowUpLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" />
-                  </a>
-                  <span className="font-mono text-[10px] text-zinc-400">
-                    ARCH-SERIES
-                  </span>
+          {/* Row 2 (3D Peel-Y Reveal) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 absolute inset-x-0 top-0 [transform-style:preserve-3d]">
+            {row2Services.map((service, index) => {
+              const Icon = service.icon;
+              return (
+                <div
+                  key={service.code}
+                  ref={(el) => {
+                    row2CardsRef.current[index] = el;
+                  }}
+                  className="group relative bg-white dark:bg-zinc-900 p-6 rounded-2xl flex flex-col justify-between shadow-[0_-12px_40px_rgba(0,0,0,0.08),0_12px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_12px_30px_rgba(0,0,0,0.4)] border border-zinc-200 dark:border-zinc-800 will-change-transform"
+                >
+                  <div>
+                    <div className="flex items-center justify-between pb-3">
+                      <span className="font-mono text-2xl font-black text-zinc-300 dark:text-zinc-700 group-hover:text-zinc-900 dark:group-hover:text-amber-400 transition-colors">
+                        {service.code}
+                      </span>
+                      <div className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs group-hover:bg-zinc-950 dark:group-hover:bg-amber-500 group-hover:text-white dark:group-hover:text-zinc-950 transition-colors">
+                        <Icon className="w-5 h-5" strokeWidth={1.5} />
+                      </div>
+                    </div>
+                    <div className="font-mono text-[10px] text-zinc-400 tracking-wider">
+                      {service.tag}
+                    </div>
+                    <h3 className="text-base font-bold text-zinc-950 dark:text-white mt-1 mb-2">
+                      {service.title}
+                    </h3>
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed line-clamp-2">
+                      {service.description}
+                    </p>
+                    <ul className="mt-4 space-y-1.5 pt-2 border-t border-zinc-200/60 dark:border-zinc-800 text-xs text-zinc-700 dark:text-zinc-300">
+                      {service.highlights.slice(0, 3).map((highlight, idx) => (
+                        <li key={idx} className="flex items-center gap-2">
+                          <CheckCircle2
+                            className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0"
+                            strokeWidth={1.75}
+                          />
+                          <span className="line-clamp-1">{highlight}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="mt-4 pt-3 flex items-center justify-between border-t border-zinc-200/60 dark:border-zinc-800">
+                    <a
+                      href="#estimator"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-900 dark:text-zinc-200 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+                    >
+                      <span>استعلام و مشاوره</span>
+                      <ArrowUpLeft className="w-3.5 h-3.5" />
+                    </a>
+                    <span className="font-mono text-[10px] text-zinc-400">
+                      ARCH-SERIES
+                    </span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
-        {/* Bottom Assurance Strip (NO borders) */}
-        <div className="p-5 sm:p-6 rounded-2xl bg-zinc-50 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
+        {/* Bottom Assurance Strip */}
+        <div className="mt-8 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900 flex flex-col sm:flex-row items-center justify-between gap-4 border border-zinc-100 dark:border-zinc-800 relative z-20">
           <div className="flex items-center gap-3">
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
-            <p className="text-xs sm:text-sm text-zinc-700 leading-normal">
-              <strong>تضمین حقوقی و مالی:</strong> تمامی عملیات منبع‌یابی، خرید ارزی، حمل و ترخیص آریان خودرو تحت قرارداد رسمی، تضمین مکتوب هزینه‌ها و بیمه‌نامه معتبر اجرا می‌شود.
+            <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-normal">
+              <strong>تضمین حقوقی و مالی:</strong> تمامی عملیات منبع‌یابی، خرید ارزی، حمل و ترخیص تحت قرارداد رسمی اجرا می‌شود.
             </p>
           </div>
           <a
             href="tel:02188000000"
-            className="shrink-0 text-xs font-bold font-mono px-4 py-2 rounded-full bg-white text-zinc-800 hover:bg-zinc-100 transition-colors shadow-2xs"
+            className="shrink-0 text-xs font-bold font-mono px-4 py-2 rounded-full bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors border border-zinc-200 dark:border-zinc-700"
             dir="ltr"
           >
             021-88000000 EXT: 104
           </a>
         </div>
-
       </div>
     </section>
   );

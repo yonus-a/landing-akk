@@ -1,53 +1,90 @@
 import * as THREE from "three";
 import { freezeStaticGroup } from "../webgl/utils";
 import { INITIAL_SHIP, PALETTE_CONTAINERS } from "../../domain/constants";
+import {
+  createShipContainerTexture,
+  createShipHullDecalTexture,
+  createShipWakeTexture,
+} from "../textures/proceduralTextures";
 
 export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
   const shipGroup = new THREE.Group();
   const vessel = new THREE.Group();
 
+  /* ============================================================
+     1. MATERIALS & FINISHES (TUNED FOR GRAPHITE EDGE EXTRACTION)
+     ============================================================ */
   const hullNavyMat = new THREE.MeshStandardMaterial({
     color: 0x0f294a,
-    roughness: 0.42,
-    metalness: 0.3,
+    roughness: 0.38,
+    metalness: 0.28,
   });
+
   const hullRedMat = new THREE.MeshStandardMaterial({
-    color: 0x991b1b,
-    roughness: 0.55,
-    metalness: 0.2,
+    color: 0x881337,
+    roughness: 0.52,
+    metalness: 0.18,
   });
+
   const bootStripeMat = new THREE.MeshStandardMaterial({
-    color: 0xf8fafc,
-    roughness: 0.4,
+    color: 0xffffff,
+    roughness: 0.2,
     metalness: 0.1,
   });
+
   const deckMat = new THREE.MeshStandardMaterial({
-    color: 0x273549,
-    roughness: 0.72,
-    metalness: 0.3,
+    color: 0x1e293b,
+    roughness: 0.75,
+    metalness: 0.35,
   });
+
   const bridgeWhiteMat = new THREE.MeshStandardMaterial({
     color: 0xf8fafc,
-    roughness: 0.32,
+    roughness: 0.28,
     metalness: 0.12,
   });
+
   const bridgeGlassMat = new THREE.MeshPhysicalMaterial({
-    color: 0x061526,
-    roughness: 0.08,
-    metalness: 0.25,
+    color: 0x020617,
+    roughness: 0.06,
+    metalness: 0.85,
     clearcoat: 1.0,
   });
+
   const safetyOrangeMat = new THREE.MeshStandardMaterial({
     color: 0xea580c,
     roughness: 0.35,
     metalness: 0.15,
   });
-  const steelGreyMat = new THREE.MeshStandardMaterial({
-    color: 0x64748b,
-    roughness: 0.5,
-    metalness: 0.6,
+
+  const safetyAmberMat = new THREE.MeshStandardMaterial({
+    color: 0xf59e0b,
+    roughness: 0.3,
+    metalness: 0.2,
   });
 
+  const steelGreyMat = new THREE.MeshStandardMaterial({
+    color: 0x475569,
+    roughness: 0.55,
+    metalness: 0.55,
+  });
+
+  // High-contrast galvanized steel for lashing rods (creates crisp diagonal graphite strokes)
+  const lashingRodMat = new THREE.MeshStandardMaterial({
+    color: 0xe2e8f0,
+    roughness: 0.25,
+    metalness: 0.75,
+  });
+
+  const machineryYellowMat = new THREE.MeshStandardMaterial({
+    color: 0xeab308,
+    roughness: 0.45,
+    metalness: 0.3,
+  });
+
+  /* ============================================================
+     2. HULL, BULBOUS BOW, WATERLINE & DECK
+     ============================================================ */
   const hullShape = new THREE.Shape();
   hullShape.moveTo(-15.0, -82);
   hullShape.lineTo(15.0, -82);
@@ -72,24 +109,28 @@ export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
   hullMesh.receiveShadow = true;
   vessel.add(hullMesh);
 
+  // Red underwater antifouling hull section
   const waterline = hullMesh.clone();
   waterline.material = hullRedMat;
   waterline.scale.set(1.006, 0.52, 1.005);
   waterline.position.y = 6.4;
   vessel.add(waterline);
 
+  // Bulbous bow (reduces hydrodynamic drag & throws signature bow wave)
   const bulbGeo = new THREE.SphereGeometry(4.2, 20, 16);
   bulbGeo.scale(0.85, 0.95, 2.6);
   const bulbMesh = new THREE.Mesh(bulbGeo, hullRedMat);
   bulbMesh.position.set(0, 3.2, 92);
   vessel.add(bulbMesh);
 
+  // High-contrast white bootstripe
   const bootStripe = hullMesh.clone();
   bootStripe.material = bootStripeMat;
   bootStripe.scale.set(1.009, 0.035, 1.007);
   bootStripe.position.y = 7.15;
   vessel.add(bootStripe);
 
+  // Bow flare shield (sheer strake)
   const bowShield = new THREE.Mesh(
     new THREE.CylinderGeometry(
       14.5,
@@ -106,6 +147,7 @@ export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
   bowShield.position.set(0, 14.2, 72);
   vessel.add(bowShield);
 
+  // Main weather deck
   const deck = new THREE.Mesh(
     new THREE.BoxGeometry(30.5, 1.2, 154),
     deckMat
@@ -114,6 +156,140 @@ export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
   deck.receiveShadow = true;
   vessel.add(deck);
 
+  /* ============================================================
+     3. "ARIAN KHODRO" HULL BRANDING & NAUTICAL MARKINGS
+     ============================================================ */
+  const hullDecalTex = createShipHullDecalTexture();
+  const hullDecalMat = new THREE.MeshBasicMaterial({
+    map: hullDecalTex,
+    transparent: true,
+  });
+
+  // Starboard hull decal
+  const hullDecalStarboard = new THREE.Mesh(
+    new THREE.PlaneGeometry(74, 9.2),
+    hullDecalMat
+  );
+  hullDecalStarboard.position.set(16.32, 9.5, -4);
+  hullDecalStarboard.rotation.y = Math.PI / 2;
+  vessel.add(hullDecalStarboard);
+
+  // Port hull decal
+  const hullDecalPort = new THREE.Mesh(
+    new THREE.PlaneGeometry(74, 9.2),
+    hullDecalMat
+  );
+  hullDecalPort.position.set(-16.32, 9.5, -4);
+  hullDecalPort.rotation.y = -Math.PI / 2;
+  vessel.add(hullDecalPort);
+
+  // Bow Hawse Pipes and Heavy Bower Anchors
+  for (const side of [-1, 1]) {
+    // Hawse hole (recessed pocket)
+    const hawseHole = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.9, 0.9, 2.2, 12),
+      deckMat
+    );
+    hawseHole.rotation.z = side * 0.45;
+    hawseHole.position.set(side * 14.8, 9.6, 78);
+    vessel.add(hawseHole);
+
+    // Stockless anchor flukes
+    const anchor = new THREE.Mesh(
+      new THREE.BoxGeometry(1.6, 2.8, 0.6),
+      steelGreyMat
+    );
+    anchor.rotation.y = side * 0.3;
+    anchor.position.set(side * 15.3, 9.2, 77.8);
+    vessel.add(anchor);
+  }
+
+  /* ============================================================
+     4. FORECASTLE WAVE BREAKWATER & BOW MOORING GEAR
+     ============================================================ */
+  // V-Shaped Forecastle Breakwater (deflects sea spray away from Bay 1)
+  const breakwaterGroup = new THREE.Group();
+  const bwLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(14.8, 3.8, 0.6),
+    hullNavyMat
+  );
+  bwLeft.position.set(-6.8, 14.5, 71.5);
+  bwLeft.rotation.y = -0.52;
+  breakwaterGroup.add(bwLeft);
+
+  const bwRight = new THREE.Mesh(
+    new THREE.BoxGeometry(14.8, 3.8, 0.6),
+    hullNavyMat
+  );
+  bwRight.position.set(6.8, 14.5, 71.5);
+  bwRight.rotation.y = 0.52;
+  breakwaterGroup.add(bwRight);
+
+  // Breakwater top rail cap in high-contrast white
+  const bwCapL = new THREE.Mesh(
+    new THREE.BoxGeometry(15.0, 0.4, 0.8),
+    bridgeWhiteMat
+  );
+  bwCapL.position.set(-6.8, 16.4, 71.5);
+  bwCapL.rotation.y = -0.52;
+  breakwaterGroup.add(bwCapL);
+
+  const bwCapR = new THREE.Mesh(
+    new THREE.BoxGeometry(15.0, 0.4, 0.8),
+    bridgeWhiteMat
+  );
+  bwCapR.position.set(6.8, 16.4, 71.5);
+  bwCapR.rotation.y = 0.52;
+  breakwaterGroup.add(bwCapR);
+
+  // Vertical triangular stiffeners on the aft side of the breakwater
+  for (let s = -4; s <= 4; s += 2) {
+    const gusset = new THREE.Mesh(
+      new THREE.BoxGeometry(0.3, 3.2, 1.8),
+      steelGreyMat
+    );
+    gusset.position.set(s * 2.8, 14.2, 69.8);
+    breakwaterGroup.add(gusset);
+  }
+  vessel.add(breakwaterGroup);
+
+  // Bow Mooring Machinery (Anchor Windlasses & Cable Drums)
+  for (const side of [-1, 1]) {
+    const windlassBase = new THREE.Mesh(
+      new THREE.BoxGeometry(3.2, 1.5, 4.2),
+      machineryYellowMat
+    );
+    windlassBase.position.set(side * 6.5, 13.8, 80);
+    vessel.add(windlassBase);
+
+    const cableDrum = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.2, 1.2, 2.8, 14),
+      steelGreyMat
+    );
+    cableDrum.rotation.z = Math.PI / 2;
+    cableDrum.position.set(side * 6.5, 14.8, 80);
+    vessel.add(cableDrum);
+
+    // Mooring bollards
+    const bollard = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.45, 0.45, 1.4, 10),
+      bridgeWhiteMat
+    );
+    bollard.position.set(side * 11.2, 13.8, 83);
+    vessel.add(bollard);
+  }
+
+  // Bow Jackstaff (Flagpole)
+  const jackstaff = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.12, 0.22, 6.5, 8),
+    bridgeWhiteMat
+  );
+  jackstaff.position.set(0, 16.5, 88.5);
+  vessel.add(jackstaff);
+
+  /* ============================================================
+     5. SUPERSTRUCTURE & NAVIGATION BRIDGE TOWER
+     ============================================================ */
   const tower = new THREE.Group();
   for (let f = 0; f < 6; f++) {
     const w = 26 - f * 0.9;
@@ -127,97 +303,178 @@ export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
     block.receiveShadow = true;
     tower.add(block);
 
+    // Horizontal panoramic accommodation window ribbons
     const winStrip = new THREE.Mesh(
       new THREE.BoxGeometry(w + 0.15, 0.65, d - 2.5),
       bridgeGlassMat
     );
     winStrip.position.set(0, 14.8 + f * 3.1, -53.2);
     tower.add(winStrip);
+
+    // Exterior deck walkway handrails in crisp white
+    const deckRailing = new THREE.Mesh(
+      new THREE.BoxGeometry(w + 0.3, 0.4, d + 0.3),
+      steelGreyMat
+    );
+    deckRailing.position.set(0, 13.1 + f * 3.1, -54);
+    tower.add(deckRailing);
   }
 
+  // Flying Bridge Wings (Extend beyond ship's beam for line-of-sight navigation)
   const bridgeWing = new THREE.Mesh(
-    new THREE.BoxGeometry(36.5, 3.2, 8.2),
+    new THREE.BoxGeometry(37.5, 3.2, 8.4),
     bridgeWhiteMat
   );
   bridgeWing.position.set(0, 33.1, -51.5);
   bridgeWing.castShadow = true;
   tower.add(bridgeWing);
 
+  // Enclosed navigation wheelhouse windows
   const bridgeWindows = new THREE.Mesh(
-    new THREE.BoxGeometry(36.7, 1.35, 8.4),
+    new THREE.BoxGeometry(37.7, 1.45, 8.6),
     bridgeGlassMat
   );
   bridgeWindows.position.set(0, 33.4, -51.4);
   tower.add(bridgeWindows);
 
+  // Navigation lights on wingtips (Port Red, Starboard Green)
+  const portLight = new THREE.Mesh(
+    new THREE.SphereGeometry(0.45, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0xef4444 })
+  );
+  portLight.position.set(-18.8, 33.5, -51.5);
+  tower.add(portLight);
+
+  const stbdLight = new THREE.Mesh(
+    new THREE.SphereGeometry(0.45, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0x10b981 })
+  );
+  stbdLight.position.set(18.8, 33.5, -51.5);
+  tower.add(stbdLight);
+
+  // Main Radar & Communications Mast
   const mastPole = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.35, 0.7, 11, 12),
+    new THREE.CylinderGeometry(0.35, 0.75, 11.5, 12),
     bridgeWhiteMat
   );
-  mastPole.position.set(0, 40.2, -51.5);
+  mastPole.position.set(0, 40.4, -51.5);
   tower.add(mastPole);
 
-  const radarScanner = new THREE.Mesh(
-    new THREE.BoxGeometry(5.5, 0.35, 0.6),
+  // S-Band Long-Range Radar Scanner Bar
+  const radarScannerS = new THREE.Mesh(
+    new THREE.BoxGeometry(6.2, 0.35, 0.65),
     bridgeWhiteMat
   );
-  radarScanner.position.set(0, 44.5, -51.5);
-  tower.add(radarScanner);
+  radarScannerS.position.set(0, 44.8, -51.5);
+  tower.add(radarScannerS);
 
-  const satDomeL = new THREE.Mesh(
-    new THREE.SphereGeometry(1.1, 14, 12),
+  // X-Band Compact Radar Scanner Bar
+  const radarScannerX = new THREE.Mesh(
+    new THREE.BoxGeometry(4.0, 0.28, 0.5),
     bridgeWhiteMat
   );
-  satDomeL.position.set(-6.5, 35.8, -51.5);
+  radarScannerX.position.set(0, 42.4, -51.5);
+  radarScannerX.rotation.y = 0.75;
+  tower.add(radarScannerX);
+
+  // Satellite Communications Radomes
+  const satDomeL = new THREE.Mesh(
+    new THREE.SphereGeometry(1.2, 14, 12),
+    bridgeWhiteMat
+  );
+  satDomeL.position.set(-6.8, 35.8, -51.5);
   tower.add(satDomeL);
+
   const satDomeR = satDomeL.clone();
-  satDomeR.position.x = 6.5;
+  satDomeR.position.x = 6.8;
   tower.add(satDomeR);
 
+  // Engine Exhaust Funnel with Arian Khodro Brand Band
   const funnelBase = new THREE.Mesh(
-    new THREE.BoxGeometry(7.5, 11.5, 9.5),
+    new THREE.BoxGeometry(7.8, 12.0, 9.8),
     safetyOrangeMat
   );
   funnelBase.position.set(0, 34.5, -62.5);
   funnelBase.castShadow = true;
   tower.add(funnelBase);
 
+  // Warm Amber / Gold Corporate Band on Funnel
+  const funnelBand = new THREE.Mesh(
+    new THREE.BoxGeometry(8.0, 2.2, 10.0),
+    safetyAmberMat
+  );
+  funnelBand.position.set(0, 35.0, -62.5);
+  tower.add(funnelBand);
+
+  // Dark Navy Funnel Cap
   const funnelCap = new THREE.Mesh(
-    new THREE.BoxGeometry(7.7, 2.2, 9.7),
+    new THREE.BoxGeometry(8.1, 2.2, 10.1),
     hullNavyMat
   );
-  funnelCap.position.set(0, 39.8, -62.5);
+  funnelCap.position.set(0, 40.2, -62.5);
   tower.add(funnelCap);
 
+  // Dual Enclosed Free-Fall Lifeboats in Orange Launch Cradles
   for (const side of [-1, 1]) {
     const lifeboat = new THREE.Mesh(
-      new THREE.ConeGeometry(1.4, 5.2, 12),
+      new THREE.CapsuleGeometry(1.2, 3.8, 10, 12),
       safetyOrangeMat
     );
-    lifeboat.rotation.x = Math.PI * 0.35;
-    lifeboat.position.set(side * 14.2, 20.5, -56);
+    lifeboat.rotation.x = Math.PI * 0.38;
+    lifeboat.position.set(side * 14.2, 21.2, -56);
     tower.add(lifeboat);
   }
 
   vessel.add(tower);
 
+  /* ============================================================
+     6. CONTAINER CARGO BAYS, LASHING BRIDGES & X-RODS
+     ============================================================ */
   const bays = [-72, -37, -23, -9, 5, 19, 33, 47, 61];
+
+  // Elevated Lashing Bridges between Bays with Handrails
   bays.forEach((zPos) => {
-    const lashingBridge = new THREE.Mesh(
-      new THREE.BoxGeometry(30.0, 5.5, 0.8),
+    const bridgeGroup = new THREE.Group();
+
+    // Catwalk platform
+    const catwalk = new THREE.Mesh(
+      new THREE.BoxGeometry(29.6, 5.8, 0.9),
       steelGreyMat
     );
-    lashingBridge.position.set(0, 15.5, zPos - 6.8);
-    vessel.add(lashingBridge);
+    catwalk.position.set(0, 15.6, zPos - 6.8);
+    bridgeGroup.add(catwalk);
+
+    // Safety top rail in high-contrast silver
+    const topRail = new THREE.Mesh(
+      new THREE.BoxGeometry(29.8, 0.25, 0.25),
+      bridgeWhiteMat
+    );
+    topRail.position.set(0, 18.6, zPos - 6.8);
+    bridgeGroup.add(topRail);
+
+    // Vertical structural cell-guide stanchions at stack corners
+    for (const side of [-1, 1]) {
+      const stanchion = new THREE.Mesh(
+        new THREE.BoxGeometry(0.45, 16.0, 0.45),
+        steelGreyMat
+      );
+      stanchion.position.set(side * 14.8, 20.6, zPos - 6.8);
+      bridgeGroup.add(stanchion);
+    }
+
+    vessel.add(bridgeGroup);
   });
 
-  const containerGeo = new THREE.BoxGeometry(2.55, 2.65, 12.4);
+  // Dedicated High-Contrast Container Texture (Corrugations, ISO Corner Castings, Stencils)
+  const shipContainerTex = createShipContainerTexture();
+  const containerGeo = new THREE.BoxGeometry(2.36, 2.44, 12.0);
   const containerMat = new THREE.MeshStandardMaterial({
+    map: shipContainerTex,
     color: 0xffffff,
-    roughness: 0.54,
-    metalness: 0.32,
+    roughness: 0.46,
+    metalness: 0.26,
     bumpMap: corrugatedBump,
-    bumpScale: 0.09,
+    bumpScale: 0.08,
   });
 
   const transforms: Array<{
@@ -227,18 +484,44 @@ export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
     color: THREE.Color;
   }> = [];
 
+  // Generate realistic stepped container stacks across the 9 bays
   bays.forEach((zPos, bIdx) => {
-    for (let col = -5; col <= 5; col++) {
-      if (zPos > 55 && Math.abs(col) > 3) continue;
-      const xPos = col * 2.68;
-      const maxTiers = zPos > 45 ? 4 : bIdx % 2 === 0 ? 6 : 5;
+    // Narrow stacks near the bow taper
+    const maxCols = zPos > 55 ? 3 : zPos > 40 ? 4 : 5;
+
+    for (let col = -maxCols; col <= maxCols; col++) {
+      const xPos = col * 2.7;
+
+      // Realistic tiered pyramid stacking (higher in midship, stepped at sides & bow)
+      let maxTiers = 5;
+      if (zPos > 50) {
+        maxTiers = 3;
+      } else if (zPos > 30) {
+        maxTiers = 4;
+      } else if (Math.abs(zPos) < 25) {
+        maxTiers = 6;
+      } else if (zPos === -72) {
+        maxTiers = 4;
+      }
+
+      // Outer columns are 1 tier lower for stability & wind aerodynamics
+      if (Math.abs(col) === maxCols && maxTiers > 3) {
+        maxTiers -= 1;
+      }
+
       for (let t = 0; t < maxTiers; t++) {
-        if (t === maxTiers - 1 && Math.abs(col * 3 + bIdx) % 4 === 0) continue;
+        // Natural varied container loading pattern
+        if (t === maxTiers - 1 && Math.abs(col * 4 + bIdx * 3) % 5 === 0) {
+          continue;
+        }
+
+        // Color selection prioritizing high luminance contrast between neighbors
         const cIdx =
-          Math.abs(bIdx * 5 + col * 3 + t * 2) % PALETTE_CONTAINERS.length;
+          Math.abs(bIdx * 7 + col * 3 + t * 4) % PALETTE_CONTAINERS.length;
+
         transforms.push({
           x: xPos,
-          y: 14.5 + t * 2.68,
+          y: 14.2 + t * 2.68,
           z: zPos,
           color: PALETTE_CONTAINERS[cIdx],
         });
@@ -267,6 +550,71 @@ export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
   }
   vessel.add(instancedContainers);
 
+  /* ============================================================
+     7. ICONIC DIAGONAL CRISS-CROSS LASHING RODS ("X" BRACING)
+     The universal visual hallmark of a modern container ship!
+     ============================================================ */
+  const lashingGroup = new THREE.Group();
+  const rodGeo = new THREE.CylinderGeometry(0.06, 0.06, 5.8, 4);
+  rodGeo.rotateZ(Math.PI / 4);
+
+  // Add X-shaped lashing rods across exposed container faces
+  const exposedFaces = [
+    { z: 67.1, cols: [-3, -1, 1, 3] }, // Forward face of Bay 61
+    { z: 54.9, cols: [-4, -2, 0, 2, 4] },
+    { z: -15.1, cols: [-4, -2, 0, 2, 4] },
+    { z: -43.1, cols: [-4, -2, 0, 2, 4] },
+    { z: -78.1, cols: [-3, -1, 1, 3] }, // Aft face of Bay -72
+  ];
+
+  exposedFaces.forEach(({ z, cols }) => {
+    cols.forEach((colX) => {
+      const centerX = colX * 2.7;
+
+      // Positive diagonal (\)
+      const rod1 = new THREE.Mesh(rodGeo, lashingRodMat);
+      rod1.position.set(centerX, 16.8, z);
+      rod1.rotation.y = 0;
+      lashingGroup.add(rod1);
+
+      // Negative diagonal (/)
+      const rod2 = new THREE.Mesh(rodGeo, lashingRodMat);
+      rod2.position.set(centerX, 16.8, z);
+      rod2.rotation.z = -Math.PI / 2;
+      lashingGroup.add(rod2);
+    });
+  });
+  vessel.add(lashingGroup);
+
+  /* ============================================================
+     8. OCEAN FOAM BOW SPRAY & STERN PROPELLER WAKE
+     ============================================================ */
+  const wakeTex = createShipWakeTexture();
+  const wakeMat = new THREE.MeshBasicMaterial({
+    map: wakeTex,
+    transparent: true,
+    opacity: 0.82,
+    depthWrite: false,
+  });
+
+  // Churning stern wake streaming astern
+  const sternWake = new THREE.Mesh(
+    new THREE.PlaneGeometry(36, 120),
+    wakeMat
+  );
+  sternWake.rotation.x = -Math.PI / 2;
+  sternWake.position.set(0, 0.25, -145);
+  vessel.add(sternWake);
+
+  // Bow wave foam spray peeling from the bulbous bow
+  const bowWake = new THREE.Mesh(
+    new THREE.PlaneGeometry(42, 46),
+    wakeMat
+  );
+  bowWake.rotation.x = -Math.PI / 2;
+  bowWake.position.set(0, 0.25, 82);
+  vessel.add(bowWake);
+
   freezeStaticGroup(vessel);
 
   shipGroup.add(vessel);
@@ -279,4 +627,3 @@ export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
 
   return shipGroup;
 }
-

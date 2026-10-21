@@ -207,6 +207,8 @@ export function useHeroScene() {
     const postScene = new THREE.Scene();
     const postCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
+    const isDarkInit = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
+
     const graphiteShaderMat = new THREE.ShaderMaterial({
       uniforms: {
         tDiffuse: { value: sceneRenderTarget.texture },
@@ -214,6 +216,7 @@ export function useHeroScene() {
         uTime: { value: 0.0 },
         uEdgeWeight: { value: 1.0 },
         uShadeDensity: { value: 1.0 },
+        uDark: { value: isDarkInit ? 1.0 : 0.0 },
       },
       vertexShader: graphiteVertexShader,
       fragmentShader: graphiteFragmentShader,
@@ -422,7 +425,7 @@ export function useHeroScene() {
           4.9
         )
 
-        // STAGE 3: Showcasing the Container Ship on the ocean
+        // STAGE 3: Showcasing the Container Ship on the ocean (Elevated 3/4 perspective revealing full container stacks, bays, and lashing)
         .to(
           airplaneGroup.position,
           { x: -520, y: 330, z: -1050, ease: "none", duration: 3.2 },
@@ -430,12 +433,12 @@ export function useHeroScene() {
         )
         .to(
           camera.position,
-          { x: 68, y: 25, z: -60, ease: "power2.out", duration: 3.2 },
+          { x: 78, y: 46, z: -52, ease: "power2.out", duration: 3.2 },
           6.8
         )
         .to(
           camLookTarget,
-          { x: 0, y: 16, z: -140, ease: "power2.out", duration: 3.2 },
+          { x: -4, y: 17, z: -136, ease: "power2.out", duration: 3.2 },
           6.8
         )
 
@@ -451,15 +454,15 @@ export function useHeroScene() {
           10.0
         )
 
-        // STAGE 5: Seamless Glide onto the Boulevard into a Low-Angle Hero Shot
+        // STAGE 5: Seamless Glide onto the Boulevard into a Low-Angle Hero Shot (Showcasing Cab Face & Persian Container Branding)
         .to(
           camera.position,
-          { x: 155.2, y: 21.3, z: -144.8, ease: "power2.out", duration: 2.8 },
+          { x: 151.8, y: 21.9, z: -146.2, ease: "power2.out", duration: 2.8 },
           12.3
         )
         .to(
           camLookTarget,
-          { x: 168.4, y: 21.1, z: -165.5, ease: "power2.out", duration: 2.8 },
+          { x: 167.0, y: 21.5, z: -168.5, ease: "power2.out", duration: 2.8 },
           12.3
         );
     });
@@ -548,7 +551,13 @@ export function useHeroScene() {
       ScrollTrigger.refresh();
     };
 
+    const handleThemeChange = () => {
+      const isDark = document.documentElement.classList.contains("dark");
+      graphiteShaderMat.uniforms.uDark.value = isDark ? 1.0 : 0.0;
+    };
+
     window.addEventListener("resize", handleResize);
+    window.addEventListener("themechange", handleThemeChange);
     handleResize();
 
     const loadingTimeout1 = setTimeout(() => {
@@ -569,6 +578,7 @@ export function useHeroScene() {
       clearTimeout(loadingTimeout1);
       clearTimeout(refreshTimer);
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("themechange", handleThemeChange);
       cancelAnimationFrame(animationFrameId);
       gsapCtx.revert();
 

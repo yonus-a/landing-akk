@@ -74,7 +74,7 @@ export function Hero() {
     <section
       id="hero"
       ref={scrollWrapperRef}
-      className={`${styles.heroWrapper || ""} relative w-full bg-white select-none`}
+      className={`${styles.heroWrapper || ""} relative w-full bg-white dark:bg-zinc-950 select-none transition-colors duration-300`}
       style={{ height: "320vh" }}
       dir="rtl"
       lang="fa"
@@ -85,9 +85,9 @@ export function Hero() {
       <div
         ref={heroStageRef}
         onMouseMove={handleMouseMove}
-        className="sticky top-0 h-screen w-full flex items-center overflow-hidden bg-white z-10"
+        className="sticky top-0 h-screen w-full flex items-center overflow-hidden bg-white dark:bg-zinc-950 z-10 transition-colors duration-300"
       >
-        {/* 3D GRAPHITE ANIMATION LAYER: Positioned in the left/center visual field to clearly showcase Aircraft, Ship & Truck */}
+        {/* 3D GRAPHITE ANIMATION LAYER */}
         <div
           ref={canvasContainerRef}
           id="canvas-container"
@@ -123,7 +123,7 @@ export function Hero() {
             {/* Minimal Brand Badge (NO borders) */}
             <div
               ref={badgeRef}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-100/90 text-zinc-800 text-xs font-semibold tracking-wide shadow-2xs"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-100/90 dark:bg-zinc-900/90 border border-transparent dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 text-xs font-semibold tracking-wide shadow-2xs"
             >
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
               <span>گروه بازرگانی و لجستیک بین‌المللی آریان خودرو</span>
@@ -133,7 +133,7 @@ export function Hero() {
             {/* High-Contrast Bold Headline */}
             <h1
               ref={headlineRef}
-              className="text-3xl sm:text-4xl lg:text-[44px] font-black text-zinc-950 leading-[1.26] tracking-tight"
+              className="text-3xl sm:text-4xl lg:text-[44px] font-black text-zinc-950 dark:text-white leading-[1.26] tracking-tight"
             >
               تجارت بین‌الملل، ترخیص تخصصی و حمل سراسری کالا
             </h1>
@@ -141,7 +141,7 @@ export function Hero() {
             {/* Crisp & Legible Subtitle */}
             <p
               ref={subtitleRef}
-              className="text-sm sm:text-base text-zinc-600 leading-relaxed font-normal"
+              className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal"
             >
               مدیریت صفر تا صد زنجیره تأمین، واردات خودرو و قطعات یدکی، حوالجات ارزی و ترخیص سریع از کلیه گمرکات کشور با کمترین بهای تمام‌شده.
             </p>
@@ -150,7 +150,7 @@ export function Hero() {
             <div ref={ctaGroupRef} className="flex flex-wrap items-center gap-3 pt-2">
               <a
                 href="#estimator"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-zinc-950 hover:bg-zinc-800 text-white text-xs sm:text-sm font-bold shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-zinc-950 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-950 text-xs sm:text-sm font-bold shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
               >
                 <span>استعلام آنلاین هزینه</span>
                 <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
@@ -158,7 +158,7 @@ export function Hero() {
 
               <a
                 href="#services"
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-zinc-100 hover:bg-zinc-200/80 text-zinc-800 text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-zinc-100 hover:bg-zinc-200/80 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-transparent dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer"
               >
                 <span>مشاهده خدمات</span>
               </a>
@@ -167,20 +167,20 @@ export function Hero() {
             {/* Minimal Inline Key Stats (NO borders) */}
             <div
               ref={statsGroupRef}
-              className="flex items-center gap-5 pt-3 text-xs text-zinc-400 font-medium flex-wrap"
+              className="flex items-center gap-5 pt-3 text-xs text-zinc-400 dark:text-zinc-500 font-medium flex-wrap"
             >
               <div>
-                <span className="font-bold text-zinc-900 font-mono text-sm ml-1">+۱۵</span>
+                <span className="font-bold text-zinc-900 dark:text-white font-mono text-sm ml-1">+۱۵</span>
                 <span>سال سابقه</span>
               </div>
-              <span className="text-zinc-300">•</span>
+              <span className="text-zinc-300 dark:text-zinc-700">•</span>
               <div>
-                <span className="font-bold text-zinc-900 font-mono text-sm ml-1">+۸,۵۰۰</span>
+                <span className="font-bold text-zinc-900 dark:text-white font-mono text-sm ml-1">+۸,۵۰۰</span>
                 <span>کانتینر ترخیص‌شده</span>
               </div>
-              <span className="text-zinc-300">•</span>
+              <span className="text-zinc-300 dark:text-zinc-700">•</span>
               <div>
-                <span className="font-bold text-zinc-900 font-mono text-sm ml-1">۴</span>
+                <span className="font-bold text-zinc-900 dark:text-white font-mono text-sm ml-1">۴</span>
                 <span>دفتر فعال بین‌المللی</span>
               </div>
             </div>

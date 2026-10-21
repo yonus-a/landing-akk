@@ -96,30 +96,30 @@ export function GlobalHubsSection() {
   ];
 
   return (
-    <section id="hubs" className="relative w-full py-24 sm:py-32 bg-white" dir="rtl">
+    <section id="hubs" className="relative w-full py-24 sm:py-32 bg-white dark:bg-zinc-950 transition-colors duration-300" dir="rtl">
       <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3 pb-12 sm:pb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-100 text-xs font-mono text-zinc-600 shadow-2xs">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-transparent dark:border-zinc-800 text-xs font-mono text-zinc-600 dark:text-zinc-400 shadow-2xs">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
             <span>{"// 05 — GLOBAL NETWORK & CUSTOMS DEPLOYMENT"}</span>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-950 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-950 dark:text-white tracking-tight">
             دفاتر بین‌المللی و گمرکات تحت پوشش مستقیم
           </h2>
-          <p className="text-sm sm:text-base text-zinc-600 leading-relaxed font-normal">
+          <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
             استقرار شعب فعال در ۴ مرکز کلیدی تجارت جهانی در کنار کارگزاران رسمی و مقیم در ۶ گمرک تراز اول کشور.
           </p>
         </div>
 
-        {/* BLOCK 1: International Operating Hubs (NO borders) */}
+        {/* BLOCK 1: International Operating Hubs */}
         <div className="space-y-4 mb-16">
           <div className="flex items-center justify-between pb-3">
             <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-zinc-700" />
-              <h3 className="text-base sm:text-lg font-bold text-zinc-950">
+              <Building2 className="w-4 h-4 text-zinc-700 dark:text-amber-400" />
+              <h3 className="text-base sm:text-lg font-bold text-zinc-950 dark:text-white">
                 دفاتر عملیاتی و انبارهای لجستیکی خارجی
               </h3>
             </div>
@@ -132,31 +132,31 @@ export function GlobalHubsSection() {
             {internationalHubs.map((hub, idx) => (
               <div
                 key={idx}
-                className="bg-zinc-50/80 rounded-2xl p-6 hover:bg-zinc-100/90 transition-all duration-200 flex flex-col justify-between shadow-2xs hover:-translate-y-0.5"
+                className="bg-zinc-50/80 dark:bg-zinc-900/80 border border-transparent dark:border-zinc-800/80 rounded-2xl p-6 hover:bg-zinc-100/90 dark:hover:bg-zinc-800/90 transition-all duration-200 flex flex-col justify-between shadow-2xs hover:-translate-y-0.5"
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-zinc-200/80 text-zinc-700 font-bold">
+                    <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-zinc-200/80 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold">
                       {hub.type}
                     </span>
                     <MapPin className="w-4 h-4 text-zinc-400" />
                   </div>
 
-                  <h4 className="text-sm font-bold text-zinc-950 mb-1">
+                  <h4 className="text-sm font-bold text-zinc-950 dark:text-white mb-1">
                     {hub.city}
                   </h4>
-                  <div className="text-[11px] text-zinc-500 font-medium mb-3">
+                  <div className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium mb-3">
                     {hub.country}
                   </div>
 
-                  <p className="text-xs text-zinc-600 leading-relaxed font-normal mb-4">
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal mb-4">
                     {hub.role}
                   </p>
                 </div>
 
                 <div className="pt-3 space-y-1 font-mono text-[10px] text-zinc-400">
                   <div className="truncate">GPS: {hub.coords}</div>
-                  <div className="text-zinc-700 font-bold" dir="ltr">
+                  <div className="text-zinc-700 dark:text-zinc-300 font-bold" dir="ltr">
                     {hub.phone}
                   </div>
                 </div>
@@ -165,12 +165,12 @@ export function GlobalHubsSection() {
           </div>
         </div>
 
-        {/* BLOCK 2: Direct Customs Ports (NO borders) */}
+        {/* BLOCK 2: Direct Customs Ports */}
         <div className="space-y-4">
           <div className="flex items-center justify-between pb-3">
             <div className="flex items-center gap-2">
-              <Anchor className="w-4 h-4 text-zinc-700" />
-              <h3 className="text-base sm:text-lg font-bold text-zinc-950">
+              <Anchor className="w-4 h-4 text-zinc-700 dark:text-amber-400" />
+              <h3 className="text-base sm:text-lg font-bold text-zinc-950 dark:text-white">
                 گمرکات تخصصی تحت پوشش مستقیم با کارگزاران مقیم
               </h3>
             </div>
@@ -186,9 +186,9 @@ export function GlobalHubsSection() {
               return (
                 <div
                   key={idx}
-                  className="bg-zinc-50/80 rounded-2xl p-5 hover:bg-zinc-100/90 transition-all duration-200 flex items-start gap-3.5 shadow-2xs hover:-translate-y-0.5"
+                  className="bg-zinc-50/80 dark:bg-zinc-900/80 border border-transparent dark:border-zinc-800/80 rounded-2xl p-5 hover:bg-zinc-100/90 dark:hover:bg-zinc-800/90 transition-all duration-200 flex items-start gap-3.5 shadow-2xs hover:-translate-y-0.5"
                 >
-                  <div className="p-3 rounded-xl bg-white text-zinc-800 shrink-0 shadow-2xs">
+                  <div className="p-3 rounded-xl bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 shrink-0 shadow-2xs">
                     <Icon className="w-5 h-5" strokeWidth={1.5} />
                   </div>
 
@@ -197,16 +197,16 @@ export function GlobalHubsSection() {
                       <span className="text-[10px] font-mono text-zinc-400">
                         {customs.tag}
                       </span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-bold">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 border border-transparent dark:border-emerald-800/40 font-bold">
                         میانگین: {customs.time}
                       </span>
                     </div>
 
-                    <h4 className="text-xs sm:text-sm font-bold text-zinc-950">
+                    <h4 className="text-xs sm:text-sm font-bold text-zinc-950 dark:text-white">
                       {customs.name}
                     </h4>
 
-                    <p className="text-xs text-zinc-600 leading-relaxed font-normal">
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
                       {customs.specialty}
                     </p>
                   </div>

@@ -7,8 +7,11 @@
  *  3. Dynamic luminance-based 3-layer cross-hatching (45°, -45°, and deep shadow horizontal)
  *  4. Graphite powder smudge shading in mid-tones & shadows
  *  5. Authentic sketchbook paper texture (paper fiber noise)
- *  6. Seamless perimeter edge feathering to pure white (#ffffff) with NO visible border lines
- *  7. Dynamic pencil grade adjustment (HB / 2B / 6B) via uEdgeWeight & uShadeDensity
+ *  6. Seamless perimeter edge feathering to pure white (#ffffff) or obsidian (#09090b)
+ *  7. Dual-Engine Light/Dark Mode:
+ *     - Light Mode: Classic graphite pencil sketch on pure white archival paper
+ *     - Dark Mode: Technical architectural blueprint with luminous platinum chalk lines
+ *       and soft titanium-slate cross-hatching on deep obsidian paper
  */
 
 export const graphiteVertexShader = /* glsl */ `
@@ -25,6 +28,7 @@ export const graphiteFragmentShader = /* glsl */ `
   uniform float     uTime;
   uniform float     uEdgeWeight;
   uniform float     uShadeDensity;
+  uniform float     uDark;
   varying vec2      vUv;
 
   /* ── Procedural Hash & Noise ──────────────────────────────── */
@@ -120,27 +124,42 @@ export const graphiteFragmentShader = /* glsl */ `
     // Soft graphite powder smudge
     float smudge = (1.0 - luma) * (0.32 + 0.28 * leadGrain);
 
-    // 4. Sketchbook paper fiber & tone (calibrated for pure white #ffffff blending)
-    vec3 paperColor  = vec3(1.0, 1.0, 1.0);
-    vec3 graphiteInk = vec3(0.12, 0.115, 0.11);
-
-    // Total graphite darkness accumulated
-    float totalGraphite = clamp(
+    // ── 4A. LIGHT MODE SKETCHBOOK COMPOSITION ──────────────────
+    float totalLightGraphite = clamp(
       smudge + hatch1 + hatch2 + hatch3 + pencilOutline * 0.92,
       0.0, 0.96
     );
+    vec3 lightPaper = vec3(1.0, 1.0, 1.0);
+    vec3 lightInk   = vec3(0.12, 0.115, 0.11);
+    vec3 lightResult = mix(lightPaper, lightInk, totalLightGraphite);
 
-    vec3 finalSketch = mix(paperColor, graphiteInk, totalGraphite);
+    // ── 4B. DARK MODE ARCHITECTURAL BLUEPRINT COMPOSITION ──────
+    // Base paper: Deep obsidian matching zinc-950 #09090b
+    vec3 darkPaper  = vec3(0.035, 0.035, 0.045);
+    // Soft titanium-slate pencil for hatching & shading (preserves ALL details without blinding glare)
+    vec3 shadeChalk = vec3(0.22, 0.25, 0.30);
+    // Brilliant platinum chalk for crisp edge contours (ship railings, container ridges, truck cabin, wheels)
+    vec3 lineChalk  = vec3(0.90, 0.92, 0.96);
 
-    // 5. Seamless edge feather to pure white (#ffffff)
-    // Ensures NO visible borders whatsoever — blends 100% invisibly into white backgrounds
+    float shadeFactor = clamp(smudge + hatch1 + hatch2 + hatch3, 0.0, 0.85);
+
+    // Clean highlight for bright white container, rims, wave crests
+    float whiteHighlight = smoothstep(0.85, 0.99, mc) * 0.30;
+
+    vec3 darkResult = mix(darkPaper, shadeChalk, shadeFactor);
+    darkResult += vec3(whiteHighlight);
+    darkResult = mix(darkResult, lineChalk, pencilOutline);
+
+    // ── 5. SEAMLESS THEME BLEND & PERIMETER FEATHERING ─────────
+    vec3 finalSketch = mix(lightResult, darkResult, uDark);
+
+    vec3 edgePaper = mix(lightPaper, darkPaper, uDark);
     float edgeX = smoothstep(0.0, 0.12, vUv.x) * smoothstep(0.0, 0.12, 1.0 - vUv.x);
     float edgeY = smoothstep(0.0, 0.12, vUv.y) * smoothstep(0.0, 0.12, 1.0 - vUv.y);
     float edgeFade = edgeX * edgeY;
 
-    finalSketch = mix(vec3(1.0, 1.0, 1.0), finalSketch, edgeFade);
+    finalSketch = mix(edgePaper, finalSketch, edgeFade);
 
     gl_FragColor = vec4(finalSketch, 1.0);
   }
 `;
-
