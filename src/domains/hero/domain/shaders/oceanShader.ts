@@ -116,7 +116,8 @@ export function createOceanMaterial(): THREE.ShaderMaterial {
           float fogFactor = clamp(1.0 - exp(-vDist * 0.00045), 0.0, 0.92);
           color = mix(color, uHorizonColor, fogFactor);
 
-          gl_FragColor = vec4(color, 1.0);
+          // Alpha marks ocean pixels for the graphite post-pass (0 = ocean, fading out with distance fog)
+          gl_FragColor = vec4(color, fogFactor);
       }
     `,
   });

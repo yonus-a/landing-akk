@@ -3,7 +3,7 @@
 .heroWrapper {
   font-family: 'Vazirmatn', sans-serif;
   background-color: #ffffff;
-  color: #18181b;
+  color: #1e295a;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   position: relative;
@@ -74,8 +74,8 @@
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid rgba(24, 24, 27, 0.15);
-  border-top-color: #18181b;
+  border: 3px solid rgba(30, 41, 90, 0.15);
+  border-top-color: #2a5ae0;
   border-radius: 50%;
   animation: spin 0.9s linear infinite;
 }

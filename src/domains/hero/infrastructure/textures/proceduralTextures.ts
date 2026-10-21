@@ -150,7 +150,7 @@ export function createHeroContainerTexture(): THREE.CanvasTexture {
   });
   ctx.restore();
 
-  // Main Persian Headline: "آریان خودرو خاورمیانه" in 100% PURE WHITE (#FFFFFF / #FFF)
+  // Main Persian Headline: "جهان‌گستر" in 100% PURE WHITE (#FFFFFF / #FFF)
   ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -158,14 +158,14 @@ export function createHeroContainerTexture(): THREE.CanvasTexture {
   ctx.shadowColor = "transparent";
   ctx.shadowBlur = 0;
   ctx.fillStyle = "#ffffff"; // Pure White Font #FFF
-  ctx.fillText("آریان خودرو خاورمیانه", 1024, 150);
+  ctx.fillText("جهان‌گستر", 1024, 150);
   ctx.restore();
 
   // Fine Pure White Micro-Rule under headline
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(700, 198, 648, 3.5);
 
-  // English Subtitle: "ARYAN KHODRO KHAVAR-MIYANEH" in 100% Pure White (#FFFFFF / #FFF)
+  // English Subtitle: "JAHAN-GOSTAR" in 100% Pure White (#FFFFFF / #FFF)
   ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -173,7 +173,7 @@ export function createHeroContainerTexture(): THREE.CanvasTexture {
   ctx.shadowColor = "transparent";
   ctx.shadowBlur = 0;
   ctx.fillStyle = "#ffffff";
-  ctx.fillText("ARYAN KHODRO KHAVAR-MIYANEH", 1024, 238);
+  ctx.fillText("JAHAN-GOSTAR", 1024, 238);
   ctx.restore();
 
   // Operational Subtitle in 100% Pure White (#FFFFFF / #FFF)
@@ -371,11 +371,11 @@ export function createShipContainerTexture(): THREE.CanvasTexture {
   // 2. High-contrast vertical corrugation flutes (trapezoidal shadow/highlight ribs)
   // 36 rhythmic flutes across the container side
   for (let x = 36; x < 988; x += 26) {
-    // Deep graphite shadow flute
-    ctx.fillStyle = "#090d16";
+    // Soft shadow flute
+    ctx.fillStyle = "#8a93a3";
     ctx.fillRect(x, 24, 7, 464);
     // Midtone transition
-    ctx.fillStyle = "#475569";
+    ctx.fillStyle = "#c4cad5";
     ctx.fillRect(x + 7, 24, 5, 464);
     // Face plate
     ctx.fillStyle = "#f8fafc";
@@ -386,7 +386,7 @@ export function createShipContainerTexture(): THREE.CanvasTexture {
   }
 
   // 3. Heavy steel perimeter frame (corner posts, top/bottom rails)
-  ctx.fillStyle = "#090d16";
+  ctx.fillStyle = "#5a6272";
   ctx.fillRect(0, 0, 1024, 24); // Top rail
   ctx.fillRect(0, 488, 1024, 24); // Bottom rail
   ctx.fillRect(0, 0, 32, 512); // Left corner post
@@ -405,7 +405,7 @@ export function createShipContainerTexture(): THREE.CanvasTexture {
     { x: 978, y: 468 },
   ];
   corners.forEach(({ x, y }) => {
-    ctx.fillStyle = "#020617";
+    ctx.fillStyle = "#3a4152";
     ctx.fillRect(x, y, 42, 40);
     // Silver contour rim
     ctx.strokeStyle = "#ffffff";
@@ -428,7 +428,7 @@ export function createShipContainerTexture(): THREE.CanvasTexture {
 
   // 6. Stenciled Shipping Line Markings (high-contrast black/white)
   // Branding plaque in upper-center
-  ctx.fillStyle = "#090d16";
+  ctx.fillStyle = "#2b3550";
   ctx.fillRect(340, 40, 344, 76);
   ctx.strokeStyle = "#ffffff";
   ctx.lineWidth = 2;
@@ -437,10 +437,10 @@ export function createShipContainerTexture(): THREE.CanvasTexture {
   ctx.fillStyle = "#ffffff";
   ctx.font = "900 36px monospace";
   ctx.textAlign = "center";
-  ctx.fillText("ARIAN 45G1", 512, 88);
+  ctx.fillText("JAHAN 45G1", 512, 88);
 
   // Container specifications in upper right
-  ctx.fillStyle = "#090d16";
+  ctx.fillStyle = "#2b3550";
   ctx.fillRect(720, 40, 250, 150);
   ctx.strokeStyle = "#ffffff";
   ctx.lineWidth = 1.5;
@@ -489,15 +489,15 @@ export function createShipHullDecalTexture(): THREE.CanvasTexture {
   c.height = 128;
   const ctx = c.getContext("2d")!;
 
-  // Deep Navy background matching ship hull
-  ctx.fillStyle = "#0f294a";
+  // Navy background matching ship hull
+  ctx.fillStyle = "#3b5b8f";
   ctx.fillRect(0, 0, 1024, 128);
 
   // Architectural crisp white company name
   ctx.fillStyle = "#ffffff";
   ctx.font = "900 50px sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("ARIAN KHODRO", 512, 60);
+  ctx.fillText("JAHAN-GOSTAR", 512, 60);
 
   // Subtitle
   ctx.font = "bold 16px monospace";
@@ -569,6 +569,75 @@ export function createShipWakeTexture(): THREE.CanvasTexture {
 
   const tex = new THREE.CanvasTexture(c);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}
+
+/**
+ * Neutral building facade (white-based so the material color tints the wall):
+ * floor slabs, framed glazing with mullions, sills and a roof parapet band.
+ * One texture tile = 4 storeys; repeat vertically per building height.
+ */
+export function createBuildingFacadeTexture(): THREE.CanvasTexture {
+  const c = document.createElement("canvas");
+  c.width = 512;
+  c.height = 512;
+  const ctx = c.getContext("2d")!;
+
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, 512, 512);
+
+  // Subtle plaster grain
+  for (let i = 0; i < 1800; i++) {
+    const shade = 228 + Math.floor(Math.random() * 22);
+    ctx.fillStyle = `rgba(${shade}, ${shade}, ${shade}, 0.5)`;
+    ctx.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);
+  }
+
+  const floors = 4;
+  const floorH = 512 / floors;
+  const cols = 5;
+  const bayW = 512 / cols;
+
+  for (let f = 0; f < floors; f++) {
+    const y0 = f * floorH;
+
+    // Floor slab band
+    ctx.fillStyle = "#d9dbe0";
+    ctx.fillRect(0, y0 + floorH - 10, 512, 10);
+
+    for (let b = 0; b < cols; b++) {
+      const wx = b * bayW + 16;
+      const wy = y0 + 22;
+      const ww = bayW - 32;
+      const wh = floorH - 52;
+
+      // Window reveal / frame
+      ctx.fillStyle = "#9aa3b2";
+      ctx.fillRect(wx - 4, wy - 4, ww + 8, wh + 8);
+
+      // Sky-reflecting glass
+      const glass = ctx.createLinearGradient(wx, wy, wx + ww, wy + wh);
+      glass.addColorStop(0, "#9fb6d3");
+      glass.addColorStop(0.55, "#6f87a8");
+      glass.addColorStop(1, "#8aa2c2");
+      ctx.fillStyle = glass;
+      ctx.fillRect(wx, wy, ww, wh);
+
+      // Mullion and transom
+      ctx.fillStyle = "#e9ecf1";
+      ctx.fillRect(wx + ww / 2 - 2, wy, 4, wh);
+      ctx.fillRect(wx, wy + wh * 0.32, ww, 3);
+
+      // Sill
+      ctx.fillStyle = "#f4f5f7";
+      ctx.fillRect(wx - 7, wy + wh + 4, ww + 14, 5);
+    }
+  }
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.anisotropy = 8;
   return tex;
 }
 

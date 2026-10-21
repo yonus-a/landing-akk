@@ -38,8 +38,8 @@ export function Navbar() {
       <div
         className={`pointer-events-auto w-full max-w-[1140px] rounded-2xl sm:rounded-full px-4 sm:px-7 py-2.5 sm:py-3 flex items-center justify-between transition-all duration-300 ${
           isScrolled
-            ? "bg-white/80 dark:bg-zinc-900/85 backdrop-blur-2xl shadow-[0_16px_40px_rgba(0,0,0,0.08),0_2px_6px_rgba(0,0,0,0.03)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.4)] border border-zinc-200/50 dark:border-zinc-800/80 scale-[0.99]"
-            : "bg-white/65 dark:bg-zinc-900/70 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.05),0_1px_3px_rgba(0,0,0,0.02)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.3)] border border-zinc-200/30 dark:border-zinc-800/50"
+            ? "bg-white/80 dark:bg-zinc-900/85 backdrop-blur-2xl shadow-[0_16px_40px_rgba(15,21,48,0.08),0_2px_6px_rgba(15,21,48,0.03)] dark:shadow-[0_16px_40px_rgba(15,21,48,0.4)] border border-zinc-200/50 dark:border-zinc-800/80 scale-[0.99]"
+            : "bg-white/65 dark:bg-zinc-900/70 backdrop-blur-xl shadow-[0_10px_30px_rgba(15,21,48,0.05),0_1px_3px_rgba(15,21,48,0.02)] dark:shadow-[0_10px_30px_rgba(15,21,48,0.3)] border border-zinc-200/30 dark:border-zinc-800/50"
         }`}
       >
         {/* Right: Minimal Brand Identity */}
@@ -49,10 +49,10 @@ export function Navbar() {
           </div>
           <div className="flex flex-col">
             <span className="text-sm sm:text-base font-black text-zinc-950 dark:text-white tracking-tight leading-snug">
-              بازرگانی آریان خودرو
+              بازرگانی جهان‌گستر
             </span>
             <span className="text-[10px] text-zinc-400 dark:text-zinc-400 font-medium hidden sm:inline leading-none">
-              تجارت بین‌الملل و ترخیص تخصصی
+              تجارت بین‌الملل و لجستیک
             </span>
           </div>
         </a>
@@ -118,7 +118,7 @@ export function Navbar() {
 
       {/* Floating Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="pointer-events-auto fixed top-18 sm:top-20 inset-x-4 max-w-[400px] mx-auto rounded-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-zinc-200/50 dark:border-zinc-800/80 space-y-4 animate-in fade-in slide-in-from-top-3 duration-200">
+        <div className="pointer-events-auto fixed top-18 sm:top-20 inset-x-4 max-w-[400px] mx-auto rounded-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl p-5 shadow-[0_20px_50px_rgba(15,21,48,0.12)] dark:shadow-[0_20px_50px_rgba(15,21,48,0.5)] border border-zinc-200/50 dark:border-zinc-800/80 space-y-4 animate-in fade-in slide-in-from-top-3 duration-200">
           <div className="flex flex-col space-y-1">
             {navLinks.map((link) => (
               <a

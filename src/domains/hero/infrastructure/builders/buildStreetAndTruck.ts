@@ -5,6 +5,7 @@ import {
   createTruckGroundShadowTexture,
   createHeroContainerFrontTexture,
   createHeroContainerRoofTexture,
+  createBuildingFacadeTexture,
 } from "../textures/proceduralTextures";
 
 /**
@@ -303,7 +304,19 @@ export function buildStaticStreetAndRealisticTruck(
   streetWorldGroup.add(createPortCrane(-52));
   streetWorldGroup.add(createPortCrane(-125));
 
-  const buildingColors = [0x334155, 0x1e293b, 0x475569, 0x0f172a];
+  // Sandstone, cream stucco, terracotta and pale slate-blue facades
+  const buildingColors = [0xd8c7a8, 0xe4ddd0, 0xc39a7c, 0xa9b6c9];
+  const facadeTex = createBuildingFacadeTexture();
+  const roofMat = new THREE.MeshStandardMaterial({
+    color: 0xb9bec7,
+    roughness: 0.9,
+    metalness: 0.0,
+  });
+  const parapetMat = new THREE.MeshStandardMaterial({
+    color: 0xeef0f3,
+    roughness: 0.7,
+    metalness: 0.0,
+  });
   for (let i = -5; i <= 5; i++) {
     const z = i * 36;
     const pole = new THREE.Mesh(
@@ -329,16 +342,36 @@ export function buildStaticStreetAndRealisticTruck(
     streetWorldGroup.add(lampHead);
 
     const bH = 22 + (Math.abs(i * 7) % 24);
+    const bTex = facadeTex.clone();
+    bTex.repeat.set(2, bH / 14);
+    bTex.needsUpdate = true;
     const bMat = new THREE.MeshStandardMaterial({
       color: buildingColors[Math.abs(i) % buildingColors.length],
-      roughness: 0.5,
-      metalness: 0.3,
+      map: bTex,
+      roughness: 0.85,
+      metalness: 0.0,
     });
-    const bldg = new THREE.Mesh(new THREE.BoxGeometry(24, bH, 28), bMat);
+    // BoxGeometry face order: +x, -x, +y (roof), -y, +z, -z
+    const bldg = new THREE.Mesh(new THREE.BoxGeometry(24, bH, 28), [
+      bMat,
+      bMat,
+      roofMat,
+      roofMat,
+      bMat,
+      bMat,
+    ]);
     bldg.position.set(42, bH * 0.5, z);
     bldg.castShadow = true;
     bldg.receiveShadow = true;
     streetWorldGroup.add(bldg);
+
+    const parapet = new THREE.Mesh(
+      new THREE.BoxGeometry(24.6, 1.2, 28.6),
+      parapetMat
+    );
+    parapet.position.set(42, bH + 0.6, z);
+    parapet.castShadow = true;
+    streetWorldGroup.add(parapet);
   }
 
   // ============================================================================
@@ -515,8 +548,8 @@ export function buildStaticStreetAndRealisticTruck(
 
   // Pure White Branding Textures (toneMapped: false guarantees #FFFFFF stays pure white)
   const containerBrandTex = createPureWhiteBrandingTexture(
-    "آریان خودرو خاورمیانه",
-    "ARYAN KHODRO KHAVAR-MIYANEH  •  HEAVY LOGISTICS",
+    "جهان‌گستر",
+    "JAHAN-GOSTAR  •  INTERNATIONAL TRADE & LOGISTICS",
     false
   );
   const containerBrandMat = new THREE.MeshBasicMaterial({
@@ -526,7 +559,7 @@ export function buildStaticStreetAndRealisticTruck(
   });
 
   const roofSignBrandTex = createPureWhiteBrandingTexture(
-    "آریان خودرو خاورمیانه",
+    "جهان‌گستر",
     "",
     true
   );

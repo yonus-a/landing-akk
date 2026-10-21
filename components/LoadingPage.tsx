@@ -18,6 +18,7 @@ export function LoadingPage({ orbState = "searching" }: LoadingPageProps) {
         state={orbState}
         size={64}
         theme="auto"
+        color="#2a5ae0"
         aria-label="در حال بارگذاری..."
       />
     </div>

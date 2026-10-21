@@ -85,6 +85,10 @@ const LOGISTICS_MODES: Record<1 | 2 | 3, LogisticsModeContent> = {
   },
 };
 
+// Right-to-left brand gradient: navy → brand blue → ocean blue (lightened variant for dark mode)
+const HEADING_GRADIENT =
+  "bg-linear-to-l from-brand via-brand-accent to-[#2b9bd6] dark:from-white dark:via-[#b9cbff] dark:to-[#6fa8ff] bg-clip-text text-transparent";
+
 export function Hero() {
   const {
     canvasContainerRef,
@@ -227,7 +231,7 @@ export function Hero() {
         <div
           className="absolute inset-0 pointer-events-none transition-opacity duration-700 z-1"
           style={{
-            background: `radial-gradient(850px circle at ${mousePos.x}% ${mousePos.y}%, rgba(244, 244, 245, 0.4), transparent 75%)`,
+            background: `radial-gradient(850px circle at ${mousePos.x}% ${mousePos.y}%, rgba(236, 239, 248, 0.4), transparent 75%)`,
           }}
         />
 
@@ -251,12 +255,20 @@ export function Hero() {
               />
             </div>
 
-            {/* Dynamic High-Contrast Bold Headline */}
+            {/* Company Identity */}
+            <p className="text-sm sm:text-base lg:text-lg font-black tracking-tight leading-none">
+              <span className={HEADING_GRADIENT}>{"جهان\u200Cگستر"}</span>
+              <span className="text-zinc-400 dark:text-zinc-500 font-medium text-xs sm:text-sm lg:text-base mr-2">
+                تجارت بین‌الملل و لجستیک
+              </span>
+            </p>
+
+            {/* Dynamic Gradient Headline */}
             <h1
               ref={headlineRef}
-              className="text-xl sm:text-2xl md:text-3xl lg:text-[42px] font-black text-zinc-950 dark:text-white leading-tight lg:leading-[1.26] tracking-tight min-h-[48px] sm:min-h-[68px] lg:min-h-[106px] flex items-center"
+              className="text-xl sm:text-2xl md:text-3xl lg:text-[42px] font-black leading-tight lg:leading-[1.26] tracking-tight min-h-[48px] sm:min-h-[68px] lg:min-h-[106px] flex items-center"
             >
-              {currentMode.headline}
+              <span className={HEADING_GRADIENT}>{currentMode.headline}</span>
             </h1>
 
             {/* Dynamic Crisp & Legible Subtitle */}

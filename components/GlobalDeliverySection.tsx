@@ -129,8 +129,12 @@ export function GlobalDeliverySection() {
             float gy = -tl - 2.0 * tm - tr + bl + 2.0 * bm + br;
             float edgeGrad = sqrt(gx * gx + gy * gy);
 
-            if (mc > 0.990 && edgeGrad < 0.015) {
-                vec3 bgPure = mix(vec3(1.0, 1.0, 1.0), vec3(0.035, 0.035, 0.045), uDark);
+            // The globe shader writes low alpha on ocean pixels; only those get brand-colored ink
+            vec4 centerSample = texture2D(tDiffuse, vUv);
+            float oceanMask = 1.0 - centerSample.a;
+
+            if (mc > 0.990 && edgeGrad < 0.015 && oceanMask < 0.5) {
+                vec3 bgPure = mix(vec3(1.0, 1.0, 1.0), vec3(0.118, 0.161, 0.353), uDark);
                 gl_FragColor = vec4(bgPure, 1.0);
                 return;
             }
@@ -165,18 +169,40 @@ export function GlobalDeliverySection() {
 
             float smudge = (1.0 - luma) * (0.24 + 0.22 * leadGrain);
 
-            // Light Mode: Authentic graphite sketchbook on pure white
-            float totalLightGraphite = clamp(smudge + hatch1 + hatch2 + hatch3 + pencilOutline * 0.96, 0.0, 0.96);
-            vec3 lightResult = mix(vec3(1.0, 1.0, 1.0), vec3(0.10, 0.10, 0.11), totalLightGraphite);
+            vec3 brandNavy   = vec3(0.118, 0.161, 0.353);
+            vec3 brandAccent = vec3(0.165, 0.353, 0.878);
 
-            // Dark Mode: Technical blueprint on obsidian with titanium shading and platinum lines
-            vec3 darkPaper  = vec3(0.035, 0.035, 0.045);
-            vec3 shadeChalk = vec3(0.24, 0.27, 0.33);
-            vec3 lineChalk  = vec3(0.90, 0.92, 0.96);
+            // Watercolor wash: the scene's real colors, partially desaturated, with shadows leaning toward brand navy
+            float centerLuma = dot(centerSample.rgb, vec3(0.299, 0.587, 0.114));
+            vec3 muted = mix(vec3(centerLuma), centerSample.rgb, 0.65);
+            muted = mix(muted, brandNavy, (1.0 - centerLuma) * 0.18);
+
+            // Light Mode: graphite sketchbook over a soft color wash
+            float totalLightGraphite = clamp(smudge + hatch1 + hatch2 + hatch3 + pencilOutline * 0.96, 0.0, 0.96);
+            vec3 washPaper = mix(vec3(1.0, 1.0, 1.0), muted, 0.45);
+            vec3 lightInk  = mix(vec3(0.10, 0.10, 0.11), muted * 0.6, 0.35);
+            vec3 lightGraphite = mix(washPaper, lightInk, totalLightGraphite);
+
+            // Ocean: brand accent #2a5ae0 hatching and brand navy #1e295a contours over a real-water wash
+            float oceanShade = clamp(smudge + hatch1 + hatch2 + hatch3, 0.0, 0.96);
+            vec3 oceanWash = mix(brandAccent, muted, 0.35);
+            vec3 lightOcean = mix(vec3(1.0, 1.0, 1.0), oceanWash, 0.18 + oceanShade * 0.7);
+            lightOcean = mix(lightOcean, brandNavy, clamp(pencilOutline * 0.96 + oceanShade * 0.35, 0.0, 0.96));
+
+            vec3 lightResult = mix(lightGraphite, lightOcean, oceanMask);
+
+            // Dark Mode: Technical blueprint on brand navy with color-tinted titanium shading and platinum lines
+            vec3 darkPaper  = brandNavy;
+            vec3 shadeChalk = mix(vec3(0.24, 0.27, 0.33), muted, 0.45);
+            shadeChalk = mix(shadeChalk, brandAccent, oceanMask);
+            vec3 lineChalk  = mix(vec3(0.90, 0.92, 0.96), vec3(0.80, 0.87, 1.0), oceanMask);
 
             float shadeFactor = clamp(smudge + hatch1 + hatch2 + hatch3, 0.0, 0.85);
 
-            vec3 darkResult = mix(darkPaper, shadeChalk, shadeFactor);
+            float backdropFade = smoothstep(0.995, 0.96, centerLuma);
+            vec3 darkResult = mix(darkPaper, muted, 0.30 * (1.0 - oceanMask) * backdropFade);
+            darkResult = mix(darkResult, brandAccent, oceanMask * 0.12);
+            darkResult = mix(darkResult, shadeChalk, shadeFactor);
             darkResult = mix(darkResult, lineChalk, pencilOutline);
 
             vec3 finalColor = mix(lightResult, darkResult, uDark);
@@ -609,6 +635,12 @@ export function GlobalDeliverySection() {
 
             vec3 sampleP = vPosObj * 18.0;
             float hCenter = fbm(sampleP);
+
+            // Earthy land tones: arid sand blending into muted vegetation
+            vec3 sandTint = vec3(1.16, 1.04, 0.80);
+            vec3 sageTint = vec3(0.94, 1.08, 0.86);
+            vec3 landTint = mix(sandTint, sageTint, smoothstep(0.38, 0.62, hCenter));
+            texCol = mix(texCol, texCol * landTint, isLand);
             float hX = fbm(sampleP + vec3(0.03, 0.0, 0.0));
             float hY = fbm(sampleP + vec3(0.0, 0.03, 0.0));
 
@@ -631,7 +663,9 @@ export function GlobalDeliverySection() {
             vec3 col = texCol * shading * topoDetail + vec3(spec) - vec3(innerAtmos);
             col = mix(vec3(0.06), col, rimOutline);
 
-            gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
+            // Alpha marks ocean pixels for the graphite post-pass (0 = ocean)
+            float oceanFlag = (1.0 - isLand) * rimOutline;
+            gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0 - oceanFlag);
         }
       `,
     });
@@ -844,19 +878,19 @@ export function GlobalDeliverySection() {
       roughness: 0.65,
     });
     const suitDarkMat = new THREE.MeshStandardMaterial({
-      color: 0x27272a,
+      color: 0x1f2748,
       roughness: 0.55,
     });
     const charcoalMat = new THREE.MeshStandardMaterial({
-      color: 0x3f3f46,
+      color: 0x4a4034,
       roughness: 0.55,
     });
     const jacketMidMat = new THREE.MeshStandardMaterial({
-      color: 0x52525b,
+      color: 0x4b5670,
       roughness: 0.5,
     });
     const vestSlateMat = new THREE.MeshStandardMaterial({
-      color: 0x71717a,
+      color: 0x857057,
       roughness: 0.48,
     });
     const trouserMidMat = new THREE.MeshStandardMaterial({
@@ -864,7 +898,7 @@ export function GlobalDeliverySection() {
       roughness: 0.52,
     });
     const skinSketchMat = new THREE.MeshStandardMaterial({
-      color: 0xe4e4e7,
+      color: 0xf0d5bf,
       roughness: 0.58,
     });
     const shirtLightMat = new THREE.MeshStandardMaterial({
@@ -1487,7 +1521,7 @@ export function GlobalDeliverySection() {
       const bCtx = boxC.getContext("2d")!;
 
       // بافت مقوایی روشن با کادرهای استاندارد حمل‌ونقل
-      bCtx.fillStyle = "#d4d4d8";
+      bCtx.fillStyle = "#e2cfae";
       bCtx.fillRect(0, 0, 512, 512);
       bCtx.strokeStyle = "#18181b";
       bCtx.lineWidth = 10;
@@ -1868,7 +1902,7 @@ export function GlobalDeliverySection() {
       {/* Structured Content Container matching site design system */}
       <div className="relative z-10 w-full max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-8 pointer-events-none">
         {/* Right Column: Text Content with exact site typography hierarchy */}
-        <div className="max-w-xl pointer-events-auto space-y-4 bg-white/85 dark:bg-zinc-900/85 backdrop-blur-md p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] border border-zinc-100/80 dark:border-zinc-800/80">
+        <div className="max-w-xl pointer-events-auto space-y-4 bg-white/85 dark:bg-zinc-900/85 backdrop-blur-md p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgba(15,21,48,0.03)] dark:shadow-[0_8px_30px_rgba(15,21,48,0.4)] border border-zinc-100/80 dark:border-zinc-800/80">
         
 
           {/* Main Title matching Services & Workflow sections */}

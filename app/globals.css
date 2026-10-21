@@ -5,13 +5,33 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  --brand: #1e295a;
+  --brand-accent: #2a5ae0;
   --background: #ffffff;
-  --foreground: #18181b;
+  --foreground: #1e295a;
 }
 
 .dark {
-  --background: #09090b;
-  --foreground: #f4f4f5;
+  --background: #1e295a;
+  --foreground: #eceff8;
+}
+
+/* Brand-tinted neutral scale: every `zinc-*` utility resolves to navy shades of #1e295a. */
+@theme {
+  --color-zinc-50: #f5f7fc;
+  --color-zinc-100: #eceff8;
+  --color-zinc-200: #dbe0f0;
+  --color-zinc-300: #bfc7e2;
+  --color-zinc-400: #8f9bc6;
+  --color-zinc-500: #67739f;
+  --color-zinc-600: #4d5989;
+  --color-zinc-700: #3b4779;
+  --color-zinc-800: #2f3b6d;
+  --color-zinc-900: #263264;
+  --color-zinc-950: #1e295a;
+
+  --color-brand: #1e295a;
+  --color-brand-accent: #2a5ae0;
 }
 
 @theme inline {
@@ -51,8 +71,8 @@ html.lenis body {
 }
 
 html.dark {
-  background-color: #09090b;
-  color: #f4f4f5;
+  background-color: var(--background);
+  color: var(--foreground);
   color-scheme: dark;
 }
 
@@ -73,17 +93,17 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #e4e4e7;
+  background: #dbe0f0;
   border-radius: 999px;
 }
 .dark ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: #3b4779;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #d4d4d8;
+  background: #bfc7e2;
 }
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: #4d5989;
 }
 
 /* WebGL Canvas */

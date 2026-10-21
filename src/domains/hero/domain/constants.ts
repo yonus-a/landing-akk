@@ -40,11 +40,11 @@ export const PALETTE_CONTAINERS = [
   new THREE.Color(0xf8fafc), // Stark White Reefer Container (High-contrast luma)
   new THREE.Color(0x0284c7), // Maersk / Ocean Sky Blue
   new THREE.Color(0xd97706), // MSC Warm Industrial Amber
-  new THREE.Color(0x0f172a), // Deep Slate Navy / Charcoal
+  new THREE.Color(0x3b5b8f), // Brand-harmonized Navy Blue
   new THREE.Color(0xffffff), // Pure White High-Cube Reefer
   new THREE.Color(0xc2410c), // Hapag-Lloyd Rust Orange
   new THREE.Color(0x047857), // Evergreen Forest Emerald
   new THREE.Color(0xb91c1c), // Maritime Crimson Red
   new THREE.Color(0xfacc15), // Safety Marine Yellow
-  new THREE.Color(0x334155), // Industrial Graphite Steel
+  new THREE.Color(0x7d8696), // Industrial Steel Grey
 ];

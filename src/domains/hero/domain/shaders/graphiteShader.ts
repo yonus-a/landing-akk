@@ -7,11 +7,13 @@
  *  3. Dynamic luminance-based 3-layer cross-hatching (45°, -45°, and deep shadow horizontal)
  *  4. Graphite powder smudge shading in mid-tones & shadows
  *  5. Authentic sketchbook paper texture (paper fiber noise)
- *  6. Seamless perimeter edge feathering to pure white (#ffffff) or obsidian (#09090b)
+ *  6. Seamless perimeter edge feathering to pure white (#ffffff) or brand navy (#1e295a)
  *  7. Dual-Engine Light/Dark Mode:
  *     - Light Mode: Classic graphite pencil sketch on pure white archival paper
  *     - Dark Mode: Technical architectural blueprint with luminous platinum chalk lines
- *       and soft titanium-slate cross-hatching on deep obsidian paper
+ *       and soft titanium-slate cross-hatching on brand-navy paper
+ *  8. Muted watercolor wash of the scene's real colors beneath the pencil work
+ *  9. Ocean pixels (flagged via render-target alpha) are inked in the brand colors
  */
 
 export const graphiteVertexShader = /* glsl */ `
@@ -126,36 +128,62 @@ export const graphiteFragmentShader = /* glsl */ `
 
     // ── 4A. LIGHT MODE SKETCHBOOK COMPOSITION ──────────────────
     // Sample un-jittered center pixel from tDiffuse to protect branding text & specular highlights (#ffffff)
-    vec3 centerCol = texture2D(tDiffuse, vUv).rgb;
+    vec4 centerSample = texture2D(tDiffuse, vUv);
+    vec3 centerCol = centerSample.rgb;
     float centerLuma = dot(centerCol, vec3(0.299, 0.587, 0.114));
     float whiteMask = smoothstep(0.65, 0.88, centerLuma);
     float lightOutline = pencilOutline * (1.0 - whiteMask);
 
+    // The ocean shader writes low alpha; only those pixels get brand-colored ink
+    float oceanMask = 1.0 - centerSample.a;
+
     float totalLightGraphite = clamp(
       smudge + hatch1 + hatch2 + hatch3 + lightOutline * 0.92,
-      0.0, 0.96
+      0.0, 0.86
     );
     totalLightGraphite *= (1.0 - whiteMask);
 
+    vec3 brandNavy   = vec3(0.118, 0.161, 0.353);
+    vec3 brandAccent = vec3(0.165, 0.353, 0.878);
+
+    // Watercolor wash: the scene's real colors, partially desaturated, with shadows leaning toward brand navy
+    vec3 muted = mix(vec3(centerLuma), centerCol, 0.65);
+    muted = mix(muted, brandNavy, (1.0 - centerLuma) * 0.18);
+
     vec3 lightPaper = vec3(1.0, 1.0, 1.0);
-    vec3 lightInk   = vec3(0.12, 0.115, 0.11);
-    vec3 lightResult = mix(lightPaper, lightInk, totalLightGraphite);
-    lightResult = mix(lightResult, vec3(1.0, 1.0, 1.0), whiteMask);
+    vec3 washPaper  = mix(lightPaper, muted, 0.45);
+    vec3 lightInk   = mix(vec3(0.12, 0.115, 0.11), muted * 0.6, 0.35);
+    vec3 lightGraphite = mix(washPaper, lightInk, totalLightGraphite);
+
+    // Ocean: brand accent #2a5ae0 hatching and brand navy #1e295a contours over a real-water wash
+    float oceanShade = clamp(smudge + hatch1 + hatch2 + hatch3, 0.0, 0.96) * (1.0 - whiteMask);
+    vec3 oceanWash = mix(brandAccent, muted, 0.35);
+    vec3 lightOcean = mix(lightPaper, oceanWash, 0.18 + oceanShade * 0.7);
+    lightOcean = mix(lightOcean, brandNavy, clamp(lightOutline * 0.92 + oceanShade * 0.35, 0.0, 0.96));
+
+    vec3 lightResult = mix(lightGraphite, lightOcean, oceanMask);
+    lightResult = mix(lightResult, mix(lightPaper, muted, 0.25), whiteMask);
 
     // ── 4B. DARK MODE ARCHITECTURAL BLUEPRINT COMPOSITION ──────
-    // Base paper: Deep obsidian matching zinc-950 #09090b
-    vec3 darkPaper  = vec3(0.035, 0.035, 0.045);
+    // Base paper: brand navy #1e295a (matches zinc-950 page background)
+    vec3 darkPaper  = brandNavy;
     // Soft titanium-slate pencil for hatching & shading (preserves ALL details without blinding glare)
     vec3 shadeChalk = vec3(0.22, 0.25, 0.30);
     // Brilliant platinum chalk for crisp edge contours (ship railings, container ridges, truck cabin, wheels)
     vec3 lineChalk  = vec3(0.90, 0.92, 0.96);
+
+    shadeChalk = mix(shadeChalk, muted, 0.45);
+    shadeChalk = mix(shadeChalk, brandAccent, oceanMask);
+    lineChalk  = mix(lineChalk, vec3(0.80, 0.87, 1.0), oceanMask);
 
     float shadeFactor = clamp(smudge + hatch1 + hatch2 + hatch3, 0.0, 0.85);
 
     // Clean highlight for bright white container, rims, wave crests
     float whiteHighlight = smoothstep(0.70, 0.95, centerLuma) * 0.30;
 
-    vec3 darkResult = mix(darkPaper, shadeChalk, shadeFactor);
+    vec3 darkResult = mix(darkPaper, muted, 0.30 * (1.0 - oceanMask));
+    darkResult = mix(darkResult, brandAccent, oceanMask * 0.12);
+    darkResult = mix(darkResult, shadeChalk, shadeFactor);
     darkResult += vec3(whiteHighlight);
     darkResult = mix(darkResult, lineChalk, pencilOutline * (1.0 - whiteMask));
     darkResult = mix(darkResult, vec3(1.0, 1.0, 1.0), whiteMask);

@@ -15,15 +15,15 @@ export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
      1. MATERIALS & FINISHES (TUNED FOR GRAPHITE EDGE EXTRACTION)
      ============================================================ */
   const hullNavyMat = new THREE.MeshStandardMaterial({
-    color: 0x0f294a,
-    roughness: 0.38,
-    metalness: 0.28,
+    color: 0x3b5b8f,
+    roughness: 0.55,
+    metalness: 0.05,
   });
 
   const hullRedMat = new THREE.MeshStandardMaterial({
-    color: 0x881337,
-    roughness: 0.52,
-    metalness: 0.18,
+    color: 0xa8433f,
+    roughness: 0.6,
+    metalness: 0.05,
   });
 
   const bootStripeMat = new THREE.MeshStandardMaterial({
@@ -33,9 +33,9 @@ export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
   });
 
   const deckMat = new THREE.MeshStandardMaterial({
-    color: 0x1e293b,
-    roughness: 0.75,
-    metalness: 0.35,
+    color: 0x7d8c74,
+    roughness: 0.8,
+    metalness: 0.05,
   });
 
   const bridgeWhiteMat = new THREE.MeshStandardMaterial({
@@ -45,9 +45,9 @@ export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
   });
 
   const bridgeGlassMat = new THREE.MeshPhysicalMaterial({
-    color: 0x020617,
-    roughness: 0.06,
-    metalness: 0.85,
+    color: 0x3e5f82,
+    roughness: 0.12,
+    metalness: 0.2,
     clearcoat: 1.0,
   });
 
@@ -64,9 +64,9 @@ export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
   });
 
   const steelGreyMat = new THREE.MeshStandardMaterial({
-    color: 0x475569,
+    color: 0x8d98a8,
     roughness: 0.55,
-    metalness: 0.55,
+    metalness: 0.2,
   });
 
   // High-contrast galvanized steel for lashing rods (creates crisp diagonal graphite strokes)
@@ -157,7 +157,7 @@ export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
   vessel.add(deck);
 
   /* ============================================================
-     3. "ARIAN KHODRO" HULL BRANDING & NAUTICAL MARKINGS
+     3. "JAHAN-GOSTAR" HULL BRANDING & NAUTICAL MARKINGS
      ============================================================ */
   const hullDecalTex = createShipHullDecalTexture();
   const hullDecalMat = new THREE.MeshBasicMaterial({
@@ -389,7 +389,7 @@ export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
   satDomeR.position.x = 6.8;
   tower.add(satDomeR);
 
-  // Engine Exhaust Funnel with Arian Khodro Brand Band
+  // Engine Exhaust Funnel with Jahan-Gostar Brand Band
   const funnelBase = new THREE.Mesh(
     new THREE.BoxGeometry(7.8, 12.0, 9.8),
     safetyOrangeMat
@@ -472,7 +472,7 @@ export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
     map: shipContainerTex,
     color: 0xffffff,
     roughness: 0.46,
-    metalness: 0.26,
+    metalness: 0.08,
     bumpMap: corrugatedBump,
     bumpScale: 0.08,
   });
@@ -640,9 +640,9 @@ export function buildContainerShip(corrugatedBump: THREE.Texture): THREE.Group {
   // 3D ISO 1161 Steel Corner Castings on all containers
   const castingGeo = new THREE.BoxGeometry(0.24, 0.24, 0.26);
   const castingMat = new THREE.MeshStandardMaterial({
-    color: 0x090d16,
-    roughness: 0.4,
-    metalness: 0.8,
+    color: 0x4a5263,
+    roughness: 0.45,
+    metalness: 0.3,
   });
 
   const totalCastings = transforms.length * 8;

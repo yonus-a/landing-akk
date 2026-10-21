@@ -37,7 +37,7 @@ export function WhyUsSection() {
       title: "حضور مستقیم در مبدأ تجارت",
       subtitle: "حذف کامل واسطه‌ها در چین، دبی و ترکیه",
       description:
-        "استقرار دفاتر رسمی و انبارهای اختصاصی تجمیع بار در جبل‌علی دبی، گوانجو، ایوو، شنژن و استانبول؛ خرید، بازرسی و حمل مستقیم توسط تیم مقیم آریان خودرو انجام می‌شود.",
+        "استقرار دفاتر رسمی و انبارهای اختصاصی تجمیع بار در جبل‌علی دبی، گوانجو، ایوو، شنژن و استانبول؛ خرید، بازرسی و حمل مستقیم توسط تیم مقیم جهان‌گستر انجام می‌شود.",
       icon: Building2,
       metricValue: "۳ هاب",
       metricLabel: "دفتر و انبار عملیاتی فعال",
@@ -258,15 +258,15 @@ export function WhyUsSection() {
                   </div>
                 </div>
 
-                {/* Clean Comparison Split (Arian vs Traditional) */}
+                {/* Clean Comparison Split (Jahan-Gostar vs Traditional) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-6 border-t border-white/[0.06]">
-                  {/* Arian Standard */}
+                  {/* Jahan-Gostar Standard */}
                   <div className="p-4 rounded-2xl bg-emerald-500/[0.04] border border-emerald-500/20 space-y-2.5">
                     <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
                       <span className="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
                         <Check className="w-2.5 h-2.5" strokeWidth={3} />
                       </span>
-                      <span>استاندارد آریان خودرو</span>
+                      <span>استاندارد جهان‌گستر</span>
                     </div>
                     <ul className="space-y-2">
                       {current.comparison.map((row, i) => (

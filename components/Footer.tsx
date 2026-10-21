@@ -39,7 +39,7 @@ export function Footer() {
       <div className="relative max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 z-10">
         
         {/* Top CTA Banner (NO borders) */}
-        <div className="p-8 sm:p-11 rounded-3xl bg-zinc-900 mb-16 flex flex-col lg:flex-row items-center justify-between gap-6 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+        <div className="p-8 sm:p-11 rounded-3xl bg-zinc-900 mb-16 flex flex-col lg:flex-row items-center justify-between gap-6 shadow-[0_20px_50px_rgba(15,21,48,0.3)]">
           <div className="space-y-2 text-center lg:text-right">
             <span className="font-mono text-xs text-amber-400 font-bold tracking-wider">
               READY FOR GLOBAL TRADE?
@@ -48,7 +48,7 @@ export function Footer() {
               آماده شروع پروژه واردات یا ترخیص محموله خود هستید؟
             </h3>
             <p className="text-xs sm:text-sm text-zinc-400 max-w-xl font-normal leading-relaxed">
-              همین حالا با کارشناسان رسمی آریان خودرو تماس حاصل فرمایید یا پیش‌فاکتور خود را جهت دریافت Cost Sheet ارسال نمایید.
+              همین حالا با کارشناسان رسمی جهان‌گستر تماس حاصل فرمایید یا پیش‌فاکتور خود را جهت دریافت Cost Sheet ارسال نمایید.
             </p>
           </div>
 
@@ -84,16 +84,16 @@ export function Footer() {
               </div>
               <div>
                 <span className="text-lg font-black text-white tracking-tight">
-                  بازرگانی آریان خودرو
+                  بازرگانی جهان‌گستر
                 </span>
                 <div className="text-[10px] font-mono text-zinc-500">
-                  ARIAN KHODRO TRADING GROUP
+                  JAHAN-GOSTAR TRADING & LOGISTICS
                 </div>
               </div>
             </div>
 
             <p className="text-xs text-zinc-400 leading-relaxed font-normal">
-              گروه بین‌المللی بازرگانی و لجستیک آریان خودرو با بیش از ۱۵ سال سابقه مستمر، ارائه‌دهنده زنجیره صفر تا صد خدمات بازرگانی خارجی، واردات خودرو و قطعات یدکی، حمل دریایی و هوایی و ترخیص تخصصی از کلیه گمرکات کشور می‌باشد.
+              گروه بین‌المللی بازرگانی و لجستیک جهان‌گستر با بیش از ۱۵ سال سابقه مستمر، ارائه‌دهنده زنجیره صفر تا صد خدمات بازرگانی خارجی، واردات خودرو و قطعات یدکی، حمل دریایی و هوایی و ترخیص تخصصی از کلیه گمرکات کشور می‌باشد.
             </p>
 
             <div className="pt-2 flex items-center gap-2 text-xs font-mono text-zinc-400">
@@ -198,7 +198,7 @@ export function Footer() {
         {/* Bottom Copyright & Blueprint Specs (NO borders) */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-zinc-500 font-mono">
           <div>
-            © {currentYear} بازرگانی آریان خودرو. تمامی حقوق مادی و معنوی محفوظ است.
+            © {currentYear} بازرگانی جهان‌گستر. تمامی حقوق مادی و معنوی محفوظ است.
           </div>
           <div className="flex items-center gap-4 text-zinc-500">
             <span>CAD-SPEC // VER 3.2.0</span>

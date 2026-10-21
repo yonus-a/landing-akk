@@ -112,7 +112,7 @@ export function CostEstimatorForm() {
         </div>
 
         {/* Specification Card (NO borders, soft floating shadow) */}
-        <div className="bg-white rounded-3xl shadow-[0_12px_45px_rgba(0,0,0,0.03)] overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-[0_12px_45px_rgba(15,21,48,0.03)] overflow-hidden">
           
           {/* Service Selector Tabs Bar (NO borders) */}
           <div className="bg-zinc-50/70 p-3 sm:p-4 overflow-x-auto">
@@ -153,7 +153,7 @@ export function CostEstimatorForm() {
                     استعلام شما با موفقیت ثبت گردید
                   </h3>
                   <p className="text-sm text-zinc-600 leading-relaxed">
-                    کارشناسان تخصصی بازرگانی آریان خودرو اطلاعات محموله شما را بررسی کرده و حداکثر تا ۲ ساعت کاری آینده برای ارائه برآورد نهایی بهای تمام‌شده با شما تماس خواهند گرفت.
+                    کارشناسان تخصصی بازرگانی جهان‌گستر اطلاعات محموله شما را بررسی کرده و حداکثر تا ۲ ساعت کاری آینده برای ارائه برآورد نهایی بهای تمام‌شده با شما تماس خواهند گرفت.
                   </p>
                 </div>
 
@@ -363,7 +363,7 @@ export function CostEstimatorForm() {
                 <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="flex items-center gap-2 text-xs text-zinc-500">
                     <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                    <span>اطلاعات تجاری شما نزد گروه بازرگانی آریان خودرو ۱۰۰٪ محرمانه خواهد بود.</span>
+                    <span>اطلاعات تجاری شما نزد گروه بازرگانی جهان‌گستر ۱۰۰٪ محرمانه خواهد بود.</span>
                   </div>
 
                   <button
