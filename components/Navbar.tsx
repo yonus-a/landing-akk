@@ -6,8 +6,8 @@ import {
   ArrowLeft,
   Menu,
   X,
-  Compass,
 } from "lucide-react";
+import Image from "next/image";
 import { ThemeToggle } from "./ThemeToggle";
 
 export function Navbar() {
@@ -26,6 +26,7 @@ export function Navbar() {
     { label: "خدمات بازرگانی", href: "#services" },
     { label: "فرآیند ۶ مرحله‌ای", href: "#workflow" },
     { label: "استعلام قیمت", href: "#estimator" },
+    { label: "تیم ما", href: "#team" },
     { label: "دفاتر و گمرکات", href: "#hubs" },
   ];
 
@@ -44,12 +45,17 @@ export function Navbar() {
       >
         {/* Right: Minimal Brand Identity */}
         <a href="#" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-full bg-zinc-950 dark:bg-amber-500 flex items-center justify-center text-white dark:text-zinc-950 shadow-2xs transition-transform duration-200 group-hover:scale-105">
-            <Compass className="w-4 h-4 text-amber-400 dark:text-zinc-950" strokeWidth={1.75} />
-          </div>
+          <Image
+            src="/logo-mark.png"
+            alt="لوگوی جهان‌گستر"
+            width={1049}
+            height={515}
+            preload
+            className="h-5 sm:h-6 w-auto transition-transform duration-200 group-hover:scale-105 dark:brightness-0 dark:invert"
+          />
           <div className="flex flex-col">
             <span className="text-sm sm:text-base font-black text-zinc-950 dark:text-white tracking-tight leading-snug">
-              بازرگانی جهان‌گستر
+              جهان‌گستر
             </span>
             <span className="text-[10px] text-zinc-400 dark:text-zinc-400 font-medium hidden sm:inline leading-none">
               تجارت بین‌الملل و لجستیک

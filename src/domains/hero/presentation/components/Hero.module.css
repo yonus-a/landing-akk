@@ -85,3 +85,7 @@
     transform: rotate(360deg);
   }
 }
+
+h1 span {
+  padding: .1em 0;
+}

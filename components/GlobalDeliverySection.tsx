@@ -847,20 +847,27 @@ export function GlobalDeliverySection() {
       });
     }
 
+    // Single hub; origins chosen from continents that stay on the camera-facing hemisphere
     const TEHRAN = { lat: 35.7, lon: 51.4 };
-    const BANDAR_ABBAS = { lat: 27.2, lon: 56.3 };
 
     const pointToPointRoutes = [
-      { from: { lat: 31.2, lon: 121.5 }, to: TEHRAN, h: 0.3 },
-      { from: { lat: 22.5, lon: 114.1 }, to: BANDAR_ABBAS, h: 0.28 },
-      { from: { lat: 25.2, lon: 55.3 }, to: BANDAR_ABBAS, h: 0.16 },
-      { from: { lat: 41.0, lon: 29.0 }, to: TEHRAN, h: 0.2 },
-      { from: { lat: 53.5, lon: 10.0 }, to: TEHRAN, h: 0.26 },
+      { from: { lat: 53.5, lon: 10.0 }, to: TEHRAN, h: 0.24 }, // Europe — Hamburg
+      { from: { lat: -26.2, lon: 28.0 }, to: TEHRAN, h: 0.24 }, // Africa — Johannesburg
+      { from: { lat: 31.2, lon: 121.5 }, to: TEHRAN, h: 0.26 }, // East Asia — Shanghai
+      { from: { lat: -31.95, lon: 115.9 }, to: TEHRAN, h: 0.28 }, // Oceania — Perth
     ];
 
     pointToPointRoutes.forEach((r) =>
       addHairlinePointToPointArrow(r.from, r.to, r.h)
     );
+
+    // Hub marker where all corridors converge
+    const hubPos = latLonToVec3(TEHRAN.lat, TEHRAN.lon, GLOBE_RADIUS * 1.016);
+    const hubNormal = hubPos.clone().normalize();
+    const hubRing = new THREE.Mesh(new THREE.RingGeometry(0.16, 0.22, 32), arrowInkMat);
+    hubRing.position.copy(hubPos);
+    hubRing.lookAt(hubPos.clone().add(hubNormal));
+    globeGroup.add(hubRing);
 
     globeGroup.rotation.set(0.28, -2.05, -0.06);
 
@@ -1607,7 +1614,6 @@ export function GlobalDeliverySection() {
         start: "top top",
         end: () => `+=${Math.max(window.innerHeight * 2.8, 2800)}`,
         pin: true,
-        anticipatePin: 1,
         scrub: 1.2,
         invalidateOnRefresh: true,
       },
@@ -1814,9 +1820,14 @@ export function GlobalDeliverySection() {
        SECTION 5 — RENDER LOOP & RESIZE
        ============================================================ */
     const clock = new THREE.Clock();
-    let animId: number;
+    let animId = 0;
+    let inView = false;
 
     function animate() {
+      if (!inView) {
+        animId = 0;
+        return;
+      }
       animId = requestAnimationFrame(animate);
       const elapsed = clock.getElapsedTime();
 
@@ -1843,7 +1854,15 @@ export function GlobalDeliverySection() {
       renderer.setRenderTarget(null);
       renderer.render(postScene, postCamera);
     }
-    animate();
+
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting;
+        if (inView && !animId) animate();
+      },
+      { rootMargin: "200px 0px" }
+    );
+    visibilityObserver.observe(section);
 
     const onResize = () => {
       if (!section) return;
@@ -1868,6 +1887,7 @@ export function GlobalDeliverySection() {
     window.addEventListener("themechange", onThemeChange);
 
     return () => {
+      visibilityObserver.disconnect();
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("themechange", onThemeChange);

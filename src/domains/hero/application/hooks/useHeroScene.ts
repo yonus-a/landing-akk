@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
@@ -201,6 +202,15 @@ export function useHeroScene() {
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    // Soft studio reflections so metallic parts (chrome, aluminium, steel) don't render black
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    const roomEnv = new RoomEnvironment();
+    const envTexture = pmremGenerator.fromScene(roomEnv, 0.04).texture;
+    roomEnv.dispose();
+    pmremGenerator.dispose();
+    scene.environment = envTexture;
+    scene.environmentIntensity = 0.55;
 
     /* ============================================================
        SECTION 1.5 — GRAPHITE DRAWING POST-PROCESSING PIPELINE
@@ -486,9 +496,14 @@ export function useHeroScene() {
        SECTION 8 — TWO-PASS RENDER LOOP (Scene -> RT -> Graphite)
        ============================================================ */
     const clock = new THREE.Clock();
-    let animationFrameId: number;
+    let animationFrameId = 0;
+    let inView = true;
 
     function animate() {
+      if (!inView) {
+        animationFrameId = 0;
+        return;
+      }
       animationFrameId = requestAnimationFrame(animate);
       const delta = clock.getDelta();
       const elapsed = clock.getElapsedTime();
@@ -539,6 +554,18 @@ export function useHeroScene() {
       renderer.render(postScene, postCamera);
     }
     animate();
+
+    const visibilityTarget = scrollWrapperEl ?? canvasContainerRef.current;
+    const visibilityObserver = visibilityTarget
+      ? new IntersectionObserver(
+          ([entry]) => {
+            inView = entry.isIntersecting;
+            if (inView && !animationFrameId) animate();
+          },
+          { rootMargin: "200px 0px" }
+        )
+      : null;
+    if (visibilityTarget) visibilityObserver?.observe(visibilityTarget);
 
     /* ============================================================
        SECTION 9 — RESIZE & BOOTSTRAP
@@ -602,6 +629,7 @@ export function useHeroScene() {
     return () => {
       clearTimeout(loadingTimeout1);
       clearTimeout(refreshTimer);
+      visibilityObserver?.disconnect();
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("themechange", handleThemeChange);
       cancelAnimationFrame(animationFrameId);
@@ -610,6 +638,7 @@ export function useHeroScene() {
       disposeObject3D(scene);
       disposeObject3D(postScene);
       sceneRenderTarget.dispose();
+      envTexture.dispose();
       sharedGlowTex.dispose();
       corrugatedBump.dispose();
       heroContainerTex.dispose();

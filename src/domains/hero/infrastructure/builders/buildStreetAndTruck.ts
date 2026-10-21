@@ -35,9 +35,9 @@ function createPureWhiteBrandingTexture(
 
     // Deep high-contrast architectural midnight slate backing
     const grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, "#080c14");
-    grad.addColorStop(0.5, "#0f172a");
-    grad.addColorStop(1, "#080c14");
+    grad.addColorStop(0, "#3b5b8f");
+    grad.addColorStop(0.5, "#4a6fae");
+    grad.addColorStop(1, "#3b5b8f");
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 
@@ -120,7 +120,7 @@ export function buildStaticStreetAndRealisticTruck(
     metalness: 0.08,
   });
   const darkConcreteMat = new THREE.MeshStandardMaterial({
-    color: 0x475569,
+    color: 0x9a9ea5,
     roughness: 0.9,
     metalness: 0.1,
   });
@@ -412,7 +412,7 @@ export function buildStaticStreetAndRealisticTruck(
 
   // Recessed Panel Seam & Architectural Trim Material (Crucial for Light Mode contrast on white body)
   const panelSeamMat = new THREE.MeshBasicMaterial({
-    color: 0x0f172a,
+    color: 0x4a5263,
   });
 
   const cabSilverAccentMat = new THREE.MeshStandardMaterial({
@@ -422,20 +422,20 @@ export function buildStaticStreetAndRealisticTruck(
   });
 
   const darkPlasticTrimMat = new THREE.MeshStandardMaterial({
-    color: 0x111827,
+    color: 0x4b5260,
     roughness: 0.58,
     metalness: 0.2,
   });
 
   const grilleMeshMat = new THREE.MeshStandardMaterial({
     map: grilleMeshTex,
-    color: 0x1e293b,
+    color: 0x7a8494,
     roughness: 0.42,
     metalness: 0.55,
   });
 
   const chassisSteelMat = new THREE.MeshStandardMaterial({
-    color: 0x181f29,
+    color: 0x5f6775,
     roughness: 0.52,
     metalness: 0.58,
   });
@@ -453,13 +453,13 @@ export function buildStaticStreetAndRealisticTruck(
   });
 
   const tireRubberMat = new THREE.MeshStandardMaterial({
-    color: 0x111318,
+    color: 0x3c3f46,
     roughness: 0.86,
     metalness: 0.06,
   });
 
   const cabGlassMat = new THREE.MeshPhysicalMaterial({
-    color: 0x091326,
+    color: 0x46668a,
     roughness: 0.04,
     metalness: 0.12,
     reflectivity: 1.0,
@@ -497,7 +497,7 @@ export function buildStaticStreetAndRealisticTruck(
 
   // High-Contrast Wheel & Truck Materials
   const highContrastTireMat = new THREE.MeshStandardMaterial({
-    color: 0x1e2530,
+    color: 0x42464e,
     roughness: 0.8,
     metalness: 0.12,
   });
@@ -531,7 +531,7 @@ export function buildStaticStreetAndRealisticTruck(
   });
 
   const fenderMat = new THREE.MeshStandardMaterial({
-    color: 0x141923,
+    color: 0x4c5260,
     roughness: 0.62,
     metalness: 0.22,
   });
@@ -542,7 +542,7 @@ export function buildStaticStreetAndRealisticTruck(
   });
 
   const interiorMat = new THREE.MeshStandardMaterial({
-    color: 0x1e293b,
+    color: 0x7a8494,
     roughness: 0.7,
   });
 
@@ -1628,7 +1628,7 @@ export function buildStaticStreetAndRealisticTruck(
     metalness: 0.1,
   });
   const heroUnderMat = new THREE.MeshStandardMaterial({
-    color: 0x0f172a,
+    color: 0x4a5263,
     roughness: 0.85,
     metalness: 0.1,
   });
@@ -1694,7 +1694,7 @@ export function buildStaticStreetAndRealisticTruck(
 
   // 12 Structural Edge Beams Defining the Container Rectangular Prism
   const containerRailMat = new THREE.MeshStandardMaterial({
-    color: 0x1e293b,
+    color: 0x7a8494,
     roughness: 0.42,
     metalness: 0.58,
   });
@@ -1738,7 +1738,7 @@ export function buildStaticStreetAndRealisticTruck(
   // Dark contact shadow directly beneath container
   const containerUnderShadow = new THREE.Mesh(
     new THREE.BoxGeometry(2.62, 0.14, 12.46),
-    new THREE.MeshBasicMaterial({ color: 0x070b12 })
+    new THREE.MeshBasicMaterial({ color: 0x3a4150 })
   );
   containerUnderShadow.position.set(0, -1.38, 0);
   heroContainerGroup.add(containerUnderShadow);
@@ -1746,7 +1746,7 @@ export function buildStaticStreetAndRealisticTruck(
   // 8 ISO Corner Castings with Twist-Lock Aperture Details
   const castingGeo = new THREE.BoxGeometry(0.25, 0.25, 0.27);
   const castingMat = new THREE.MeshStandardMaterial({
-    color: 0x0f172a,
+    color: 0x4a5263,
     roughness: 0.48,
     metalness: 0.62,
   });

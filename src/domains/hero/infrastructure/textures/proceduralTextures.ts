@@ -45,10 +45,10 @@ export function createHeroContainerTexture(): THREE.CanvasTexture {
   // Contrast-engineered for architectural graphite pencil hatching
   for (let x = 40; x < 2008; x += 40) {
     // Deep graphite shadow flute
-    ctx.fillStyle = "#334155";
+    ctx.fillStyle = "#8a93a3";
     ctx.fillRect(x, 26, 9, 460);
     // Midtone lead transition
-    ctx.fillStyle = "#94a3b8";
+    ctx.fillStyle = "#c4cad5";
     ctx.fillRect(x + 9, 26, 7, 460);
     // Pure white face plate
     ctx.fillStyle = "#f8fafc";
@@ -59,14 +59,14 @@ export function createHeroContainerTexture(): THREE.CanvasTexture {
   }
 
   // 3. Heavy Dark Structural Steel Perimeter Frame & Corner Rails
-  ctx.fillStyle = "#0f172a";
+  ctx.fillStyle = "#5a6272";
   ctx.fillRect(0, 0, 2048, 28); // Top rail
   ctx.fillRect(0, 484, 2048, 28); // Bottom rail
   ctx.fillRect(0, 0, 42, 512); // Left corner post
   ctx.fillRect(2006, 0, 42, 512); // Right corner post
 
   // Inner dark pinstripe contour
-  ctx.strokeStyle = "#334155";
+  ctx.strokeStyle = "#8a93a3";
   ctx.lineWidth = 2.5;
   ctx.strokeRect(40, 26, 1968, 460);
 
@@ -78,7 +78,7 @@ export function createHeroContainerTexture(): THREE.CanvasTexture {
     { x: 1996, y: 460 },
   ];
   corners.forEach(({ x, y }) => {
-    ctx.fillStyle = "#020617";
+    ctx.fillStyle = "#3a4152";
     ctx.fillRect(x, y, 48, 48);
     // Silver contour rim
     ctx.strokeStyle = "#ffffff";
@@ -103,15 +103,15 @@ export function createHeroContainerTexture(): THREE.CanvasTexture {
   // Sleek, high-contrast Midnight Titanium plaque enabling pure white Persian typography
   ctx.save();
   // Realistic 3D drop shadow anchoring the corporate plaque to the white corrugated wall
-  ctx.shadowColor = "rgba(15, 23, 42, 0.45)";
+  ctx.shadowColor = "rgba(30, 41, 90, 0.25)";
   ctx.shadowBlur = 20;
   ctx.shadowOffsetY = 8;
 
   // Plaque Base Plate in Deep Midnight Charcoal Slate
   const plaqueGrad = ctx.createLinearGradient(304, 66, 304, 346);
-  plaqueGrad.addColorStop(0, "#080c14");
-  plaqueGrad.addColorStop(0.5, "#0f172a");
-  plaqueGrad.addColorStop(1, "#080c14");
+  plaqueGrad.addColorStop(0, "#3f63a3");
+  plaqueGrad.addColorStop(0.5, "#5079c2");
+  plaqueGrad.addColorStop(1, "#3f63a3");
   ctx.fillStyle = plaqueGrad;
   ctx.beginPath();
   ctx.roundRect(304, 66, 1440, 280, 16);
@@ -180,7 +180,7 @@ export function createHeroContainerTexture(): THREE.CanvasTexture {
   ctx.textAlign = "center";
   ctx.font = "bold 20px monospace";
   ctx.fillStyle = "#ffffff";
-  ctx.fillText("INTERNATIONAL TRANSIT • AUTOMOTIVE LOGISTICS • TIR CARNET", 1024, 290);
+  ctx.fillText("INTERNATIONAL TRADE • LOGISTICS • TIR CARNET", 1024, 290);
 
   // 7. Left Side Decals (Yellow Height Hazard & Customs TIR)
   ctx.fillStyle = "#eab308";
@@ -249,14 +249,14 @@ export function createHeroContainerFrontTexture(): THREE.CanvasTexture {
   }
 
   // Steel perimeter frame
-  ctx.fillStyle = "#0f172a";
+  ctx.fillStyle = "#5a6272";
   ctx.fillRect(0, 0, 512, 26);
   ctx.fillRect(0, 486, 512, 26);
   ctx.fillRect(0, 0, 26, 512);
   ctx.fillRect(486, 0, 26, 512);
 
   // Vertical center post
-  ctx.fillStyle = "#334155";
+  ctx.fillStyle = "#8a93a3";
   ctx.fillRect(248, 24, 16, 464);
 
   const tex = new THREE.CanvasTexture(c);
@@ -285,7 +285,7 @@ export function createHeroContainerRoofTexture(): THREE.CanvasTexture {
   }
 
   // Steel roof coamings
-  ctx.fillStyle = "#0f172a";
+  ctx.fillStyle = "#5a6272";
   ctx.fillRect(0, 0, 512, 18);
   ctx.fillRect(0, 1006, 512, 18);
   ctx.fillRect(0, 0, 18, 1024);
@@ -306,9 +306,9 @@ export function createTruckGroundShadowTexture(): THREE.CanvasTexture {
 
   // Soft feathered radial/elliptical ambient occlusion shadow gradient
   const grad = ctx.createRadialGradient(256, 128, 30, 256, 128, 120);
-  grad.addColorStop(0, "rgba(10, 15, 26, 0.78)");
-  grad.addColorStop(0.35, "rgba(15, 23, 42, 0.52)");
-  grad.addColorStop(0.7, "rgba(30, 41, 59, 0.22)");
+  grad.addColorStop(0, "rgba(30, 41, 90, 0.38)");
+  grad.addColorStop(0.35, "rgba(30, 41, 90, 0.24)");
+  grad.addColorStop(0.7, "rgba(30, 41, 90, 0.1)");
   grad.addColorStop(1, "rgba(0, 0, 0, 0)");
 
   ctx.fillStyle = grad;
@@ -323,11 +323,11 @@ export function createAsphaltTexture(): THREE.CanvasTexture {
   c.width = 512;
   c.height = 512;
   const ctx = c.getContext("2d")!;
-  ctx.fillStyle = "#1e2430";
+  ctx.fillStyle = "#80848c";
   ctx.fillRect(0, 0, 512, 512);
 
   for (let i = 0; i < 12000; i++) {
-    const v = 22 + Math.floor(Math.random() * 26);
+    const v = 108 + Math.floor(Math.random() * 40);
     ctx.fillStyle = `rgb(${v},${v + 2},${v + 6})`;
     ctx.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);
   }
@@ -342,9 +342,9 @@ export function createGrilleMeshTexture(): THREE.CanvasTexture {
   c.width = 128;
   c.height = 128;
   const ctx = c.getContext("2d")!;
-  ctx.fillStyle = "#070a10";
+  ctx.fillStyle = "#4a5160";
   ctx.fillRect(0, 0, 128, 128);
-  ctx.strokeStyle = "#263040";
+  ctx.strokeStyle = "#a3abb8";
   ctx.lineWidth = 2;
   for (let y = 0; y < 128; y += 8) {
     for (let x = 0; x < 128; x += 12) {
@@ -612,14 +612,14 @@ export function createBuildingFacadeTexture(): THREE.CanvasTexture {
       const wh = floorH - 52;
 
       // Window reveal / frame
-      ctx.fillStyle = "#9aa3b2";
+      ctx.fillStyle = "#c3c9d3";
       ctx.fillRect(wx - 4, wy - 4, ww + 8, wh + 8);
 
       // Sky-reflecting glass
       const glass = ctx.createLinearGradient(wx, wy, wx + ww, wy + wh);
-      glass.addColorStop(0, "#9fb6d3");
-      glass.addColorStop(0.55, "#6f87a8");
-      glass.addColorStop(1, "#8aa2c2");
+      glass.addColorStop(0, "#c6d6ea");
+      glass.addColorStop(0.55, "#9fb4cf");
+      glass.addColorStop(1, "#b5c7de");
       ctx.fillStyle = glass;
       ctx.fillRect(wx, wy, ww, wh);
 

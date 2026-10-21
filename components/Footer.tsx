@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import {
-  Compass,
   Phone,
   Mail,
   MapPin,
@@ -79,15 +79,19 @@ export function Footer() {
           {/* Column 1: Brand Info (4 cols) */}
           <div className="lg:col-span-4 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center text-white shadow-2xs">
-                <Compass className="w-5 h-5 text-amber-400" strokeWidth={1.75} />
-              </div>
+              <Image
+                src="/logo-mark.png"
+                alt="لوگوی جهان‌گستر"
+                width={1049}
+                height={515}
+                className="h-7 w-auto brightness-0 invert"
+              />
               <div>
                 <span className="text-lg font-black text-white tracking-tight">
-                  بازرگانی جهان‌گستر
+                  جهان‌گستر
                 </span>
                 <div className="text-[10px] font-mono text-zinc-500">
-                  JAHAN-GOSTAR TRADING & LOGISTICS
+                  JAHAN-GOSTAR
                 </div>
               </div>
             </div>
@@ -198,7 +202,7 @@ export function Footer() {
         {/* Bottom Copyright & Blueprint Specs (NO borders) */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-zinc-500 font-mono">
           <div>
-            © {currentYear} بازرگانی جهان‌گستر. تمامی حقوق مادی و معنوی محفوظ است.
+            © {currentYear} جهان‌گستر. تمامی حقوق مادی و معنوی محفوظ است.
           </div>
           <div className="flex items-center gap-4 text-zinc-500">
             <span>CAD-SPEC // VER 3.2.0</span>

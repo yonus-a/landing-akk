@@ -125,12 +125,15 @@ export function ServicesSection() {
           scale: 0.85,
           opacity: 0,
           transformOrigin: "bottom center",
+          pointerEvents: "none",
         });
 
         gsap.set(row1CardsRef.current, {
           transformOrigin: "top center",
         });
 
+        // Both rows are stacked; only the visible row may receive hover
+        let row2Active = false;
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: sectionRef.current,
@@ -138,7 +141,13 @@ export function ServicesSection() {
             end: "+=1800",
             scrub: 1.2,
             pin: true,
-            anticipatePin: 1,
+            onUpdate: (self) => {
+              const next = self.progress > 0.5;
+              if (next === row2Active) return;
+              row2Active = next;
+              gsap.set(row1CardsRef.current, { pointerEvents: next ? "none" : "auto" });
+              gsap.set(row2CardsRef.current, { pointerEvents: next ? "auto" : "none" });
+            },
           },
         });
 
@@ -265,7 +274,7 @@ export function ServicesSection() {
         {/* Desktop 3D Perspective Stage */}
         <div className="hidden lg:block relative w-full min-h-[410px] my-4 [perspective:1400px] [transform-style:preserve-3d]">
           {/* Row 1 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 absolute inset-x-0 top-0 [transform-style:preserve-3d]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 absolute inset-x-0 top-0 pointer-events-none [transform-style:preserve-3d]">
             {row1Services.map((service, index) => {
               const Icon = service.icon;
               return (
@@ -274,7 +283,7 @@ export function ServicesSection() {
                   ref={(el) => {
                     row1CardsRef.current[index] = el;
                   }}
-                  className="group relative bg-zinc-50/95 dark:bg-zinc-900/95 p-6 rounded-2xl flex flex-col justify-between shadow-[0_8px_30px_rgba(15,21,48,0.04)] dark:shadow-[0_8px_30px_rgba(15,21,48,0.3)] border border-zinc-200/80 dark:border-zinc-800 will-change-transform"
+                  className="group relative pointer-events-auto bg-zinc-50/95 dark:bg-zinc-900/95 p-6 rounded-2xl flex flex-col justify-between shadow-[0_8px_30px_rgba(15,21,48,0.04)] dark:shadow-[0_8px_30px_rgba(15,21,48,0.3)] border border-zinc-200/80 dark:border-zinc-800 will-change-transform"
                 >
                   <div>
                     <div className="flex items-center justify-between pb-3">
@@ -321,7 +330,7 @@ export function ServicesSection() {
           </div>
 
           {/* Row 2 (3D Peel-Y Reveal) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 absolute inset-x-0 top-0 [transform-style:preserve-3d]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 absolute inset-x-0 top-0 pointer-events-none [transform-style:preserve-3d]">
             {row2Services.map((service, index) => {
               const Icon = service.icon;
               return (
@@ -330,7 +339,7 @@ export function ServicesSection() {
                   ref={(el) => {
                     row2CardsRef.current[index] = el;
                   }}
-                  className="group relative bg-white dark:bg-zinc-900 p-6 rounded-2xl flex flex-col justify-between shadow-[0_-12px_40px_rgba(15,21,48,0.08),0_12px_30px_rgba(15,21,48,0.05)] dark:shadow-[0_12px_30px_rgba(15,21,48,0.4)] border border-zinc-200 dark:border-zinc-800 will-change-transform"
+                  className="group relative pointer-events-auto bg-white dark:bg-zinc-900 p-6 rounded-2xl flex flex-col justify-between shadow-[0_-12px_40px_rgba(15,21,48,0.08),0_12px_30px_rgba(15,21,48,0.05)] dark:shadow-[0_12px_30px_rgba(15,21,48,0.4)] border border-zinc-200 dark:border-zinc-800 will-change-transform"
                 >
                   <div>
                     <div className="flex items-center justify-between pb-3">

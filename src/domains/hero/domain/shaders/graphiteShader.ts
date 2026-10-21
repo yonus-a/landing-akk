@@ -94,6 +94,8 @@ export const graphiteFragmentShader = /* glsl */ `
     // 3. Tonal brightness mapping for shading
     float luma = smoothstep(0.06, 0.94, mc);
     luma = pow(luma, uShadeDensity);
+    // Lift the deepest tones so dark surfaces read as shaded detail, not solid fill
+    luma = mix(0.14, 1.0, luma);
 
     // Aspect-ratio normalized pixel coords for cross-hatch strokes
     vec2 p = vUv * (uResolution / min(uResolution.x, uResolution.y)) * 480.0;
@@ -124,7 +126,7 @@ export const graphiteFragmentShader = /* glsl */ `
     }
 
     // Soft graphite powder smudge
-    float smudge = (1.0 - luma) * (0.32 + 0.28 * leadGrain);
+    float smudge = (1.0 - luma) * (0.22 + 0.20 * leadGrain);
 
     // ── 4A. LIGHT MODE SKETCHBOOK COMPOSITION ──────────────────
     // Sample un-jittered center pixel from tDiffuse to protect branding text & specular highlights (#ffffff)

@@ -5,6 +5,7 @@ import { ServicesSection } from "@/components/ServicesSection";
 import { WorkflowSection } from "@/components/WorkflowSection";
 import { GlobalDeliverySection } from "@/components/GlobalDeliverySection";
 import { WhyUsSection } from "@/components/WhyUsSection";
+import { TeamSection } from "@/components/TeamSection";
 import { CostEstimatorForm } from "@/components/CostEstimatorForm";
 import { GlobalHubsSection } from "@/components/GlobalHubsSection";
 import { FaqSection } from "@/components/FaqSection";
@@ -31,6 +32,7 @@ export default function Home() {
         <WhyUsSection />
         {/* <CostEstimatorForm /> */}
         <GlobalHubsSection />
+        <TeamSection />
         <FaqSection />
       </main>
 

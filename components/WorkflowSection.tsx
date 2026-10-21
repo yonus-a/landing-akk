@@ -28,7 +28,7 @@ export function WorkflowSection() {
       document: "برگه رسمی آنالیز بهای تمام‌شده (Cost Sheet)",
       icon: Calculator,
       description:
-        "در گام نخست، کارشناسان بازرگانی جهان‌گستر مشخصات کالا، کد تعرفه گمرکی (HS Code)، حقوق ورودی، ارزش گمرکی (TSC) و هزینه‌های حمل را بررسی کرده و پیش‌بینی ۱۰۰٪ دقیقی از بهای تمام‌شده ریالی تا تحویل نهایی به خریدار ارائه می‌دهند.",
+        "در گام نخست، کارشناسان جهان‌گستر مشخصات کالا، کد تعرفه گمرکی (HS Code)، حقوق ورودی، ارزش گمرکی (TSC) و هزینه‌های حمل را بررسی کرده و پیش‌بینی ۱۰۰٪ دقیقی از بهای تمام‌شده ریالی تا تحویل نهایی به خریدار ارائه می‌دهند.",
       tasks: [
         "بررسی ردیف تعرفه و بخشنامه‌های جاری گمرکی",
         "محاسبه حقوق و عوارض گمرکی، مالیات ارزش افزوده و پسماند",
@@ -206,7 +206,7 @@ export function WorkflowSection() {
         </div>
 
         {/* Detailed Active Step Card with Framer Motion Transition */}
-        <div className="bg-zinc-900/70 border border-zinc-800/80 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-md relative overflow-hidden">
+        <div className="bg-zinc-900/70 border border-zinc-800/80 rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
           
           <AnimatePresence mode="wait">
             <motion.div
