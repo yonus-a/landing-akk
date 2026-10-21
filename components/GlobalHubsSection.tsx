@@ -19,7 +19,7 @@ export function GlobalHubsSection() {
       phone: "+98 21 88000000",
       role: "مدیریت قراردادها، امور بانکی و ارزی، سامانه جامع تجارت و هماهنگی کل شعب",
       coords: "35.7575° N, 51.4100° E",
-      type: "HEADQUARTERS",
+      type: "دفتر مرکزی",
     },
     {
       city: "دفتر و انبار امارات (دبی)",
@@ -28,7 +28,7 @@ export function GlobalHubsSection() {
       phone: "+971 4 000 0000",
       role: "انبار تجمیع کالا در جبل‌علی، ترانزیت هوایی و دریایی، حوالجات درهم و خدمات ری‌اکسپورت",
       coords: "25.1972° N, 55.2744° E",
-      type: "OPERATIONAL HUB",
+      type: "هاب عملیاتی",
     },
     {
       city: "دفتر و انبار چین (گوانجو و ایوو)",
@@ -37,7 +37,7 @@ export function GlobalHubsSection() {
       phone: "+86 20 0000 0000",
       role: "منبع‌یابی کارخانجات، بازرسی فنی و کیفی کالا، صدور بارنامه کانتینری و حواله یوان مستقیم",
       coords: "23.1291° N, 113.2644° E",
-      type: "SOURCING & CONSOLIDATION",
+      type: "مرکز منبع‌یابی و تجمیع",
     },
     {
       city: "دفتر و هاب ترانزیت ترکیه (استانبول)",
@@ -46,7 +46,7 @@ export function GlobalHubsSection() {
       phone: "+90 212 000 0000",
       role: "خرید قطعات خودرو و ماشین‌آلات صنعتی، هماهنگی کاروان تیر زمینی (TIR) به مقصد گمرک بازرگان",
       coords: "41.0082° N, 28.9784° E",
-      type: "EUROPEAN TRANSIT",
+      type: "هاب ترانزیت اروپا",
     },
   ];
 
@@ -55,42 +55,42 @@ export function GlobalHubsSection() {
       name: "گمرک شهید رجایی بندرعباس",
       specialty: "بزرگترین بندر کانتینری کشور، ترخیص FCL و کانتینرهای سنگین، خودرو و قطعات یدکی",
       icon: Anchor,
-      tag: "MARITIME HUB",
+      tag: "بندر کانتینری",
       time: "۵ الی ۸ روز کاری",
     },
     {
       name: "گمرک فرودگاه بین‌المللی امام خمینی (ره)",
       specialty: "کارگو هوایی، ترخیص فوری نمونه کالاها، قطعات حساس الکترونیکی و دارو و لوازم پزشکی",
       icon: Plane,
-      tag: "AIR CARGO HUB",
+      tag: "کارگو هوایی",
       time: "۲ الی ۴ روز کاری",
     },
     {
       name: "گمرک بوشهر",
       specialty: "تخصصی خودروهای سبک، کشنده‌ها، لوازم خانگی و کالاهای مشمول تخفیف ۲۰ درصدی ملوانی",
       icon: Anchor,
-      tag: "AUTOMOTIVE PORT",
+      tag: "بندر تخصصی خودرو",
       time: "۶ الی ۹ روز کاری",
     },
     {
       name: "گمرک بازرگان و رازی",
       specialty: "دروازه ترانزیت زمینی اروپا و ترکیه، پذیرش کامیون‌های چادری و تریلرهای کشنده جاده‌ای",
       icon: Truck,
-      tag: "LAND TRANSIT",
+      tag: "ترانزیت زمینی",
       time: "۳ الی ۵ روز کاری",
     },
     {
       name: "گمرک خرمشهر و منطقه آزاد اروند",
       specialty: "ترخیص ماشین‌آلات راه‌سازی و معدنی، فولاد، قطعات سنگین و مزایای معافیت‌های منطقه آزاد",
       icon: Anchor,
-      tag: "FREE ZONE PORT",
+      tag: "بندر منطقه آزاد",
       time: "۵ الی ۷ روز کاری",
     },
     {
       name: "گمرک غرب تهران و شهریار",
       specialty: "ترخیص ترانزیت داخلی، انبار اختصاصی قطعات یدکی خودرو و تسویه در قلب پایتخت",
       icon: Layers,
-      tag: "INLAND DEPOT",
+      tag: "گمرک پایتخت",
       time: "۳ الی ۵ روز کاری",
     },
   ];
@@ -101,11 +101,6 @@ export function GlobalHubsSection() {
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3 pb-12 sm:pb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-transparent dark:border-zinc-800 text-xs font-mono text-zinc-600 dark:text-zinc-400 shadow-2xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-            <span>{"// 05 — GLOBAL NETWORK & CUSTOMS DEPLOYMENT"}</span>
-          </div>
-
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-950 dark:text-white tracking-tight">
             دفاتر بین‌المللی و گمرکات تحت پوشش مستقیم
           </h2>
@@ -124,7 +119,7 @@ export function GlobalHubsSection() {
               </h3>
             </div>
             <span className="text-xs font-mono text-zinc-400">
-              4 OPERATING HUBS
+              ۴ هاب عملیاتی فعال
             </span>
           </div>
 
@@ -175,7 +170,7 @@ export function GlobalHubsSection() {
               </h3>
             </div>
             <span className="text-xs font-mono text-zinc-400">
-              ON-SITE RESIDENT BROKERS
+              کارگزاران رسمی مقیم
             </span>
           </div>
 

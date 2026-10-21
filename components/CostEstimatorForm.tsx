@@ -103,11 +103,6 @@ export function CostEstimatorForm() {
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3 pb-12 sm:pb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white text-xs font-mono text-zinc-600 shadow-2xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-zinc-950" />
-            <span>{"// 04 — SMART INQUIRY & COST CALCULATOR"}</span>
-          </div>
-
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-950 tracking-tight">
             استعلام آنلاین هزینه حمل، واردات و ترخیص
           </h2>

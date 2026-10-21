@@ -153,15 +153,6 @@ export function FaqSection() {
           {/* Right Column: Sticky Header, Search & Bento Support Card */}
           <div className="lg:col-span-5 lg:sticky lg:top-28 space-y-6">
             <div className="space-y-4">
-              {/* Technical Badge */}
-              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 text-xs font-mono text-zinc-600 dark:text-zinc-400 shadow-2xs">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-zinc-950 dark:bg-amber-400" />
-                </span>
-                <span dir="ltr">{"// 06 — KNOWLEDGE BASE & FAQ"}</span>
-              </div>
-
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-950 dark:text-white tracking-tight leading-[1.25]">
                 پرسش‌های متداول{" "}
                 <span className="text-zinc-500 dark:text-zinc-400 font-extrabold block sm:inline">

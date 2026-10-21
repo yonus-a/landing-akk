@@ -142,11 +142,6 @@ export function WorkflowSection() {
           transition={{ duration: 0.5 }}
           className="text-center max-w-3xl mx-auto space-y-3 pb-12 sm:pb-16"
         >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-mono text-amber-400 shadow-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-            <span>{"// 02 — WORKFLOW & LOGISTICS BLUEPRINT"}</span>
-          </div>
-
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">
             فرآیند ۶ مرحله‌ای واردات و ترخیص کالا
           </h2>

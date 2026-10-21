@@ -1869,13 +1869,7 @@ export function GlobalDeliverySection() {
       <div className="relative z-10 w-full max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-8 pointer-events-none">
         {/* Right Column: Text Content with exact site typography hierarchy */}
         <div className="max-w-xl pointer-events-auto space-y-4 bg-white/85 dark:bg-zinc-900/85 backdrop-blur-md p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] border border-zinc-100/80 dark:border-zinc-800/80">
-          {/* Badge Tag */}
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-zinc-900 dark:bg-amber-400" />
-            <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-wider">
-              {"// 02.5 — GLOBAL REACH TO FINAL DELIVERY"}
-            </span>
-          </div>
+        
 
           {/* Main Title matching Services & Workflow sections */}
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-950 dark:text-white tracking-tight leading-tight">

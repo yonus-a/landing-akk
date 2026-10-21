@@ -133,10 +133,6 @@ export function WhyUsSection() {
         {/* Clean Minimal Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
           <div className="space-y-2.5">
-            <div className="inline-flex items-center gap-2 text-xs font-mono text-amber-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              <span dir="ltr">{"// 03 — WHY ARIAN KHODRO"}</span>
-            </div>
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               تمایز اجرایی ما در بازرگانی و ترخیص
             </h2>

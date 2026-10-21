@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import {
   Globe2,
   Car,
@@ -21,8 +21,6 @@ export function ServicesSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const row1CardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const row2CardsRef = useRef<(HTMLDivElement | null)[]>([]);
-  const progressBarRef = useRef<HTMLDivElement>(null);
-  const [activeRow, setActiveRow] = useState(1);
 
   const services = [
     {
@@ -141,9 +139,6 @@ export function ServicesSection() {
             scrub: 1.2,
             pin: true,
             anticipatePin: 1,
-            onUpdate: (self) => {
-              setActiveRow(self.progress > 0.5 ? 2 : 1);
-            },
           },
         });
 
@@ -179,16 +174,6 @@ export function ServicesSection() {
           },
           0.1
         );
-
-        // ۳. نوار پیشرفت
-        if (progressBarRef.current) {
-          tl.fromTo(
-            progressBarRef.current,
-            { scaleX: 0.5 },
-            { scaleX: 1, ease: "none", duration: 1 },
-            0
-          );
-        }
       });
     },
     { scope: sectionRef }
@@ -205,12 +190,6 @@ export function ServicesSection() {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-8">
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-zinc-900 dark:bg-amber-400" />
-              <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400 tracking-wider">
-                {"// 01 — COMMERCIAL & LOGISTICS SPECS"}
-              </span>
-            </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-950 dark:text-white tracking-tight">
               خدمات جامع بازرگانی و ترخیص آریان خودرو
             </h2>
@@ -220,19 +199,6 @@ export function ServicesSection() {
           </div>
 
           <div className="flex items-center gap-4 self-start md:self-end">
-            <div className="hidden sm:flex items-center gap-2.5 bg-zinc-100 dark:bg-zinc-900 px-3.5 py-2 rounded-full border border-zinc-200/70 dark:border-zinc-800">
-              <span className="font-mono text-xs font-bold text-zinc-900 dark:text-zinc-100">
-                0{activeRow}
-              </span>
-              <div className="w-12 h-1 bg-zinc-300 dark:bg-zinc-700 rounded-full overflow-hidden">
-                <div
-                  ref={progressBarRef}
-                  className="w-full h-full bg-zinc-950 dark:bg-amber-400 origin-right"
-                />
-              </div>
-              <span className="font-mono text-xs text-zinc-400">02</span>
-            </div>
-
             <a
               href="#estimator"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-zinc-950 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-950 text-xs sm:text-sm font-bold transition-all duration-200 shadow-sm"
@@ -261,10 +227,7 @@ export function ServicesSection() {
                       <Icon className="w-5 h-5" strokeWidth={1.5} />
                     </div>
                   </div>
-                  <div className="font-mono text-[10px] text-zinc-400 tracking-wider">
-                    {service.tag}
-                  </div>
-                  <h3 className="text-base font-bold text-zinc-950 dark:text-white mt-1 mb-2">
+                  <h3 className="text-base font-bold text-zinc-950 dark:text-white mb-2">
                     {service.title}
                   </h3>
                   <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
@@ -322,10 +285,7 @@ export function ServicesSection() {
                         <Icon className="w-5 h-5" strokeWidth={1.5} />
                       </div>
                     </div>
-                    <div className="font-mono text-[10px] text-zinc-400 tracking-wider">
-                      {service.tag}
-                    </div>
-                    <h3 className="text-base font-bold text-zinc-950 dark:text-white mt-1 mb-2">
+                    <h3 className="text-base font-bold text-zinc-950 dark:text-white mb-2">
                       {service.title}
                     </h3>
                     <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed line-clamp-2">
@@ -381,10 +341,7 @@ export function ServicesSection() {
                         <Icon className="w-5 h-5" strokeWidth={1.5} />
                       </div>
                     </div>
-                    <div className="font-mono text-[10px] text-zinc-400 tracking-wider">
-                      {service.tag}
-                    </div>
-                    <h3 className="text-base font-bold text-zinc-950 dark:text-white mt-1 mb-2">
+                    <h3 className="text-base font-bold text-zinc-950 dark:text-white mb-2">
                       {service.title}
                     </h3>
                     <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed line-clamp-2">
