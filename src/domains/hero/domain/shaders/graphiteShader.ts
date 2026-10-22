@@ -10,8 +10,8 @@
  *  6. Seamless perimeter edge feathering to pure white (#ffffff) or brand navy (#1e295a)
  *  7. Dual-Engine Light/Dark Mode:
  *     - Light Mode: Classic graphite pencil sketch on pure white archival paper
- *     - Dark Mode: Technical architectural blueprint with luminous platinum chalk lines
- *       and soft titanium-slate cross-hatching on brand-navy paper
+ *     - Dark Mode: Technical architectural blueprint with luminous platinum chalk lines,
+ *       soft titanium-slate cross-hatching and muted slate fills for bright surfaces on brand-navy paper
  *  8. Muted watercolor wash of the scene's real colors beneath the pencil work
  *  9. Ocean pixels (flagged via render-target alpha) are inked in the brand colors
  */
@@ -180,15 +180,18 @@ export const graphiteFragmentShader = /* glsl */ `
 
     float shadeFactor = clamp(smudge + hatch1 + hatch2 + hatch3, 0.0, 0.85);
 
-    // Clean highlight for bright white container, rims, wave crests
-    float whiteHighlight = smoothstep(0.70, 0.95, centerLuma) * 0.30;
+    // Bright surfaces (white cabs, containers, sunlit roads, pale facades) become a muted slate
+    // fill that keeps their hue, instead of pure white glaring against the navy paper
+    vec3 darkBright = mix(darkPaper, centerCol, 0.42);
+    // Faint sparkle reserved for true specular hits (rims, wave crests)
+    float whiteHighlight = smoothstep(0.93, 1.0, centerLuma) * 0.08;
 
     vec3 darkResult = mix(darkPaper, muted, 0.30 * (1.0 - oceanMask));
     darkResult = mix(darkResult, brandAccent, oceanMask * 0.12);
     darkResult = mix(darkResult, shadeChalk, shadeFactor);
+    darkResult = mix(darkResult, darkBright, whiteMask);
     darkResult += vec3(whiteHighlight);
-    darkResult = mix(darkResult, lineChalk, pencilOutline * (1.0 - whiteMask));
-    darkResult = mix(darkResult, vec3(1.0, 1.0, 1.0), whiteMask);
+    darkResult = mix(darkResult, lineChalk, pencilOutline * mix(1.0, 0.75, whiteMask));
 
     // ── 5. SEAMLESS THEME BLEND & PERIMETER FEATHERING ─────────
     vec3 finalSketch = mix(lightResult, darkResult, uDark);
