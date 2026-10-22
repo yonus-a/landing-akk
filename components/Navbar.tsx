@@ -82,7 +82,7 @@ export function Navbar() {
 
           <a
             href="tel:02188000000"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white text-xs sm:text-sm font-bold font-mono transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white text-xs sm:text-sm font-bold tabular-nums transition-colors"
             dir="ltr"
           >
             <Phone className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" strokeWidth={2} />
@@ -141,7 +141,7 @@ export function Navbar() {
           <div className="pt-3 flex flex-col gap-2">
             <a
               href="tel:02188000000"
-              className="flex items-center justify-center gap-2 py-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-sm font-bold font-mono"
+              className="flex items-center justify-center gap-2 py-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-sm font-bold tabular-nums"
               dir="ltr"
             >
               <Phone className="w-4 h-4 text-amber-600 dark:text-amber-400" strokeWidth={1.75} />

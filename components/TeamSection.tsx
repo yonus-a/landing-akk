@@ -138,13 +138,13 @@ function TeamCard({ member }: { member: TeamMember }) {
         <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-[radial-gradient(420px_circle_at_var(--mx,50%)_var(--my,50%),rgba(255,255,255,0.22),transparent_45%)]" />
 
         {/* Member code */}
-        <span className="absolute top-3 right-3 font-mono text-xs font-bold px-2 py-1 rounded-full bg-white/80 dark:bg-zinc-950/70 backdrop-blur text-zinc-700 dark:text-zinc-300 transition-colors duration-300 group-hover:bg-brand-accent group-hover:text-white">
+        <span className="absolute top-3 right-3 tabular-nums text-xs font-bold px-2 py-1 rounded-full bg-white/80 dark:bg-zinc-950/70 backdrop-blur text-zinc-700 dark:text-zinc-300 transition-colors duration-300 group-hover:bg-brand-accent group-hover:text-white">
           {member.code}
         </span>
 
         {/* Info panel: name always visible, bio and contacts slide up on hover */}
         <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-[#0f1530]/95 via-brand/75 to-transparent pt-16 px-4 pb-4 text-white">
-          <p className="font-mono text-[10px] tracking-widest text-[#9fb9ff]">
+          <p className="tabular-nums text-[10px] tracking-widest text-[#9fb9ff]">
             {member.roleEn}
           </p>
           <h3 className="text-base font-black leading-snug mt-0.5">{member.name}</h3>

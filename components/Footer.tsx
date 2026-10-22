@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import { RoutePattern } from "@/components/RoutePattern";
 import {
   Phone,
   Mail,
@@ -35,13 +36,23 @@ export function Footer() {
   ];
 
   return (
-    <footer className="relative w-full bg-zinc-950 text-white pt-20 pb-12" dir="rtl">
+    <footer className="relative w-full bg-zinc-950 text-white pt-20 pb-12 overflow-hidden" dir="rtl">
+      <RoutePattern
+        className="opacity-45"
+        hub={{ x: 360, y: 560 }}
+        origins={[
+          { x: 1400, y: 140 },
+          { x: 900, y: -20 },
+          { x: 1420, y: 860 },
+          { x: 40, y: 80 },
+        ]}
+      />
       <div className="relative max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 z-10">
         
         {/* Top CTA Banner (NO borders) */}
         <div className="p-8 sm:p-11 rounded-3xl bg-zinc-900 mb-16 flex flex-col lg:flex-row items-center justify-between gap-6 shadow-[0_20px_50px_rgba(15,21,48,0.3)]">
           <div className="space-y-2 text-center lg:text-right">
-            <span className="font-mono text-xs text-amber-400 font-bold tracking-wider">
+            <span className="tabular-nums text-xs text-amber-400 font-bold tracking-wider">
               READY FOR GLOBAL TRADE?
             </span>
             <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-white">
@@ -90,7 +101,7 @@ export function Footer() {
                 <span className="text-lg font-black text-white tracking-tight">
                   جهان‌گستر
                 </span>
-                <div className="text-[10px] font-mono text-zinc-500">
+                <div className="text-[10px] tabular-nums text-zinc-500">
                   JAHAN-GOSTAR
                 </div>
               </div>
@@ -100,7 +111,7 @@ export function Footer() {
               گروه بین‌المللی بازرگانی و لجستیک جهان‌گستر با بیش از ۱۵ سال سابقه مستمر، ارائه‌دهنده زنجیره صفر تا صد خدمات بازرگانی خارجی، واردات خودرو و قطعات یدکی، حمل دریایی و هوایی و ترخیص تخصصی از کلیه گمرکات کشور می‌باشد.
             </p>
 
-            <div className="pt-2 flex items-center gap-2 text-xs font-mono text-zinc-400">
+            <div className="pt-2 flex items-center gap-2 text-xs tabular-nums text-zinc-400">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span>عضو رسمی اتاق بازرگانی ایران و چین</span>
             </div>
@@ -108,7 +119,7 @@ export function Footer() {
 
           {/* Column 2: Quick Links (2 cols) */}
           <div className="lg:col-span-2 space-y-3">
-            <div className="text-xs font-mono text-zinc-300 font-bold pb-1">
+            <div className="text-xs tabular-nums text-zinc-300 font-bold pb-1">
               دسترسی سریع
             </div>
             <ul className="space-y-2 text-xs">
@@ -127,7 +138,7 @@ export function Footer() {
 
           {/* Column 3: Specialized Services (3 cols) */}
           <div className="lg:col-span-3 space-y-3">
-            <div className="text-xs font-mono text-zinc-300 font-bold pb-1">
+            <div className="text-xs tabular-nums text-zinc-300 font-bold pb-1">
               خدمات تخصصی بازرگانی
             </div>
             <ul className="space-y-2 text-xs">
@@ -146,7 +157,7 @@ export function Footer() {
 
           {/* Column 4: Contact & Working Hours (3 cols) */}
           <div className="lg:col-span-3 space-y-3">
-            <div className="text-xs font-mono text-zinc-300 font-bold pb-1">
+            <div className="text-xs tabular-nums text-zinc-300 font-bold pb-1">
               تماس با دفتر مرکزی تهران
             </div>
 
@@ -162,7 +173,7 @@ export function Footer() {
                 <Phone className="w-4 h-4 text-amber-500 shrink-0" />
                 <a
                   href="tel:02188000000"
-                  className="font-mono text-white font-bold hover:underline"
+                  className="tabular-nums text-white font-bold hover:underline"
                   dir="ltr"
                 >
                   021-88000000 (۱۰ خط)
@@ -171,7 +182,7 @@ export function Footer() {
 
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-zinc-500 shrink-0" />
-                <span className="font-mono">info@ariankhodro-trading.com</span>
+                <span className="tabular-nums">info@ariankhodro-trading.com</span>
               </div>
 
               <div className="flex items-start gap-2.5 pt-1">
@@ -200,7 +211,7 @@ export function Footer() {
         </div>
 
         {/* Bottom Copyright & Blueprint Specs (NO borders) */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-zinc-500 font-mono">
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-zinc-500 tabular-nums">
           <div>
             © {currentYear} جهان‌گستر. تمامی حقوق مادی و معنوی محفوظ است.
           </div>

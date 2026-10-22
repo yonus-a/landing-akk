@@ -26,6 +26,8 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl" className="antialiased" suppressHydrationWarning>
       <head>
+        <link rel="preload" href="/fonts/Estedad/Estedad-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/Estedad/Estedad-Bold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <script
           dangerouslySetInnerHTML={{
             __html: `

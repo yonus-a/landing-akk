@@ -229,7 +229,7 @@ export function ServicesSection() {
               >
                 <div>
                   <div className="flex items-center justify-between pb-3">
-                    <span className="font-mono text-2xl font-black text-zinc-300 dark:text-zinc-700">
+                    <span className="tabular-nums text-2xl font-black text-zinc-300 dark:text-zinc-700">
                       {service.code}
                     </span>
                     <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs">
@@ -262,7 +262,7 @@ export function ServicesSection() {
                     <span>استعلام و مشاوره</span>
                     <ArrowUpLeft className="w-3.5 h-3.5" />
                   </a>
-                  <span className="font-mono text-[10px] text-zinc-400">
+                  <span className="tabular-nums text-[10px] text-zinc-400">
                     ARCH-SERIES
                   </span>
                 </div>
@@ -287,7 +287,7 @@ export function ServicesSection() {
                 >
                   <div>
                     <div className="flex items-center justify-between pb-3">
-                      <span className="font-mono text-2xl font-black text-zinc-300 dark:text-zinc-700 group-hover:text-zinc-900 dark:group-hover:text-amber-400 transition-colors">
+                      <span className="tabular-nums text-2xl font-black text-zinc-300 dark:text-zinc-700 group-hover:text-zinc-900 dark:group-hover:text-amber-400 transition-colors">
                         {service.code}
                       </span>
                       <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs group-hover:bg-zinc-950 dark:group-hover:bg-amber-500 group-hover:text-white dark:group-hover:text-zinc-950 transition-colors">
@@ -320,7 +320,7 @@ export function ServicesSection() {
                       <span>استعلام و مشاوره</span>
                       <ArrowUpLeft className="w-3.5 h-3.5" />
                     </a>
-                    <span className="font-mono text-[10px] text-zinc-400">
+                    <span className="tabular-nums text-[10px] text-zinc-400">
                       ARCH-SERIES
                     </span>
                   </div>
@@ -343,7 +343,7 @@ export function ServicesSection() {
                 >
                   <div>
                     <div className="flex items-center justify-between pb-3">
-                      <span className="font-mono text-2xl font-black text-zinc-300 dark:text-zinc-700 group-hover:text-zinc-900 dark:group-hover:text-amber-400 transition-colors">
+                      <span className="tabular-nums text-2xl font-black text-zinc-300 dark:text-zinc-700 group-hover:text-zinc-900 dark:group-hover:text-amber-400 transition-colors">
                         {service.code}
                       </span>
                       <div className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs group-hover:bg-zinc-950 dark:group-hover:bg-amber-500 group-hover:text-white dark:group-hover:text-zinc-950 transition-colors">
@@ -376,7 +376,7 @@ export function ServicesSection() {
                       <span>استعلام و مشاوره</span>
                       <ArrowUpLeft className="w-3.5 h-3.5" />
                     </a>
-                    <span className="font-mono text-[10px] text-zinc-400">
+                    <span className="tabular-nums text-[10px] text-zinc-400">
                       ARCH-SERIES
                     </span>
                   </div>
@@ -396,7 +396,7 @@ export function ServicesSection() {
           </div>
           <a
             href="tel:02188000000"
-            className="shrink-0 text-xs font-bold font-mono px-4 py-2 rounded-full bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors border border-zinc-200 dark:border-zinc-700"
+            className="shrink-0 text-xs font-bold tabular-nums px-4 py-2 rounded-full bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors border border-zinc-200 dark:border-zinc-700"
             dir="ltr"
           >
             021-88000000 EXT: 104

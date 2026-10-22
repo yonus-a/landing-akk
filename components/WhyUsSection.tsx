@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { RoutePattern } from "@/components/RoutePattern";
 import {
   Building2,
   Receipt,
@@ -125,6 +126,17 @@ export function WhyUsSection() {
       className="relative w-full py-16 sm:py-20 bg-zinc-950 text-white overflow-hidden"
       dir="rtl"
     >
+      <RoutePattern
+        className="opacity-50"
+        hub={{ x: 1120, y: 300 }}
+        origins={[
+          { x: 80, y: 160 },
+          { x: 240, y: 820 },
+          { x: 820, y: 880 },
+          { x: 1420, y: 820 },
+        ]}
+      />
+
       {/* Minimal Ambient Glow */}
       <div className="pointer-events-none absolute top-0 right-1/3 w-[500px] h-[300px] bg-amber-500/[0.05] rounded-full blur-[120px]" />
 
@@ -204,7 +216,7 @@ export function WhyUsSection() {
                         {item.title}
                       </h3>
                       <span
-                        className={`font-mono text-[10px] ${
+                        className={`tabular-nums text-[10px] ${
                           isActive ? "text-amber-400" : "text-zinc-600"
                         }`}
                       >

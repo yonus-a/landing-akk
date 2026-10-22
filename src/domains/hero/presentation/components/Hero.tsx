@@ -315,7 +315,7 @@ export function Hero() {
                       </span>
                     )}
                     <div>
-                      <span className="font-bold text-zinc-900 dark:text-white font-mono text-xs sm:text-sm ml-1">
+                      <span className="font-bold text-zinc-900 dark:text-white tabular-nums text-xs sm:text-sm ml-1">
                         {stat.value}
                       </span>
                       <span>{stat.label}</span>

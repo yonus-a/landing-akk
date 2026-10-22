@@ -14,6 +14,7 @@ import {
   Layers,
   FileSpreadsheet,
 } from "lucide-react";
+import { RoutePattern } from "@/components/RoutePattern";
 
 export function WorkflowSection() {
   const [activeStep, setActiveStep] = useState(0);
@@ -128,6 +129,17 @@ export function WorkflowSection() {
 
   return (
     <section id="workflow" className="relative w-full py-24 sm:py-32 bg-zinc-950 text-white overflow-hidden" dir="rtl">
+      <RoutePattern
+        className="opacity-60"
+        hub={{ x: 760, y: 470 }}
+        origins={[
+          { x: 60, y: 120 },
+          { x: 1400, y: 110 },
+          { x: 1380, y: 760 },
+          { x: 180, y: 820 },
+        ]}
+      />
+
       {/* Background Decorative Glows */}
       <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -185,7 +197,7 @@ export function WorkflowSection() {
 
                 <div className="flex items-center justify-between relative z-10">
                   <span
-                    className={`font-mono text-xs font-bold ${
+                    className={`tabular-nums text-xs font-bold ${
                       isActive ? "text-amber-400" : "text-zinc-500"
                     }`}
                   >
@@ -222,7 +234,7 @@ export function WorkflowSection() {
               <div className="lg:col-span-7 space-y-6">
                 <div className="space-y-3">
                   <div className="flex items-center gap-2.5">
-                    <span className="font-mono text-xs px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold">
+                    <span className="tabular-nums text-xs px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold">
                       گام {currentStep.step}
                     </span>
                     <span className="text-xs text-zinc-400 font-medium">
@@ -280,7 +292,7 @@ export function WorkflowSection() {
                   >
                     گام بعدی →
                   </button>
-                  <span className="text-xs text-zinc-400 font-mono mr-auto">
+                  <span className="text-xs text-zinc-400 tabular-nums mr-auto">
                     پیشرفت چرخه: {Math.round(((activeStep + 1) / steps.length) * 100)}٪
                   </span>
                 </div>
@@ -289,7 +301,7 @@ export function WorkflowSection() {
               {/* Right 5 Cols: Technical Meta & Deliverables Sheet */}
               <div className="lg:col-span-5 bg-zinc-950/60 border border-zinc-800/80 rounded-2xl p-6 sm:p-7 space-y-5 shadow-inner">
                 <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-                  <span className="text-xs font-mono font-bold text-amber-400">
+                  <span className="text-xs tabular-nums font-bold text-amber-400">
                     مشخصات اجرایی گام {currentStep.step}
                   </span>
                   <FileSpreadsheet className="w-4 h-4 text-zinc-400" />

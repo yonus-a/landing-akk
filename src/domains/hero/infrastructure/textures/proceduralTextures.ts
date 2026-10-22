@@ -154,7 +154,7 @@ export function createHeroContainerTexture(): THREE.CanvasTexture {
   ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = "900 96px 'Vazirmatn', Tahoma, sans-serif";
+  ctx.font = "900 96px 'Estedad', Tahoma, sans-serif";
   ctx.shadowColor = "transparent";
   ctx.shadowBlur = 0;
   ctx.fillStyle = "#ffffff"; // Pure White Font #FFF
@@ -169,7 +169,7 @@ export function createHeroContainerTexture(): THREE.CanvasTexture {
   ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = "900 38px 'Vazirmatn', sans-serif";
+  ctx.font = "900 38px 'Estedad', sans-serif";
   ctx.shadowColor = "transparent";
   ctx.shadowBlur = 0;
   ctx.fillStyle = "#ffffff";
@@ -178,7 +178,7 @@ export function createHeroContainerTexture(): THREE.CanvasTexture {
 
   // Operational Subtitle in 100% Pure White (#FFFFFF / #FFF)
   ctx.textAlign = "center";
-  ctx.font = "bold 20px monospace";
+  ctx.font = "bold 20px 'Estedad', sans-serif";
   ctx.fillStyle = "#ffffff";
   ctx.fillText("INTERNATIONAL TRADE • LOGISTICS • TIR CARNET", 1024, 290);
 
@@ -207,14 +207,14 @@ export function createHeroContainerTexture(): THREE.CanvasTexture {
 
   ctx.textAlign = "left";
   ctx.fillStyle = "#0f172a";
-  ctx.font = "bold 24px monospace";
+  ctx.font = "bold 24px 'Estedad', sans-serif";
   ctx.fillText("AKME  948210  5", 1755, 120);
   ctx.fillStyle = "#d97706";
-  ctx.font = "bold 20px monospace";
+  ctx.font = "bold 20px 'Estedad', sans-serif";
   ctx.fillText("45G1  HIGH CUBE", 1755, 155);
 
   ctx.fillStyle = "#334155";
-  ctx.font = "16px monospace";
+  ctx.font = "16px 'Estedad', sans-serif";
   ctx.fillText("MAX GROSS  32,500 KG", 1755, 195);
   ctx.fillText("TARE        3,840 KG", 1755, 225);
   ctx.fillText("PAYLOAD    28,660 KG", 1755, 255);
@@ -435,7 +435,7 @@ export function createShipContainerTexture(): THREE.CanvasTexture {
   ctx.strokeRect(344, 44, 336, 68);
 
   ctx.fillStyle = "#ffffff";
-  ctx.font = "900 36px monospace";
+  ctx.font = "900 36px 'Estedad', sans-serif";
   ctx.textAlign = "center";
   ctx.fillText("JAHAN 45G1", 512, 88);
 
@@ -447,14 +447,14 @@ export function createShipContainerTexture(): THREE.CanvasTexture {
   ctx.strokeRect(724, 44, 242, 142);
 
   ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 20px monospace";
+  ctx.font = "bold 20px 'Estedad', sans-serif";
   ctx.textAlign = "left";
   ctx.fillText("AKME  948210  5", 736, 75);
   ctx.fillStyle = "#facc15";
-  ctx.font = "bold 17px monospace";
+  ctx.font = "bold 17px 'Estedad', sans-serif";
   ctx.fillText("45G1  HIGH CUBE", 736, 105);
   ctx.fillStyle = "#ffffff";
-  ctx.font = "14px monospace";
+  ctx.font = "14px 'Estedad', sans-serif";
   ctx.fillText("MAX GROSS  32,500 KG", 736, 135);
   ctx.fillText("PAYLOAD    28,660 KG", 736, 160);
 
@@ -500,7 +500,7 @@ export function createShipHullDecalTexture(): THREE.CanvasTexture {
   ctx.fillText("JAHAN-GOSTAR", 512, 60);
 
   // Subtitle
-  ctx.font = "bold 16px monospace";
+  ctx.font = "bold 16px 'Estedad', sans-serif";
   ctx.fillStyle = "#93c5fd";
   ctx.fillText("GLOBAL LOGISTICS & COMMERCIAL TRADING GROUP", 512, 92);
 
@@ -527,10 +527,10 @@ export function createShipHullDecalTexture(): THREE.CanvasTexture {
 
   // IMO Number on right
   ctx.fillStyle = "#cbd5e1";
-  ctx.font = "bold 18px monospace";
+  ctx.font = "bold 18px 'Estedad', sans-serif";
   ctx.textAlign = "right";
   ctx.fillText("IMO 9842105", 980, 60);
-  ctx.font = "14px monospace";
+  ctx.font = "14px 'Estedad', sans-serif";
   ctx.fillText("PORT: BANDAR ABBAS", 980, 84);
 
   const tex = new THREE.CanvasTexture(c);

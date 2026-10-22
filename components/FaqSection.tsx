@@ -248,7 +248,7 @@ export function FaqSection() {
                     <ArrowUpLeft className="w-3.5 h-3.5 mr-auto sm:mr-0" />
                   </a>
 
-                  <div className="flex items-center justify-center gap-1.5 text-[11px] font-mono text-zinc-500 dark:text-zinc-400 px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200/50 dark:border-zinc-800/60">
+                  <div className="flex items-center justify-center gap-1.5 text-[11px] tabular-nums text-zinc-500 dark:text-zinc-400 px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200/50 dark:border-zinc-800/60">
                     <Sparkles className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                     <span>استعلام رایگان تعرفه</span>
                   </div>
@@ -313,7 +313,7 @@ export function FaqSection() {
 
                         <div className="space-y-1.5">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono text-[11px] font-bold text-zinc-400 dark:text-zinc-500">
+                            <span className="tabular-nums text-[11px] font-bold text-zinc-400 dark:text-zinc-500">
                               0{idx + 1}
                             </span>
                             <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">

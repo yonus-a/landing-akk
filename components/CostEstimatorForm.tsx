@@ -157,7 +157,7 @@ export function CostEstimatorForm() {
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-zinc-50 font-mono text-sm inline-block shadow-2xs">
+                <div className="p-4 rounded-2xl bg-zinc-50 tabular-nums text-sm inline-block shadow-2xs">
                   <span className="text-zinc-500 ml-2">کد پیگیری پرونده:</span>
                   <span className="font-bold text-zinc-950 text-base">{trackingCode}</span>
                 </div>
@@ -184,7 +184,7 @@ export function CostEstimatorForm() {
 
                 {/* Section 1: Logistics Specs */}
                 <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-xs font-mono font-bold text-zinc-400 pb-1">
+                  <div className="flex items-center gap-2 text-xs tabular-nums font-bold text-zinc-400 pb-1">
                     <span>{"// STEP A: LOGISTICS PARAMETERS"}</span>
                   </div>
 
@@ -231,7 +231,7 @@ export function CostEstimatorForm() {
                             <div className="text-[11px] font-bold line-clamp-1">
                               {st.label.split(" (")[0]}
                             </div>
-                            <div className="text-[10px] opacity-70 mt-0.5 font-mono">
+                            <div className="text-[10px] opacity-70 mt-0.5 tabular-nums">
                               {st.time}
                             </div>
                           </button>
@@ -243,7 +243,7 @@ export function CostEstimatorForm() {
 
                 {/* Section 2: Cargo Specifications */}
                 <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-xs font-mono font-bold text-zinc-400 pb-1">
+                  <div className="flex items-center gap-2 text-xs tabular-nums font-bold text-zinc-400 pb-1">
                     <span>{"// STEP B: COMMODITY DETAILS"}</span>
                   </div>
 
@@ -289,7 +289,7 @@ export function CostEstimatorForm() {
 
                 {/* Section 3: Contact & Notes */}
                 <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-xs font-mono font-bold text-zinc-400 pb-1">
+                  <div className="flex items-center gap-2 text-xs tabular-nums font-bold text-zinc-400 pb-1">
                     <span>{"// STEP C: CLIENT INFORMATION"}</span>
                   </div>
 
@@ -322,7 +322,7 @@ export function CostEstimatorForm() {
                         onChange={(e) =>
                           setFormData({ ...formData, phone: e.target.value })
                         }
-                        className="w-full p-3.5 rounded-xl bg-zinc-100/70 border-none text-xs text-zinc-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-zinc-950 font-mono text-left shadow-2xs"
+                        className="w-full p-3.5 rounded-xl bg-zinc-100/70 border-none text-xs text-zinc-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-zinc-950 tabular-nums text-left shadow-2xs"
                         required
                       />
                     </div>

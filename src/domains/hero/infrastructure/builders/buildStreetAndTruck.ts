@@ -60,7 +60,7 @@ function createPureWhiteBrandingTexture(
 
     // Main Persian Title in 100% PURE WHITE (#FFFFFF / #FFF)
     const mainFontSize = isRoofSign ? 84 : 144;
-    ctx.font = `900 ${mainFontSize}px "Vazirmatn", "IRANSans", "Tahoma", "Arial", sans-serif`;
+    ctx.font = `900 ${mainFontSize}px "Estedad", "IRANSans", "Tahoma", "Arial", sans-serif`;
     ctx.fillStyle = "#ffffff";
     ctx.fillText(primaryText, w / 2, isRoofSign ? h * 0.52 : h * 0.42);
 

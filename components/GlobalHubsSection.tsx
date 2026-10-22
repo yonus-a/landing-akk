@@ -118,7 +118,7 @@ export function GlobalHubsSection() {
                 دفاتر عملیاتی و انبارهای لجستیکی خارجی
               </h3>
             </div>
-            <span className="text-xs font-mono text-zinc-400">
+            <span className="text-xs tabular-nums text-zinc-400">
               ۴ هاب عملیاتی فعال
             </span>
           </div>
@@ -131,7 +131,7 @@ export function GlobalHubsSection() {
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-zinc-200/80 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold">
+                    <span className="text-[10px] tabular-nums px-2.5 py-1 rounded-full bg-zinc-200/80 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold">
                       {hub.type}
                     </span>
                     <MapPin className="w-4 h-4 text-zinc-400" />
@@ -149,7 +149,7 @@ export function GlobalHubsSection() {
                   </p>
                 </div>
 
-                <div className="pt-3 space-y-1 font-mono text-[10px] text-zinc-400">
+                <div className="pt-3 space-y-1 tabular-nums text-[10px] text-zinc-400">
                   <div className="truncate">GPS: {hub.coords}</div>
                   <div className="text-zinc-700 dark:text-zinc-300 font-bold" dir="ltr">
                     {hub.phone}
@@ -169,7 +169,7 @@ export function GlobalHubsSection() {
                 گمرکات تخصصی تحت پوشش مستقیم با کارگزاران مقیم
               </h3>
             </div>
-            <span className="text-xs font-mono text-zinc-400">
+            <span className="text-xs tabular-nums text-zinc-400">
               کارگزاران رسمی مقیم
             </span>
           </div>
@@ -189,10 +189,10 @@ export function GlobalHubsSection() {
 
                   <div className="space-y-1.5 flex-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono text-zinc-400">
+                      <span className="text-[10px] tabular-nums text-zinc-400">
                         {customs.tag}
                       </span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 border border-transparent dark:border-emerald-800/40 font-bold">
+                      <span className="text-[10px] tabular-nums px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 border border-transparent dark:border-emerald-800/40 font-bold">
                         میانگین: {customs.time}
                       </span>
                     </div>
