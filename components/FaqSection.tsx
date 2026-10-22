@@ -280,7 +280,7 @@ export function FaqSection() {
                 </button>
               </div>
             ) : (
-              filteredFaqs.map((faq, idx) => {
+              filteredFaqs.map((faq) => {
                 const isOpen = openId === faq.id;
                 const IconComponent = faq.icon;
 
@@ -313,9 +313,6 @@ export function FaqSection() {
 
                         <div className="space-y-1.5">
                           <div className="flex items-center gap-2">
-                            <span className="tabular-nums text-[11px] font-bold text-zinc-400 dark:text-zinc-500">
-                              0{idx + 1}
-                            </span>
                             <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
                               {faq.categoryLabel}
                             </span>

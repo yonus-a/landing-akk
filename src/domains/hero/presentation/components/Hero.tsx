@@ -206,7 +206,7 @@ export function Hero() {
         <div
           ref={canvasContainerRef}
           id="canvas-container"
-          className="relative lg:absolute lg:inset-y-0 lg:left-0 w-full h-[40dvh] sm:h-[46dvh] lg:h-full lg:w-[72%] flex items-center justify-center pointer-events-none z-0 overflow-hidden shrink-0"
+          className="relative lg:absolute lg:inset-y-0 lg:left-0 w-full flex-1 min-h-[34dvh] lg:min-h-0 lg:h-full lg:w-[72%] flex items-center justify-center pointer-events-none z-0 overflow-hidden"
           style={{
             background: "transparent",
             border: "none",
@@ -231,7 +231,7 @@ export function Hero() {
         />
 
         {/* FOREGROUND HERO CONTENT: Pure, Borderless, Box-Free Right-Aligned Typography */}
-        <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12 xl:px-16 flex-1 flex flex-col justify-end lg:justify-center items-start lg:h-full pointer-events-none pb-2 sm:pb-4 lg:pb-0">
+        <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12 xl:px-16 shrink-0 lg:flex-1 flex flex-col justify-end lg:justify-center items-start lg:h-full pointer-events-none pb-2 sm:pb-4 lg:pb-0">
           <div
             ref={heroContentRef}
             className="relative isolate w-full max-w-lg lg:max-w-[500px] xl:max-w-[540px] flex flex-col items-start text-right space-y-2.5 sm:space-y-4 lg:space-y-5 transition-all duration-300 pointer-events-auto bg-gradient-to-t from-white via-white/95 to-transparent dark:from-zinc-950 dark:via-zinc-950/95 dark:to-transparent lg:bg-none pt-3 sm:pt-4 lg:pt-0"

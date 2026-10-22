@@ -15,15 +15,17 @@ import {
   Truck,
   MapPin,
   Clock,
+  Check,
   type LucideIcon,
 } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
 type DeliveryStage = {
-  label: string;
   eyebrow: string;
   icon: LucideIcon;
+  /** Accent for light and dark themes. */
+  accent: readonly [light: string, dark: string];
   title: string;
   description: string;
   metricLabel: string;
@@ -33,9 +35,9 @@ type DeliveryStage = {
 
 const STAGES: DeliveryStage[] = [
   {
-    label: "شبکه جهانی",
     eyebrow: "کریدورهای تأمین",
     icon: Globe2,
+    accent: ["#2a5ae0", "#8fb0ff"],
     title: "چهار قاره، یک مقصد",
     description:
       "محموله‌های شما از هامبورگ، ژوهانسبورگ، شانگهای و پرت با برنامه‌ریزی یکپارچه حمل دریایی و هوایی، مستقیم به سوی ایران هدایت می‌شوند.",
@@ -48,9 +50,9 @@ const STAGES: DeliveryStage[] = [
     ],
   },
   {
-    label: "ورود و ترخیص",
     eyebrow: "بنادر و گمرکات ایران",
     icon: FileCheck2,
+    accent: ["#b45309", "#fbbf24"],
     title: "از اسکله تا برگ سبز گمرک",
     description:
       "با ورود کالا به بندر، اظهارنامه EPL ثبت، آزمون‌های استاندارد و قرنطینه پیگیری و پروانه ترخیص بدون رسوب و دموراژ صادر می‌شود.",
@@ -63,9 +65,9 @@ const STAGES: DeliveryStage[] = [
     ],
   },
   {
-    label: "تحویل نهایی",
     eyebrow: "درب انبار شما",
     icon: PackageCheck,
+    accent: ["#047857", "#34d399"],
     title: "تحویل دست‌به‌دست، با خیال آسوده",
     description:
       "کالا با ناوگان سنگین و بارنامه رسمی جاده‌ای به انبار، کارخانه یا فروشگاه شما می‌رسد و با امضای صورتجلسه تحویل، چرخه کامل می‌شود.",
@@ -82,7 +84,6 @@ const STAGES: DeliveryStage[] = [
 export function GlobalDeliverySection() {
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const progressBarRef = useRef<HTMLDivElement>(null);
   const [stage, setStage] = useState(0);
   const current = STAGES[stage];
   const StageIcon = current.icon;
@@ -1900,9 +1901,6 @@ export function GlobalDeliverySection() {
         lastStage = stage;
         setStage(stage);
       }
-      if (progressBarRef.current) {
-        progressBarRef.current.style.transform = `scaleX(${tl.progress()})`;
-      }
     });
 
     /* ============================================================
@@ -2011,100 +2009,153 @@ export function GlobalDeliverySection() {
       {/* Structured Content Container matching site design system */}
       <div className="relative z-10 w-full max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-8 pointer-events-none">
         {/* Stage-synced copy card */}
-        <div className="relative w-full max-w-xl pointer-events-auto overflow-hidden rounded-3xl bg-white/85 dark:bg-zinc-900/85 backdrop-blur-md border border-zinc-100/80 dark:border-zinc-800/80 shadow-[0_18px_50px_-20px_rgba(15,21,48,0.25)] dark:shadow-[0_18px_50px_-20px_rgba(0,0,0,0.6)]">
-          <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-l from-brand via-brand-accent to-[#2b9bd6]" />
-          <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-brand-accent/10 blur-3xl pointer-events-none" />
+        <div
+          className="relative w-full max-w-xl pointer-events-auto overflow-hidden rounded-3xl bg-white/85 dark:bg-zinc-900/85 backdrop-blur-md border border-zinc-100/80 dark:border-zinc-800/80 shadow-[0_18px_50px_-20px_rgba(15,21,48,0.25)] dark:shadow-[0_18px_50px_-20px_rgba(0,0,0,0.6)] [--accent:var(--accent-l)] dark:[--accent:var(--accent-d)]"
+          style={{ "--accent-l": current.accent[0], "--accent-d": current.accent[1] } as React.CSSProperties}
+        >
+          <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-l from-brand via-(--accent) to-(--accent)/30" />
+          <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-(--accent)/15 blur-3xl pointer-events-none transition-colors duration-700" />
+          <div
+            aria-hidden
+            className="absolute inset-0 pointer-events-none opacity-30 bg-[radial-gradient(circle,var(--accent)_0.75px,transparent_1.25px)] bg-size-[16px_16px] mask-[radial-gradient(ellipse_at_top_right,black,transparent_55%)]"
+          />
 
-          <div className="relative p-6 sm:p-8 space-y-6">
+          <div className="relative p-6 sm:p-8 space-y-5">
             {/* Section heading */}
-            <div className="space-y-1.5">
-              <span className="text-[11px] font-bold tracking-wide text-brand-accent dark:text-[#8fb0ff]">
-                زنجیره تأمین سرتاسری جهان‌گستر
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-bold tracking-wide text-brand-accent dark:text-[#8fb0ff]">
+                  زنجیره تأمین سرتاسری جهان‌گستر
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight leading-tight">
+                  از هر نقطه‌ای در جهان تا دستان شما
+                </h2>
+              </div>
+              <span className="shrink-0 mt-1 inline-flex items-center gap-1.5 rounded-full border border-(--accent)/25 bg-(--accent)/8 px-2.5 py-1 text-[10px] font-bold text-(--accent) transition-colors duration-700">
+                <span className="relative flex w-2 h-2">
+                  <span className="absolute inset-0 rounded-full bg-(--accent) opacity-60 animate-ping" />
+                  <span className="relative w-2 h-2 rounded-full bg-(--accent)" />
+                </span>
+                رهگیری زنده
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white tracking-tight leading-tight">
-                از هر نقطه‌ای در جهان تا دستان شما
-              </h2>
             </div>
 
-            {/* Stage stepper */}
-            <div className="space-y-2.5">
-              <div className="grid grid-cols-3 gap-2">
-                {STAGES.map((s, i) => {
-                  const Icon = s.icon;
-                  const state = i < stage ? "done" : i === stage ? "active" : "next";
-                  return (
-                    <div
-                      key={s.label}
-                      className={`flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-[11px] sm:text-xs font-bold transition-colors duration-500 ${
-                        state === "active"
-                          ? "bg-brand text-white dark:bg-brand-accent shadow-md shadow-brand/20"
-                          : state === "done"
-                            ? "bg-brand-accent/10 text-brand dark:text-[#b9cbff]"
-                            : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800/80 dark:text-zinc-400"
-                      }`}
-                    >
-                      <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
-                      <span className="truncate">{s.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="h-1 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                <div
-                  ref={progressBarRef}
-                  className="h-full w-full origin-right scale-x-0 rounded-full bg-linear-to-l from-brand to-brand-accent"
-                />
-              </div>
-            </div>
-
-            {/* Stage content */}
-            <div className="relative min-h-[260px] sm:min-h-[240px]">
+            {/* Stage story */}
+            <div className="relative min-h-[128px]">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={stage}
-                  initial={{ opacity: 0, y: 14, filter: "blur(4px)" }}
-                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                  exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
-                  transition={{ duration: 0.35, ease: "easeOut" }}
-                  className="space-y-4"
+                  initial="hidden"
+                  animate="show"
+                  exit={{ opacity: 0, y: -8, filter: "blur(4px)", transition: { duration: 0.2 } }}
+                  variants={{ show: { transition: { staggerChildren: 0.045 } } }}
+                  className="space-y-3"
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="shrink-0 p-2.5 rounded-2xl bg-brand-accent/10 text-brand-accent dark:text-[#8fb0ff] border border-brand-accent/15">
-                      <StageIcon className="w-5 h-5" strokeWidth={1.75} />
-                    </div>
-                    <div className="space-y-1">
-                      <span className="block tabular-nums text-[11px] font-bold text-zinc-400 dark:text-zinc-500">
-                        {`گام ۰${["۱", "۲", "۳"][stage]} · ${current.eyebrow}`}
-                      </span>
+                  <div className="flex items-center gap-3.5">
+                    <motion.div
+                      variants={{
+                        hidden: { opacity: 0, scale: 0.5, rotate: -25 },
+                        show: { opacity: 1, scale: 1, rotate: 0, transition: { type: "spring", stiffness: 300, damping: 18 } },
+                      }}
+                      className="relative shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-white dark:text-zinc-950 bg-(--accent) shadow-[0_10px_24px_-8px_var(--accent)] overflow-hidden"
+                    >
+                      <span className="absolute inset-0 bg-linear-to-br from-white/35 to-transparent" />
+                      <StageIcon className="relative w-5 h-5" strokeWidth={1.9} />
+                    </motion.div>
+                    <div className="space-y-0.5 min-w-0">
+                      <motion.span
+                        variants={{ hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0 } }}
+                        className="block text-[11px] font-bold text-(--accent)"
+                      >
+                        {current.eyebrow}
+                      </motion.span>
                       <h3 className="text-lg sm:text-xl font-black text-zinc-950 dark:text-white leading-snug">
-                        {current.title}
+                        {current.title.split(" ").map((word, i) => (
+                          <React.Fragment key={i}>
+                            <motion.span
+                              className="inline-block"
+                              variants={{
+                                hidden: { opacity: 0, y: 10, filter: "blur(4px)" },
+                                show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.35, ease: "easeOut" } },
+                              }}
+                            >
+                              {word}
+                            </motion.span>{" "}
+                          </React.Fragment>
+                        ))}
                       </h3>
                     </div>
                   </div>
 
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                  <motion.p
+                    variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}
+                    className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed"
+                  >
                     {current.description}
-                  </p>
+                  </motion.p>
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
-                  <div className="flex items-center justify-between gap-3 rounded-2xl bg-zinc-50 dark:bg-zinc-950/50 border border-zinc-100 dark:border-zinc-800 px-4 py-3">
-                    <span className="text-xs text-zinc-500 dark:text-zinc-400">{current.metricLabel}</span>
-                    <span className="text-xs sm:text-sm font-black text-brand dark:text-white">{current.metricValue}</span>
-                  </div>
+            {/* Perforated tear line */}
+            <div aria-hidden className="relative -mx-6 sm:-mx-8 flex items-center">
+              <span className="absolute -right-3 w-6 h-6 rounded-full bg-white dark:bg-zinc-950 border border-zinc-100/80 dark:border-zinc-800/80" />
+              <span className="mx-5 flex-1 border-t-2 border-dashed border-zinc-200 dark:border-zinc-700/80" />
+              <span className="absolute -left-3 w-6 h-6 rounded-full bg-white dark:bg-zinc-950 border border-zinc-100/80 dark:border-zinc-800/80" />
+            </div>
 
-                  <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {current.points.map((p) => {
+            {/* Manifest + stamp */}
+            <div className="relative min-h-[112px]">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={stage}
+                  exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                  className="flex flex-col sm:flex-row sm:items-center gap-4"
+                >
+                  <ul className="flex-1 min-w-0 space-y-2.5">
+                    {current.points.map((p, i) => {
                       const PointIcon = p.icon;
                       return (
-                        <li
+                        <motion.li
                           key={p.text}
-                          className="flex items-center gap-2 rounded-xl border border-zinc-100 dark:border-zinc-800 px-3 py-2 text-[11px] sm:text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                          initial={{ opacity: 0, x: 12 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.35, delay: 0.1 + i * 0.1, ease: "easeOut" }}
+                          className="flex items-center gap-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300"
                         >
-                          <PointIcon className="w-3.5 h-3.5 shrink-0 text-brand-accent dark:text-[#8fb0ff]" strokeWidth={2} />
+                          <span className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 bg-(--accent)/10 text-(--accent)">
+                            <PointIcon className="w-3.5 h-3.5" strokeWidth={2} />
+                          </span>
                           <span className="leading-snug">{p.text}</span>
-                        </li>
+                          <span className="flex-1 min-w-3 border-b border-dotted border-zinc-300 dark:border-zinc-700 translate-y-1" />
+                          <motion.span
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 20, delay: 0.45 + i * 0.15 }}
+                            className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 bg-(--accent) text-white dark:text-zinc-950"
+                          >
+                            <Check className="w-2.5 h-2.5" strokeWidth={3.5} />
+                          </motion.span>
+                        </motion.li>
                       );
                     })}
                   </ul>
+
+                  {/* Rubber stamp */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 1.8, rotate: -24 }}
+                    animate={{ opacity: 1, scale: 1, rotate: -7 }}
+                    transition={{ type: "spring", stiffness: 380, damping: 16, delay: 0.35 }}
+                    className="self-center shrink-0 w-36 rounded-xl border-2 border-(--accent) p-1 text-(--accent) bg-(--accent)/5"
+                  >
+                    <div className="rounded-lg border border-dashed border-(--accent)/60 px-2 py-2.5 text-center space-y-1">
+                      <div className="text-[9px] font-bold opacity-80">{current.metricLabel}</div>
+                      <div className="text-sm font-black leading-snug">{current.metricValue}</div>
+                      <div dir="ltr" className="text-[7px] font-bold tracking-[0.3em] opacity-60">
+                        JAHANGOSTAR
+                      </div>
+                    </div>
+                  </motion.div>
                 </motion.div>
               </AnimatePresence>
             </div>

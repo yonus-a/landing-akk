@@ -1,26 +1,20 @@
 "use client";
 
 import React, { forwardRef } from "react";
-import { ThinkingOrb } from "thinking-orbs";
-import styles from "./Hero.module.css";
+import { SiteLoader } from "@/components/SiteLoader";
 
 export const LoadingScreen = forwardRef<HTMLDivElement>((_, ref) => {
   return (
     <div
       ref={ref}
       id="loadingScreen"
-      className={`${styles.loadingScreen} loading-screen select-none`}
+      role="status"
+      aria-live="polite"
+      className="loading-screen fixed inset-0 z-[99999] flex flex-col items-center justify-center gap-6 bg-white dark:bg-zinc-950 transition-[opacity,visibility] duration-600 ease-out select-none"
     >
-      <ThinkingOrb
-        state="searching"
-        size={64}
-        theme="auto"
-        aria-label="در حال بارگذاری..."
-      />
+      <SiteLoader />
     </div>
   );
 });
 
 LoadingScreen.displayName = "LoadingScreen";
-
-

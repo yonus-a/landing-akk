@@ -3,9 +3,9 @@
 import React, { useRef, useState } from "react";
 import Image from "next/image";
 import { Mail, Phone, Users } from "lucide-react";
+import { MobileCarousel } from "./MobileCarousel";
 
 interface TeamMember {
-  code: string;
   name: string;
   role: string;
   roleEn: string;
@@ -19,7 +19,6 @@ interface TeamMember {
 
 const TEAM: TeamMember[] = [
   {
-    code: "01",
     name: "محمدرضا جهانگیری",
     role: "مدیرعامل و بنیان‌گذار",
     roleEn: "CEO & FOUNDER",
@@ -29,7 +28,6 @@ const TEAM: TeamMember[] = [
     linkedin: "#",
   },
   {
-    code: "02",
     name: "سارا محمدی",
     role: "مدیر بازرگانی خارجی",
     roleEn: "HEAD OF FOREIGN TRADE",
@@ -39,7 +37,6 @@ const TEAM: TeamMember[] = [
     linkedin: "#",
   },
   {
-    code: "03",
     name: "علی رضایی",
     role: "مدیر عملیات لجستیک",
     roleEn: "LOGISTICS OPERATIONS",
@@ -49,7 +46,6 @@ const TEAM: TeamMember[] = [
     linkedin: "#",
   },
   {
-    code: "04",
     name: "مریم احمدی",
     role: "مدیر مالی و ارزی",
     roleEn: "FINANCE & FX",
@@ -137,11 +133,6 @@ function TeamCard({ member }: { member: TeamMember }) {
         {/* Cursor-tracking glare */}
         <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-[radial-gradient(420px_circle_at_var(--mx,50%)_var(--my,50%),rgba(255,255,255,0.22),transparent_45%)]" />
 
-        {/* Member code */}
-        <span className="absolute top-3 right-3 tabular-nums text-xs font-bold px-2 py-1 rounded-full bg-white/80 dark:bg-zinc-950/70 backdrop-blur text-zinc-700 dark:text-zinc-300 transition-colors duration-300 group-hover:bg-brand-accent group-hover:text-white">
-          {member.code}
-        </span>
-
         {/* Info panel: name always visible, bio and contacts slide up on hover */}
         <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-[#0f1530]/95 via-brand/75 to-transparent pt-16 px-4 pb-4 text-white">
           <p className="tabular-nums text-[10px] tracking-widest text-[#9fb9ff]">
@@ -211,10 +202,16 @@ export function TeamSection() {
           </div>
         </div>
 
-        {/* Single row of team cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+        <MobileCarousel label="تیم ما" className="sm:hidden">
           {TEAM.map((member) => (
-            <TeamCard key={member.code} member={member} />
+            <TeamCard key={member.name} member={member} />
+          ))}
+        </MobileCarousel>
+
+        {/* Single row of team cards */}
+        <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-6">
+          {TEAM.map((member) => (
+            <TeamCard key={member.name} member={member} />
           ))}
         </div>
       </div>

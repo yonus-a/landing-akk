@@ -615,7 +615,7 @@ export function useHeroScene() {
     const loadingTimeout1 = setTimeout(() => {
       const ls = loadingScreenRef.current;
       if (ls) {
-        ls.classList.add("hidden");
+        ls.classList.add("opacity-0", "invisible", "pointer-events-none");
         const loadingTimeout2 = setTimeout(() => {
           if (ls) ls.style.display = "none";
         }, 700);
