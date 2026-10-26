@@ -3,7 +3,6 @@ import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { ServicesSection } from "@/components/ServicesSection";
 import { WorkflowSection } from "@/components/WorkflowSection";
-import { GlobalDeliverySection } from "@/components/GlobalDeliverySection";
 import { WhyUsSection } from "@/components/WhyUsSection";
 import { TeamSection } from "@/components/TeamSection";
 import { CostEstimatorForm } from "@/components/CostEstimatorForm";
@@ -19,16 +18,12 @@ export default function Home() {
 
       {/* Main Corporate Landing Flow */}
       <main className="flex-1 w-full bg-white dark:bg-zinc-950">
-        {/* Step 3: Enhanced 3D Scrollytelling Hero */}
+        {/* Step 3: 3D Scrollytelling Hero — globe → Iran → air → sea → land → parcel handover */}
         <Hero />
 
         {/* Step 4: Modular Corporate Sections */}
         <ServicesSection />
         <WorkflowSection />
-
-        {/* Interactive 3D Global Reach to Final Handover Scene */}
-        <GlobalDeliverySection />
-
         <WhyUsSection />
         {/* <CostEstimatorForm /> */}
         <GlobalHubsSection />

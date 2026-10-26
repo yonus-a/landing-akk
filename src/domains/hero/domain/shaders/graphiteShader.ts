@@ -31,6 +31,8 @@ export const graphiteFragmentShader = /* glsl */ `
   uniform float     uEdgeWeight;
   uniform float     uShadeDensity;
   uniform float     uDark;
+  /* 0 → full sketch, 1 → blank paper. Drives the act-to-act dissolve inside the render pass. */
+  uniform float     uPaperFade;
   varying vec2      vUv;
 
   /* ── Procedural Hash & Noise ──────────────────────────────── */
@@ -202,6 +204,9 @@ export const graphiteFragmentShader = /* glsl */ `
     float edgeFade = edgeX * edgeY;
 
     finalSketch = mix(edgePaper, finalSketch, edgeFade);
+
+    // Act dissolve: the whole drawing lifts off the page (theme-correct, no edge bleed)
+    finalSketch = mix(finalSketch, edgePaper, uPaperFade);
 
     gl_FragColor = vec4(finalSketch, 1.0);
   }

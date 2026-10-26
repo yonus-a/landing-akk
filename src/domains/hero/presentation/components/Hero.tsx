@@ -2,15 +2,24 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./Hero.module.css";
-import { useHeroScene } from "../../application/hooks/useHeroScene";
+import { useHeroScene, type HeroPhase } from "../../application/hooks/useHeroScene";
+import { HERO_SCROLL_HEIGHT } from "../../domain/constants";
 import { LoadingScreen } from "./LoadingScreen";
 import { CloudMist } from "./CloudMist";
 import gsap from "gsap";
-import { ArrowLeft, Sparkles, Plane, Ship, Truck } from "lucide-react";
+import {
+  ArrowLeft,
+  Plane,
+  Ship,
+  Truck,
+  Globe2,
+  FileCheck2,
+  PackageCheck,
+} from "lucide-react";
 
 interface LogisticsModeContent {
-  id: 1 | 2 | 3;
-  mode: "air" | "sea" | "land";
+  id: HeroPhase;
+  mode: "air" | "sea" | "land" | "globe" | "customs" | "handover";
   label: string;
   shortLabel: string;
   badge: string;
@@ -22,9 +31,10 @@ interface LogisticsModeContent {
   stats: Array<{ value: string; label: string }>;
 }
 
-const LOGISTICS_MODES: Record<1 | 2 | 3, LogisticsModeContent> = {
-  1: {
-    id: 1,
+// Phase order follows the 3D scroll story: 1 globe → 2 Iran/customs → 3 air → 4 sea → 5 land → 6 handover
+const LOGISTICS_MODES: Record<HeroPhase, LogisticsModeContent> = {
+  3: {
+    id: 3,
     mode: "air",
     label: "باربری هوایی",
     shortLabel: "هوایی",
@@ -41,8 +51,8 @@ const LOGISTICS_MODES: Record<1 | 2 | 3, LogisticsModeContent> = {
       { value: "۱۰۰٪", label: "پوشش کامل بیمه بار" },
     ],
   },
-  2: {
-    id: 2,
+  4: {
+    id: 4,
     mode: "sea",
     label: "کشتیرانی دریایی",
     shortLabel: "دریایی",
@@ -59,8 +69,8 @@ const LOGISTICS_MODES: Record<1 | 2 | 3, LogisticsModeContent> = {
       { value: "FCL / LCL", label: "کانتینر کامل و خرده‌بار" },
     ],
   },
-  3: {
-    id: 3,
+  5: {
+    id: 5,
     mode: "land",
     label: "ترانزیت زمینی",
     shortLabel: "زمینی",
@@ -75,6 +85,62 @@ const LOGISTICS_MODES: Record<1 | 2 | 3, LogisticsModeContent> = {
       { value: "+۱۵ سال", label: "سابقه ترانزیت جاده‌ای" },
       { value: "کارنه تیر (TIR)", label: "ترانزیت بدون توقف مرزی" },
       { value: "سراسر کشور", label: "تحویل مستقیم درب انبار" },
+    ],
+  },
+  // ── Opening globe act ──
+  1: {
+    id: 1,
+    mode: "globe",
+    label: "کریدورهای تأمین",
+    shortLabel: "جهانی",
+    badge: "زنجیره تأمین سرتاسری؛ کریدورهای تأمین از چهار قاره",
+    headline: "چهار قاره، یک مقصد؛ از هر نقطه‌ای در جهان تا ایران",
+    subtitle:
+      "محموله‌های شما از هامبورگ، ژوهانسبورگ، شانگهای و پرت با برنامه‌ریزی یکپارچه حمل دریایی و هوایی، مستقیم به سوی ایران هدایت می‌شوند.",
+    ctaText: "استعلام آنلاین هزینه ترخیص",
+    ctaLink: "#estimator",
+    icon: Globe2,
+    stats: [
+      { value: "۴ قاره", label: "مبادی فعال: اروپا، آفریقا، آسیا، اقیانوسیه" },
+      { value: "دفاتر نمایندگی", label: "در مبدأ بار" },
+      { value: "بیمه تمام‌خطر", label: "پوشش کامل حمل" },
+    ],
+  },
+  2: {
+    id: 2,
+    mode: "customs",
+    label: "بنادر و گمرکات ایران",
+    shortLabel: "گمرک",
+    badge: "بنادر و گمرکات ایران؛ ترخیص بدون رسوب و دموراژ",
+    headline: "از اسکله تا برگ سبز گمرک",
+    subtitle:
+      "با ورود کالا به بندر، اظهارنامه EPL ثبت، آزمون‌های استاندارد و قرنطینه پیگیری و پروانه ترخیص بدون رسوب و دموراژ صادر می‌شود.",
+    ctaText: "استعلام آنلاین هزینه ترخیص",
+    ctaLink: "#estimator",
+    icon: FileCheck2,
+    stats: [
+      { value: "۵ الی ۱۰ روز کاری", label: "زمان تقریبی ترخیص" },
+      { value: "EPL", label: "ثبت سفارش و اظهار گمرکی" },
+      { value: "گزارش لحظه‌ای", label: "وضعیت پرونده" },
+    ],
+  },
+  // ── Closing handover act ──
+  6: {
+    id: 6,
+    mode: "handover",
+    label: "درب انبار شما",
+    shortLabel: "تحویل",
+    badge: "تحویل درب انبار؛ پلمب، بارنامه رسمی و صورتجلسه",
+    headline: "تحویل دست‌به‌دست، با خیال آسوده",
+    subtitle:
+      "کالا با ناوگان سنگین و بارنامه رسمی جاده‌ای به انبار، کارخانه یا فروشگاه شما می‌رسد و با امضای صورتجلسه تحویل، چرخه کامل می‌شود.",
+    ctaText: "استعلام آنلاین هزینه ترخیص",
+    ctaLink: "#estimator",
+    icon: PackageCheck,
+    stats: [
+      { value: "۲ الی ۴ روز کاری", label: "حمل داخلی تا انبار" },
+      { value: "رهگیری مسیر", label: "تا مقصد نهایی" },
+      { value: "صورتجلسه رسمی", label: "تحویل پلمب‌شده" },
     ],
   },
 };
@@ -94,8 +160,8 @@ export function Hero() {
     activePhase,
   } = useHeroScene();
 
-  // Active displayed mode (synced with 3D camera progression: 1=Air, 2=Sea, 3=Land)
-  const [currentModeId, setCurrentModeId] = useState<1 | 2 | 3>(1);
+  // Active displayed mode (synced with the 3D scroll acts: 1=Globe, 2=Customs, 3=Air, 4=Sea, 5=Land, 6=Handover)
+  const [currentModeId, setCurrentModeId] = useState<HeroPhase>(1);
   const currentMode = LOGISTICS_MODES[currentModeId];
 
   // Mouse spotlight coordinates for ambient organic paper aura
@@ -190,13 +256,13 @@ export function Hero() {
       id="hero"
       ref={scrollWrapperRef}
       className={`${styles.heroWrapper || ""} relative w-full bg-white dark:bg-zinc-950 select-none transition-colors duration-300`}
-      style={{ height: "320vh" }}
+      style={{ height: HERO_SCROLL_HEIGHT }}
       dir="rtl"
       lang="fa"
     >
       <LoadingScreen ref={loadingScreenRef} />
 
-      {/* Pinned Sticky Stage during the 320vh scroll */}
+      {/* Pinned Sticky Stage for the full scroll story (globe → Iran → air → sea → land → handover) */}
       <div
         ref={heroStageRef}
         onMouseMove={handleMouseMove}
