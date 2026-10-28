@@ -23,8 +23,8 @@
   box-shadow: none;
   overflow: visible;
   pointer-events: none;
-  mask-image: radial-gradient(circle at center, black 72%, transparent 100%);
-  -webkit-mask-image: radial-gradient(circle at center, black 72%, transparent 100%);
+  mask-image: radial-gradient(ellipse 82% 76% at 40% 48%, black 62%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 82% 76% at 40% 48%, black 62%, transparent 100%);
 }
 
 .webglCanvas {

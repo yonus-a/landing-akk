@@ -51,12 +51,42 @@ export const GLOBE_DIVE = {
   start: 3.5,
   /** Globe scale at the start of the dive (matches the end of the reveal). */
   scaleFrom: 1.28,
-  /** Globe scale at the end of the dive — large enough that the ground reads as flat. */
-  scaleTo: 6.4,
-  /** Camera-to-ground distance along the view axis when the dive ends (stays > near plane + hub markers). */
-  groundDistanceTo: 1.3,
+  /**
+   * Peak magnification. Kept gentle so supply corridors stay readable and don't
+   * balloon into screen-filling arcs before the cloud handoff.
+   */
+  scaleTo: 2.15,
+  /** Camera-to-surface distance at dive end — approaches the cloud deck, not the ground. */
+  groundDistanceTo: 9.5,
   /** Fraction of the dive over which the hub glides from its reveal position onto the camera axis. */
-  lockOnBlend: 0.4,
+  lockOnBlend: 0.45,
+};
+/** Photoreal Earth for Act I (maps come from `public/earth.usdz`). */
+export const EARTH_LOOK = {
+  usdzUrl: "/earth.usdz",
+  /** World-space direction towards the sun: upper right, slightly in front, so a night crescent shows on the left limb. */
+  sunDirection: [0.82, 0.36, 0.6] as const,
+  sunIntensity: 2.0,
+  /** The USDZ base colour is authored very dark; this lifts it to a natural daylight albedo. */
+  albedoGain: 3.8,
+  cityLightsIntensity: 2.6,
+  cloudRadius: 1.012,
+  atmosphereRadius: 1.05,
+  /** Baseline cloud coverage added on top of the latitude bands. */
+  cloudCover: 0.0,
+  /** Brief cloud veil at the end of the dive — enough to hide ground, not a long stay inside. */
+  diveCloudCover: 0.85,
+  /** Corridor / traveler colour (display-referred, written straight into the render target). */
+  corridorColor: [1.0, 0.71, 0.28] as const,
+};
+/**
+ * Globe → airplane handoff: paper dissolve kicks in the instant the cloud veil peaks,
+ * so scroll never idles inside an opaque cloud wall.
+ */
+export const GLOBE_TO_AIR_HANDOFF = {
+  outLead: 0.95,
+  outDuration: 0.35,
+  inDuration: 0.65,
 };
 export const GLOBE_CAMERA = {
   fov: 42,
@@ -84,22 +114,34 @@ export const DELIVERY_SCENE = {
 };
 
 /* ── Unified scroll timeline (seconds of GSAP timeline time) ─────────────
-   Act I   (0 → 8.0)      Globe reveal → locked-on dive onto Iran → paper dissolve
-   Act II  (8.0 → 23.1)   Airplane → container ship → truck
-   Act III (24.1 → 29.3)  Parcel handover at the client's door
-   Acts are bridged by the in-shader paper dissolve (see ACT_HANDOFF).    */
-/** Ground dive dissolves to paper; the airplane emerges from it. */
+   Act I   (0 → 8.0)      Globe reveal → dive into cloud bank → paper dissolve
+   Act II  (8.0 → 30.8)   Airplane → container ship → truck (stretched by LOGISTICS_TIME_SCALE)
+   Act III (31.8 → 37.0)  Parcel handover at the client's door
+   Acts are bridged by the in-shader paper dissolve (see ACT_HANDOFF /
+   GLOBE_TO_AIR_HANDOFF).                                                */
+/** Cloud-bank dive dissolves to paper; the airplane emerges from it. */
 export const LOGISTICS_ACT_START = 8.0;
+/**
+ * Stretches the airplane → ship → truck choreography over more scroll distance, so a
+ * touchpad flick doesn't race through it. The globe and handover acts keep their pace.
+ */
+export const LOGISTICS_TIME_SCALE = 2.0;
+/** Maps a time authored at the act's base pace onto the stretched timeline. */
+export const logisticsAt = (t: number) => LOGISTICS_ACT_START + t * LOGISTICS_TIME_SCALE;
 /** Length of the airplane → ship → truck choreography. */
-export const LOGISTICS_ACT_DURATION = 15.1;
+export const LOGISTICS_ACT_DURATION = 11.4 * LOGISTICS_TIME_SCALE;
 export const LOGISTICS_ACT_END = LOGISTICS_ACT_START + LOGISTICS_ACT_DURATION;
 /** Mist handoff from the truck completes; handover scene starts emerging. */
 export const HANDOVER_ACT_START = LOGISTICS_ACT_END + 1.0;
 /** Handover choreography (3.2s) plus a 2s rest on the final frame. */
 export const HANDOVER_ACT_DURATION = 5.2;
 export const HERO_TIMELINE_DURATION = HANDOVER_ACT_START + HANDOVER_ACT_DURATION;
-/** Scroll distance of the hero wrapper; ~4.7 timeline seconds per 100vh. */
-export const HERO_SCROLL_HEIGHT = "620vh";
+/** Timeline seconds per 100vh of scroll. */
+const TIMELINE_SECONDS_PER_VIEWPORT = 4.7;
+/** Scroll distance of the hero wrapper, derived so every act keeps a consistent scroll pace. */
+export const HERO_SCROLL_HEIGHT = `${Math.round(
+  (HERO_TIMELINE_DURATION / TIMELINE_SECONDS_PER_VIEWPORT) * 100
+)}vh`;
 
 export type HeroPhase = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -107,8 +149,8 @@ export type HeroPhase = 1 | 2 | 3 | 4 | 5 | 6;
 export const HERO_PHASE_END_TIMES: readonly number[] = [
   3.3, // globe → customs (zoom into Iran)
   LOGISTICS_ACT_START - 0.5, // customs → air (during the paper dissolve)
-  LOGISTICS_ACT_START + 5.44, // air → sea
-  LOGISTICS_ACT_START + 10.27, // sea → land
+  logisticsAt(3.6), // air → sea (right after the brief cloud punch)
+  logisticsAt(7.6), // sea → land
   LOGISTICS_ACT_END + 0.5, // land → handover (during the paper dissolve)
 ];
 
@@ -124,12 +166,11 @@ export function getHeroPhase(timelineTime: number): HeroPhase {
 export const HERO_PHASE_FOCUS_TIMES: Record<HeroPhase, number> = {
   1: 1.5,
   2: 5.4,
-  3: LOGISTICS_ACT_START + 0.8,
-  4: LOGISTICS_ACT_START + 8.0,
-  5: LOGISTICS_ACT_START + 13.4,
+  3: logisticsAt(0.8),
+  4: logisticsAt(5.5),
+  5: logisticsAt(10.0),
   6: HANDOVER_ACT_START + 2.2,
 };
-
 export const PALETTE_CONTAINERS = [
   new THREE.Color(0xf8fafc), // Stark White Reefer Container (High-contrast luma)
   new THREE.Color(0x0284c7), // Maersk / Ocean Sky Blue

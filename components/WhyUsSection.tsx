@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence, MotionConfig } from "framer-motion";
-import { RoutePattern } from "@/components/RoutePattern";
 import {
   Building2,
   Receipt,
@@ -289,55 +288,49 @@ export function WhyUsSection() {
     <MotionConfig reducedMotion="user">
       <section
         id="why-us"
-        className="relative w-full py-16 sm:py-20 bg-zinc-950 text-white overflow-hidden"
+        className="relative w-full py-16 sm:py-20 bg-white dark:bg-zinc-950 text-zinc-950 dark:text-white overflow-hidden transition-colors duration-300"
         dir="rtl"
         style={{ "--accent": current.accent } as React.CSSProperties}
       >
-        <RoutePattern
-          className="opacity-50"
-          hub={{ x: 1120, y: 300 }}
-          origins={[
-            { x: 80, y: 160 },
-            { x: 240, y: 820 },
-            { x: 820, y: 880 },
-            { x: 1420, y: 820 },
-          ]}
+        {/* Blueprint grid backdrop */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-60 dark:opacity-40 bg-[linear-gradient(to_right,rgba(42,90,224,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(42,90,224,0.07)_1px,transparent_1px)] bg-size-[48px_48px] mask-[radial-gradient(ellipse_75%_70%_at_50%_55%,black_30%,transparent_80%)]"
         />
 
         {/* Pillar-synced ambient glow */}
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute w-[42rem] h-[42rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px]"
+          className="pointer-events-none absolute w-[42rem] h-[42rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px] opacity-[0.08] dark:opacity-[0.14]"
           initial={false}
           animate={{ left: current.glow[0], top: current.glow[1], backgroundColor: current.accent }}
           transition={{ duration: 1.4, ease: EASE_OUT }}
-          style={{ opacity: 0.14 }}
         />
 
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
             <div className="space-y-2.5">
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-950 dark:text-white">
                 تمایز اجرایی ما در بازرگانی و ترخیص
               </h2>
             </div>
 
             <a
               href="#estimator"
-              className="inline-flex items-center gap-2 text-xs font-bold text-zinc-300 hover:text-(--accent) transition-colors group self-start sm:self-auto"
+              className="inline-flex items-center gap-2 text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:text-brand-accent dark:hover:text-(--accent) transition-colors group self-start sm:self-auto"
             >
               <span>درخواست استعلام و آنالیز هزینه</span>
-              <span className="w-7 h-7 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center group-hover:border-(--accent)/50 group-hover:bg-(--accent)/10 transition-all">
+              <span className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center group-hover:border-(--accent)/50 group-hover:bg-(--accent)/10 transition-all">
                 <ArrowUpLeft className="w-3.5 h-3.5" />
               </span>
             </a>
           </div>
 
           {/* Frame */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 rounded-3xl bg-zinc-900/30 border border-(--accent)/15 backdrop-blur-sm overflow-hidden transition-colors duration-700">
+          <div className="grid grid-cols-1 lg:grid-cols-12 rounded-3xl bg-white/80 dark:bg-zinc-900/30 border border-zinc-200 dark:border-(--accent)/15 shadow-[0_24px_60px_-30px_rgba(30,41,90,0.25)] dark:shadow-none backdrop-blur-sm overflow-hidden transition-colors duration-700">
             {/* Navigation list */}
-            <div className="lg:col-span-4 p-3 sm:p-4 border-b lg:border-b-0 lg:border-l border-white/[0.07] flex flex-col justify-between gap-1.5 bg-zinc-900/20">
+            <div className="lg:col-span-4 p-3 sm:p-4 border-b lg:border-b-0 lg:border-l border-zinc-200 dark:border-white/[0.07] flex flex-col justify-between gap-1.5 bg-zinc-50/80 dark:bg-zinc-900/20">
               {pillars.map((item, idx) => {
                 const Icon = item.icon;
                 const isActive = activeTab === idx;
@@ -370,7 +363,7 @@ export function WhyUsSection() {
                       className={`relative z-10 w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-500 ${
                         isActive
                           ? "bg-(--item-accent) text-zinc-950 shadow-[0_0_24px_-4px_var(--item-accent)]"
-                          : "bg-zinc-900/80 text-zinc-400 group-hover:text-(--item-accent) border border-white/[0.05] group-hover:border-(--item-accent)/30"
+                          : "bg-white dark:bg-zinc-900/80 text-zinc-500 dark:text-zinc-400 group-hover:text-(--item-accent) border border-zinc-200 dark:border-white/[0.05] group-hover:border-(--item-accent)/30"
                       }`}
                     >
                       <Icon className="w-4 h-4" strokeWidth={2} />
@@ -379,7 +372,9 @@ export function WhyUsSection() {
                     <div className="relative z-10 flex-1 min-w-0">
                       <h3
                         className={`text-xs sm:text-sm font-bold truncate transition-colors ${
-                          isActive ? "text-white" : "text-zinc-400 group-hover:text-zinc-200"
+                          isActive
+                            ? "text-zinc-950 dark:text-white"
+                            : "text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200"
                         }`}
                       >
                         {item.title}
@@ -407,7 +402,7 @@ export function WhyUsSection() {
                     <Motif />
                   </motion.div>
                 </AnimatePresence>
-                <div className="absolute inset-0 bg-linear-to-l from-zinc-950/60 via-zinc-950/20 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-l from-white/80 via-white/30 dark:from-zinc-950/60 dark:via-zinc-950/20 to-transparent" />
               </div>
 
               <AnimatePresence mode="wait">
@@ -422,13 +417,13 @@ export function WhyUsSection() {
                   {/* Info & KPI */}
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
                     <div className="space-y-3 max-w-lg">
-                      <div className="inline-flex items-center gap-2 text-[11px] font-medium text-(--accent)">
+                      <div className="inline-flex items-center gap-2 text-[11px] font-medium text-[color-mix(in_oklab,var(--accent)_65%,black)] dark:text-(--accent)">
                         <span>مزیت رقابتی</span>
-                        <span className="text-zinc-700">•</span>
-                        <span className="text-zinc-400">{current.subtitle}</span>
+                        <span className="text-zinc-300 dark:text-zinc-700">•</span>
+                        <span className="text-zinc-500 dark:text-zinc-400">{current.subtitle}</span>
                       </div>
-                      <h3 className="text-lg sm:text-xl font-extrabold text-white">{current.title}</h3>
-                      <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">{current.description}</p>
+                      <h3 className="text-lg sm:text-xl font-extrabold text-zinc-950 dark:text-white">{current.title}</h3>
+                      <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">{current.description}</p>
                     </div>
 
                     <motion.div
@@ -437,17 +432,17 @@ export function WhyUsSection() {
                       transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.1 }}
                       className="sm:text-left shrink-0 px-5 py-3.5 rounded-2xl bg-(--accent)/[0.06] border border-(--accent)/25 shadow-[0_12px_40px_-18px_var(--accent)] backdrop-blur-sm"
                     >
-                      <div className="text-2xl sm:text-3xl font-black text-(--accent) tracking-tight">
+                      <div className="text-2xl sm:text-3xl font-black text-[color-mix(in_oklab,var(--accent)_65%,black)] dark:text-(--accent) tracking-tight">
                         {current.metricValue}
                       </div>
-                      <div className="text-[11px] text-zinc-400 mt-0.5">{current.metricLabel}</div>
+                      <div className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">{current.metricLabel}</div>
                     </motion.div>
                   </div>
 
                   {/* Comparison */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-6 border-t border-white/[0.06]">
-                    <div className="p-4 rounded-2xl bg-emerald-500/[0.06] border border-emerald-500/20 space-y-2.5 backdrop-blur-sm">
-                      <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-6 border-t border-zinc-200 dark:border-white/[0.06]">
+                    <div className="p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-500/[0.06] border border-emerald-500/20 space-y-2.5 backdrop-blur-sm">
+                      <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-400">
                         <span className="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
                           <Check className="w-2.5 h-2.5" strokeWidth={3} />
                         </span>
@@ -460,18 +455,18 @@ export function WhyUsSection() {
                             initial={{ opacity: 0, x: 10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.4, delay: 0.15 + i * 0.1, ease: EASE_OUT }}
-                            className="text-xs text-zinc-200 leading-relaxed flex items-start gap-2"
+                            className="text-xs text-zinc-800 dark:text-zinc-200 leading-relaxed flex items-start gap-2"
                           >
-                            <span className="w-1 h-1 rounded-full bg-emerald-400 mt-2 shrink-0" />
+                            <span className="w-1 h-1 rounded-full bg-emerald-500 dark:bg-emerald-400 mt-2 shrink-0" />
                             <span>{row.arian}</span>
                           </motion.li>
                         ))}
                       </ul>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-zinc-900/50 border border-white/[0.05] space-y-2.5 backdrop-blur-sm">
+                    <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/[0.05] space-y-2.5 backdrop-blur-sm">
                       <div className="flex items-center gap-2 text-xs font-bold text-zinc-500">
-                        <span className="w-4 h-4 rounded-full bg-zinc-800 flex items-center justify-center">
+                        <span className="w-4 h-4 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center">
                           <X className="w-2.5 h-2.5 text-zinc-400" strokeWidth={2.5} />
                         </span>
                         <span>روش‌های سنتی و واسطه‌ای</span>
@@ -485,7 +480,7 @@ export function WhyUsSection() {
                             transition={{ duration: 0.4, delay: 0.25 + i * 0.1, ease: EASE_OUT }}
                             className="text-xs text-zinc-500 leading-relaxed flex items-start gap-2"
                           >
-                            <span className="w-1 h-1 rounded-full bg-zinc-700 mt-2 shrink-0" />
+                            <span className="w-1 h-1 rounded-full bg-zinc-400 dark:bg-zinc-700 mt-2 shrink-0" />
                             <span>{row.traditional}</span>
                           </motion.li>
                         ))}

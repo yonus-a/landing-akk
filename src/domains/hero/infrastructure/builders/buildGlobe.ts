@@ -1,10 +1,20 @@
 import * as THREE from "three";
-import { GLOBE_RADIUS, GLOBE_INITIAL_ROTATION, GLOBE_HUB } from "../../domain/constants";
 import {
-  createGlobeSurfaceMaterial,
-  createGlobeCloudMaterial,
-} from "../../domain/shaders/globeShader";
-import { createGlobeMapTexture } from "../textures/globeMapTexture";
+  GLOBE_RADIUS,
+  GLOBE_INITIAL_ROTATION,
+  GLOBE_HUB,
+  EARTH_LOOK,
+} from "../../domain/constants";
+import {
+  createEarthSurfaceMaterial,
+  createEarthCloudMaterial,
+  createEarthAtmosphereMaterial,
+} from "../../domain/shaders/earthShaders";
+import {
+  createPlaceholderEarthMaps,
+  disposeEarthMaps,
+  type EarthMaps,
+} from "../textures/earthUsdzTextures";
 
 export interface GlobeTraveler {
   mesh: THREE.Mesh;
@@ -14,12 +24,15 @@ export interface GlobeTraveler {
 
 export interface GlobeComponents {
   globeGroup: THREE.Group;
-  surfaceMaterial: THREE.ShaderMaterial;
-  cloudMaterial: THREE.ShaderMaterial;
   travelers: GlobeTraveler[];
-  mapTexture: THREE.CanvasTexture;
   /** Unit vector (globe-local space) pointing at the corridor hub; the ground dive locks onto it. */
   hubDirection: THREE.Vector3;
+  /** Swaps in the USDZ maps; returns the previous maps so the caller can dispose them. */
+  setMaps: (maps: EarthMaps) => EarthMaps;
+  /** Dive progress 0 → 1: rolls in a cloud bank, fades the terrain, then the halo as we enter the air. */
+  setDive: (t: number) => void;
+  update: (elapsed: number) => void;
+  dispose: () => void;
 }
 
 function latLonToVec3(lat: number, lon: number, radius: number) {
@@ -32,29 +45,48 @@ function latLonToVec3(lat: number, lon: number, radius: number) {
 }
 
 /**
- * Sketch-style 3D globe with procedural clouds, hairline supply corridors
- * converging on Tehran and small animated "travelers" moving along each arc.
+ * Photoreal Earth (USDZ day map, land mask and city lights) with procedural weather, an
+ * atmospheric halo, glowing supply corridors converging on Tehran and animated travelers.
  */
-export function buildGlobe(maxAnisotropy: number): GlobeComponents {
+export function buildGlobe(): GlobeComponents {
   const globeGroup = new THREE.Group();
   globeGroup.position.set(0, 0, 0);
 
-  const mapTexture = createGlobeMapTexture(maxAnisotropy);
-  const surfaceMaterial = createGlobeSurfaceMaterial(mapTexture);
+  const hubDirection = latLonToVec3(GLOBE_HUB.lat, GLOBE_HUB.lon, 1).normalize();
 
-  const earthGeo = new THREE.SphereGeometry(GLOBE_RADIUS, 96, 96);
-  const earthMesh = new THREE.Mesh(earthGeo, surfaceMaterial);
+  let maps = createPlaceholderEarthMaps();
+  const surfaceMaterial = createEarthSurfaceMaterial(maps, hubDirection);
+  const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(GLOBE_RADIUS, 160, 120), surfaceMaterial);
   globeGroup.add(earthMesh);
 
-  const cloudMaterial = createGlobeCloudMaterial();
-  const cloudGeo = new THREE.SphereGeometry(GLOBE_RADIUS * 1.012, 64, 64);
-  const cloudMesh = new THREE.Mesh(cloudGeo, cloudMaterial);
+  const atmosphereMaterial = createEarthAtmosphereMaterial(GLOBE_RADIUS);
+  const atmosphereMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(GLOBE_RADIUS * EARTH_LOOK.atmosphereRadius, 96, 64),
+    atmosphereMaterial
+  );
+  atmosphereMesh.renderOrder = 1;
+  globeGroup.add(atmosphereMesh);
+
+  const cloudMaterial = createEarthCloudMaterial(hubDirection);
+  const cloudMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(GLOBE_RADIUS * EARTH_LOOK.cloudRadius, 160, 120),
+    cloudMaterial
+  );
+  cloudMesh.renderOrder = 2;
   globeGroup.add(cloudMesh);
 
-  const arrowInkMat = new THREE.MeshBasicMaterial({ color: 0x09090b });
+  // Written straight into the render target, so the colour is already display-referred
+  const corridorMat = new THREE.MeshBasicMaterial({
+    color: new THREE.Color().setRGB(...EARTH_LOOK.corridorColor, THREE.LinearSRGBColorSpace),
+    transparent: true,
+    depthWrite: false,
+  });
+  const corridorGroup = new THREE.Group();
+  corridorGroup.renderOrder = 3;
+  globeGroup.add(corridorGroup);
   const travelers: GlobeTraveler[] = [];
 
-  function addHairlinePointToPointArrow(
+  function addCorridor(
     fromCoord: { lat: number; lon: number },
     toCoord: { lat: number; lon: number },
     arcHeightFactor = 0.3
@@ -82,28 +114,27 @@ export function buildGlobe(maxAnisotropy: number): GlobeComponents {
 
     [startVec, endVec].forEach((pt) => {
       const norm = pt.clone().normalize();
-      const microDot = new THREE.Mesh(new THREE.CircleGeometry(0.08, 12), arrowInkMat);
-      microDot.position.copy(pt.clone().add(norm.clone().multiplyScalar(0.03)));
-      microDot.lookAt(pt.clone().add(norm));
-      globeGroup.add(microDot);
+      const dot = new THREE.Mesh(new THREE.CircleGeometry(0.08, 12), corridorMat);
+      dot.position.copy(pt.clone().add(norm.clone().multiplyScalar(0.03)));
+      dot.lookAt(pt.clone().add(norm));
+      corridorGroup.add(dot);
     });
 
     const subPoints = fullCurve.getPoints(50).slice(0, 49);
     const bodyCurve = new THREE.CatmullRomCurve3(subPoints);
-    const hairlineArcGeo = new THREE.TubeGeometry(bodyCurve, 48, 0.022, 6, false);
-    const hairlineArcMesh = new THREE.Mesh(hairlineArcGeo, arrowInkMat);
-    globeGroup.add(hairlineArcMesh);
+    const arcMesh = new THREE.Mesh(new THREE.TubeGeometry(bodyCurve, 48, 0.022, 6, false), corridorMat);
+    corridorGroup.add(arcMesh);
 
     const tipPos = fullCurve.getPoint(0.985);
     const tipDir = endVec.clone().sub(fullCurve.getPoint(0.94)).normalize();
 
-    const microArrowHead = new THREE.Mesh(new THREE.ConeGeometry(0.065, 0.28, 12), arrowInkMat);
-    microArrowHead.position.copy(tipPos);
-    microArrowHead.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tipDir);
-    globeGroup.add(microArrowHead);
+    const arrowHead = new THREE.Mesh(new THREE.ConeGeometry(0.065, 0.28, 12), corridorMat);
+    arrowHead.position.copy(tipPos);
+    arrowHead.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tipDir);
+    corridorGroup.add(arrowHead);
 
-    const travelerMesh = new THREE.Mesh(new THREE.ConeGeometry(0.055, 0.24, 10), arrowInkMat);
-    globeGroup.add(travelerMesh);
+    const travelerMesh = new THREE.Mesh(new THREE.ConeGeometry(0.055, 0.24, 10), corridorMat);
+    corridorGroup.add(travelerMesh);
     travelers.push({
       mesh: travelerMesh,
       curve: fullCurve,
@@ -114,22 +145,32 @@ export function buildGlobe(maxAnisotropy: number): GlobeComponents {
   // Single hub; origins chosen from continents that stay on the camera-facing hemisphere
   const TEHRAN = GLOBE_HUB;
 
-  const pointToPointRoutes = [
+  const corridors = [
     { from: { lat: 53.5, lon: 10.0 }, to: TEHRAN, h: 0.24 }, // Europe — Hamburg
     { from: { lat: -26.2, lon: 28.0 }, to: TEHRAN, h: 0.24 }, // Africa — Johannesburg
     { from: { lat: 31.2, lon: 121.5 }, to: TEHRAN, h: 0.26 }, // East Asia — Shanghai
     { from: { lat: -31.95, lon: 115.9 }, to: TEHRAN, h: 0.28 }, // Oceania — Perth
   ];
 
-  pointToPointRoutes.forEach((r) => addHairlinePointToPointArrow(r.from, r.to, r.h));
+  corridors.forEach((r) => addCorridor(r.from, r.to, r.h));
 
-  // Hub marker where all corridors converge
-  const hubPos = latLonToVec3(TEHRAN.lat, TEHRAN.lon, GLOBE_RADIUS * 1.016);
-  const hubNormal = hubPos.clone().normalize();
-  const hubRing = new THREE.Mesh(new THREE.RingGeometry(0.16, 0.22, 32), arrowInkMat);
+  // Hub marker where all corridors converge, with a beacon pulse rippling out of it
+  const hubPos = hubDirection.clone().multiplyScalar(GLOBE_RADIUS * 1.016);
+  const hubRing = new THREE.Mesh(new THREE.RingGeometry(0.16, 0.22, 32), corridorMat);
   hubRing.position.copy(hubPos);
-  hubRing.lookAt(hubPos.clone().add(hubNormal));
-  globeGroup.add(hubRing);
+  hubRing.lookAt(hubPos.clone().add(hubDirection));
+  corridorGroup.add(hubRing);
+
+  const pulseMat = new THREE.MeshBasicMaterial({
+    color: corridorMat.color,
+    transparent: true,
+    depthWrite: false,
+  });
+  const hubPulse = new THREE.Mesh(new THREE.RingGeometry(0.2, 0.24, 48), pulseMat);
+  hubPulse.position.copy(hubPos);
+  hubPulse.quaternion.copy(hubRing.quaternion);
+  hubPulse.renderOrder = 4;
+  corridorGroup.add(hubPulse);
 
   globeGroup.rotation.set(
     GLOBE_INITIAL_ROTATION.x,
@@ -137,24 +178,56 @@ export function buildGlobe(maxAnisotropy: number): GlobeComponents {
     GLOBE_INITIAL_ROTATION.z
   );
 
+  const weatherMaterials = [surfaceMaterial, cloudMaterial];
+  const up = new THREE.Vector3(0, 1, 0);
+  let markerVisibility = 1;
+
   return {
     globeGroup,
-    surfaceMaterial,
-    cloudMaterial,
     travelers,
-    mapTexture,
-    hubDirection: hubNormal.clone(),
-  };
-}
+    hubDirection: hubDirection.clone(),
+    setMaps(next) {
+      const previous = maps;
+      maps = next;
+      surfaceMaterial.uniforms.uAlbedo.value = next.albedo;
+      surfaceMaterial.uniforms.uMask.value = next.mask;
+      surfaceMaterial.uniforms.uLights.value = next.lights;
+      return previous;
+    },
+    setDive(t) {
+      // Approach stays clear; a short cloud veil only at the end, then the airplane cut
+      const weatherIn = THREE.MathUtils.smoothstep(t, 0.55, 0.82);
+      const bank = THREE.MathUtils.smoothstep(t, 0.72, 0.9);
+      for (const mat of weatherMaterials) {
+        mat.uniforms.uCloudCover.value =
+          EARTH_LOOK.cloudCover + EARTH_LOOK.diveCloudCover * weatherIn;
+        mat.uniforms.uHubClear.value = 1 - THREE.MathUtils.smoothstep(t, 0.5, 0.78);
+        mat.uniforms.uDiveFade.value = bank;
+      }
+      surfaceMaterial.uniforms.uDetail.value =
+        THREE.MathUtils.smoothstep(t, 0.25, 0.55) * (1 - bank);
+      atmosphereMaterial.uniforms.uIntensity.value =
+        1 - THREE.MathUtils.smoothstep(t, 0.55, 0.85);
+      // Soften corridors at the first hint of zoom — never let them balloon then vanish
+      markerVisibility = 1 - THREE.MathUtils.smoothstep(t, 0.02, 0.22);
+      corridorMat.opacity = markerVisibility;
+      corridorGroup.visible = markerVisibility > 0.02;
+    },
+    update(elapsed) {
+      for (const mat of weatherMaterials) mat.uniforms.uTime.value = elapsed;
 
-/** Advances the corridor travelers along their arcs. */
-export function updateGlobeTravelers(travelers: GlobeTraveler[], elapsed: number): void {
-  const up = new THREE.Vector3(0, 1, 0);
-  travelers.forEach((tr) => {
-    const t = ((elapsed * 0.25 + tr.offset) % 1.0) * 0.92 + 0.03;
-    const pos = tr.curve.getPoint(t);
-    const tangent = tr.curve.getTangent(t).normalize();
-    tr.mesh.position.copy(pos);
-    tr.mesh.quaternion.setFromUnitVectors(up, tangent);
-  });
+      travelers.forEach((tr) => {
+        const t = ((elapsed * 0.25 + tr.offset) % 1.0) * 0.92 + 0.03;
+        tr.mesh.position.copy(tr.curve.getPoint(t));
+        tr.mesh.quaternion.setFromUnitVectors(up, tr.curve.getTangent(t).normalize());
+      });
+
+      const pulse = (elapsed * 0.6) % 1;
+      hubPulse.scale.setScalar(1 + pulse * 3.2);
+      pulseMat.opacity = (1 - pulse) * 0.85 * markerVisibility;
+    },
+    dispose() {
+      disposeEarthMaps(maps);
+    },
+  };
 }

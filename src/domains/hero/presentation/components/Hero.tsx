@@ -164,9 +164,6 @@ export function Hero() {
   const [currentModeId, setCurrentModeId] = useState<HeroPhase>(1);
   const currentMode = LOGISTICS_MODES[currentModeId];
 
-  // Mouse spotlight coordinates for ambient organic paper aura
-  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
-
   // Refs for kinetic entrance & mode transition
   const heroContentRef = useRef<HTMLDivElement | null>(null);
   const badgeRef = useRef<HTMLDivElement | null>(null);
@@ -242,13 +239,6 @@ export function Hero() {
     });
   }, [activePhase, currentModeId]);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setMousePos({ x, y });
-  };
-
   const CurrentIcon = currentMode.icon;
 
   return (
@@ -265,7 +255,6 @@ export function Hero() {
       {/* Pinned Sticky Stage for the full scroll story (globe → Iran → air → sea → land → handover) */}
       <div
         ref={heroStageRef}
-        onMouseMove={handleMouseMove}
         className="sticky top-0 h-screen h-[100dvh] w-full flex flex-col lg:flex-row items-center justify-between lg:justify-start overflow-hidden bg-white dark:bg-zinc-950 z-10 transition-colors duration-300 pt-14 pb-3 sm:pt-18 sm:pb-5 lg:py-0"
       >
         {/* 3D GRAPHITE ANIMATION LAYER */}
@@ -279,33 +268,25 @@ export function Hero() {
             outline: "none",
             boxShadow: "none",
             maskImage:
-              "radial-gradient(circle at center, black 72%, transparent 100%)",
+              "radial-gradient(ellipse 82% 76% at 40% 48%, black 62%, transparent 100%)",
             WebkitMaskImage:
-              "radial-gradient(circle at center, black 72%, transparent 100%)",
+              "radial-gradient(ellipse 82% 76% at 40% 48%, black 62%, transparent 100%)",
           }}
         />
 
         {/* Cloud Mist Overlay for Airplane Dive Transition */}
         <CloudMist ref={cloudMistRef} />
 
-        {/* Ambient Interactive Spotlight (Subtle light aura tracking cursor) */}
-        <div
-          className="absolute inset-0 pointer-events-none transition-opacity duration-700 z-1"
-          style={{
-            background: `radial-gradient(850px circle at ${mousePos.x}% ${mousePos.y}%, rgba(236, 239, 248, 0.4), transparent 75%)`,
-          }}
-        />
-
         {/* FOREGROUND HERO CONTENT: Pure, Borderless, Box-Free Right-Aligned Typography */}
         <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12 xl:px-16 shrink-0 lg:flex-1 flex flex-col justify-end lg:justify-center items-start lg:h-full pointer-events-none pb-2 sm:pb-4 lg:pb-0">
           <div
             ref={heroContentRef}
-            className="relative isolate w-full max-w-lg lg:max-w-[500px] xl:max-w-[540px] flex flex-col items-start text-right space-y-2.5 sm:space-y-4 lg:space-y-5 transition-all duration-300 pointer-events-auto bg-gradient-to-t from-white via-white/95 to-transparent dark:from-zinc-950 dark:via-zinc-950/95 dark:to-transparent lg:bg-none pt-3 sm:pt-4 lg:pt-0"
+            className="relative isolate w-full max-w-lg lg:max-w-[500px] xl:max-w-[540px] flex flex-col items-start text-right space-y-2.5 sm:space-y-4 lg:space-y-5 transition-all duration-300 pointer-events-auto bg-gradient-to-t from-white via-white/90 to-transparent dark:from-zinc-950 dark:via-zinc-950/90 dark:to-transparent lg:bg-none pt-3 sm:pt-4 lg:pt-0"
           >
-              {/* Feathered frosted scrim: softens the sketch behind the copy without a visible panel edge */}
+              {/* Feathered white scrim behind the copy */}
               <div
                 aria-hidden="true"
-                className="hidden lg:block absolute  -inset-x-20 -z-10 pointer-events-none bg-white/75 dark:bg-zinc-950/75 backdrop-blur-[6px] [mask-image:radial-gradient(ellipse_at_center,black_45%,transparent_72%)] [-webkit-mask-image:radial-gradient(ellipse_at_center,black_45%,transparent_72%)]"
+                className="hidden lg:block absolute inset-y-[-8%] -inset-x-16 -z-10 pointer-events-none bg-white/70 dark:bg-zinc-950/70 backdrop-blur-[4px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_76%)] [-webkit-mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_76%)]"
               />
               {/* Dynamic Logistics Mode Badge */}
               <div

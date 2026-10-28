@@ -12,9 +12,13 @@ import {
   GLOBE_CAMERA,
   GLOBE_RADIUS,
   GLOBE_DIVE,
+  EARTH_LOOK,
   ACT_HANDOFF,
+  GLOBE_TO_AIR_HANDOFF,
   DELIVERY_SCENE,
   LOGISTICS_ACT_START,
+  LOGISTICS_TIME_SCALE,
+  logisticsAt,
   HANDOVER_ACT_START,
   HERO_TIMELINE_DURATION,
   HERO_PHASE_FOCUS_TIMES,
@@ -32,6 +36,14 @@ import {
   globeGraphiteFragmentShader,
 } from "../../domain/shaders/globeGraphiteShader";
 import {
+  earthCompositeVertexShader,
+  earthCompositeFragmentShader,
+} from "../../domain/shaders/earthShaders";
+import {
+  loadEarthUsdzMaps,
+  disposeEarthMaps,
+} from "../../infrastructure/textures/earthUsdzTextures";
+import {
   createGlowTexture,
   createCorrugatedBumpTexture,
   createHeroContainerTexture,
@@ -43,7 +55,7 @@ import { buildEnhancedAirplane } from "../../infrastructure/builders/buildAirpla
 import { buildClouds } from "../../infrastructure/builders/buildClouds";
 import { buildContainerShip } from "../../infrastructure/builders/buildShip";
 import { buildStaticStreetAndRealisticTruck } from "../../infrastructure/builders/buildStreetAndTruck";
-import { buildGlobe, updateGlobeTravelers } from "../../infrastructure/builders/buildGlobe";
+import { buildGlobe } from "../../infrastructure/builders/buildGlobe";
 import { buildDeliveryHandover } from "../../infrastructure/builders/buildDeliveryHandover";
 
 export type PencilGrade = "HB" | "2B" | "6B";
@@ -61,7 +73,8 @@ export function useHeroScene() {
   const [pencilGrade, setPencilGradeState] = useState<PencilGrade>("2B");
   const [isAutoPlaying, setIsAutoPlaying] = useState<boolean>(false);
   const [activePhase, setActivePhase] = useState<HeroPhase>(1);
-  const [scrollProgress, setScrollProgress] = useState<number>(0);
+  // Read on demand instead of held in state so scrubbing never re-renders the Hero tree
+  const scrollProgressRef = useRef<number>(0);
 
   // References to graphite shader material and auto-play state for animation callbacks
   const graphiteMatRef = useRef<THREE.ShaderMaterial | null>(null);
@@ -135,15 +148,16 @@ export function useHeroScene() {
     canvas.style.pointerEvents = "none";
     container.appendChild(canvas);
 
-    // Acquire and guard WebGL context
+    // Acquire and guard WebGL context. The canvas only ever receives a fullscreen post quad,
+    // so it skips MSAA; scene antialiasing comes from the multisampled render target.
     const gl =
       (canvas.getContext("webgl2", {
-        antialias: true,
+        antialias: false,
         powerPreference: "high-performance",
         stencil: false,
       }) as WebGL2RenderingContext | null) ||
       (canvas.getContext("webgl", {
-        antialias: true,
+        antialias: false,
         powerPreference: "high-performance",
         stencil: false,
       }) as WebGLRenderingContext | null);
@@ -199,7 +213,7 @@ export function useHeroScene() {
       renderer = new THREE.WebGLRenderer({
         canvas,
         context: gl,
-        antialias: true,
+        antialias: false,
         powerPreference: "high-performance",
         stencil: false,
         alpha: false,
@@ -207,7 +221,7 @@ export function useHeroScene() {
     } catch {
       renderer = new THREE.WebGLRenderer({
         canvas,
-        antialias: true,
+        antialias: false,
         stencil: false,
       });
     }
@@ -219,6 +233,8 @@ export function useHeroScene() {
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // Transparent clear lets the Earth pass composite its halo and clouds over the paper
+    renderer.setClearColor(0x000000, 0);
 
     // Soft studio reflections so metallic parts (chrome, aluminium, steel) don't render black
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
@@ -239,6 +255,7 @@ export function useHeroScene() {
       minFilter: THREE.LinearFilter,
       magFilter: THREE.LinearFilter,
       format: THREE.RGBAFormat,
+      samples: 4,
     });
 
     const postScene = new THREE.Scene();
@@ -282,6 +299,26 @@ export function useHeroScene() {
       },
       vertexShader: globeGraphiteVertexShader,
       fragmentShader: globeGraphiteFragmentShader,
+      depthWrite: false,
+      depthTest: false,
+    });
+
+    // Act I keeps the photoreal Earth out of the pencil pass and lays it straight onto the paper
+    const earthCompositeMat = new THREE.ShaderMaterial({
+      uniforms: {
+        tDiffuse: { value: sceneRenderTarget.texture },
+        uTime: { value: 0.0 },
+        uDpr: { value: DPR },
+        uDark: { value: isDarkInit ? 1.0 : 0.0 },
+        uReady: { value: 0.0 },
+        uPaperFade: { value: 0.0 },
+        uResolution: { value: new THREE.Vector2(rtWidth, rtHeight) },
+        uGlobeCenter: { value: new THREE.Vector2(0.5, 0.5) },
+        uGlobeRadius: { value: 0.3 },
+        uStarDrift: { value: new THREE.Vector2() },
+      },
+      vertexShader: earthCompositeVertexShader,
+      fragmentShader: earthCompositeFragmentShader,
       depthWrite: false,
       depthTest: false,
     });
@@ -361,6 +398,19 @@ export function useHeroScene() {
        ============================================================ */
     const cloudsContainer = buildClouds();
     scene.add(cloudsContainer);
+    const cloudSprites: Array<{ mat: THREE.SpriteMaterial; base: number }> = [];
+    cloudsContainer.traverse((obj) => {
+      if ((obj as THREE.Sprite).isSprite) {
+        const mat = (obj as THREE.Sprite).material as THREE.SpriteMaterial;
+        cloudSprites.push({ mat, base: mat.opacity });
+      }
+    });
+    const cloudFade = { t: 1 };
+    const applyCloudFade = () => {
+      const v = cloudFade.t;
+      for (const c of cloudSprites) c.mat.opacity = c.base * v;
+      cloudsContainer.visible = v > 0.02;
+    };
 
     /* ============================================================
        SECTION 6 — REALISTIC CONTAINER SHIP
@@ -418,8 +468,37 @@ export function useHeroScene() {
     positionGlobeCamera();
     const globeLookTarget = new THREE.Vector3(globeLookX, 0, 0);
 
-    const globe = buildGlobe(renderer.capabilities.getMaxAnisotropy());
+    const globe = buildGlobe();
     globeScene.add(globe.globeGroup);
+    const globePaper = globeScene.background;
+    const earthScreenPos = new THREE.Vector3();
+
+    // The Earth fades in once its USDZ maps are decoded (or as a plain ocean world if they fail)
+    let earthReady = false;
+    const earthMapsAbort = new AbortController();
+    loadEarthUsdzMaps(EARTH_LOOK.usdzUrl, {
+      maxWidth: Math.min(
+        renderer.capabilities.maxTextureSize,
+        Math.min(window.innerWidth, window.innerHeight) < 700 ? 2048 : 4096
+      ),
+      anisotropy: Math.min(renderer.capabilities.getMaxAnisotropy(), 8),
+      signal: earthMapsAbort.signal,
+    })
+      .then((maps) => {
+        disposeEarthMaps(globe.setMaps(maps));
+        renderer.initTexture(maps.albedo);
+        renderer.initTexture(maps.mask);
+        renderer.initTexture(maps.lights);
+      })
+      .catch((err: unknown) => {
+        if (earthMapsAbort.signal.aborted) return;
+        console.warn("Earth maps could not be loaded from the USDZ.", err);
+      })
+      .finally(() => {
+        if (earthMapsAbort.signal.aborted) return;
+        earthReady = true;
+        hideLoadingScreen();
+      });
 
     const handover = buildDeliveryHandover();
     globeScene.add(handover.deliverySceneGroup);
@@ -455,22 +534,32 @@ export function useHeroScene() {
     const scrollPromptEl = scrollPromptRef.current;
     const scrollWrapperEl = scrollWrapperRef.current;
 
+    let lastPhase: HeroPhase | null = null;
+    let promptHidden: boolean | null = null;
+
     const gsapCtx = gsap.context(() => {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: scrollWrapperEl || ".scroll-wrapper",
           start: "top top",
           end: "bottom bottom",
-          scrub: 1.2,
+          // Higher smoothing absorbs touchpad momentum bursts so motion eases instead of jumping
+          scrub: 1.8,
           onUpdate: (self) => {
             const p = self.progress;
-            setScrollProgress(p);
-            setActivePhase(getHeroPhase(p * HERO_TIMELINE_DURATION));
+            scrollProgressRef.current = p;
 
-            if (scrollPromptEl) {
-              gsap.set(scrollPromptEl, {
-                opacity: p > 0.05 ? 0 : 1,
-              });
+            // Fires every scrub tick: only touch React / the DOM when something actually changes
+            const phase = getHeroPhase(p * HERO_TIMELINE_DURATION);
+            if (phase !== lastPhase) {
+              lastPhase = phase;
+              setActivePhase(phase);
+            }
+
+            const hidePrompt = p > 0.05;
+            if (scrollPromptEl && hidePrompt !== promptHidden) {
+              promptHidden = hidePrompt;
+              scrollPromptEl.style.opacity = hidePrompt ? "0" : "1";
             }
           },
         },
@@ -480,20 +569,24 @@ export function useHeroScene() {
       const deliveryGroup = handover.deliverySceneGroup;
       const { courier, client, parcelGroup } = handover;
       const mist = cloudMistEl || "#cloud-mist";
-      const L = LOGISTICS_ACT_START; // 8.0 — ground dive dissolves; airplane act begins
-      const H = HANDOVER_ACT_START; // 24.1 — handover act begins (truck shot settles at 23.1)
+      const L = LOGISTICS_ACT_START; // ground dive dissolves; airplane act begins
+      const H = HANDOVER_ACT_START; // handover act begins, 1s after the truck shot settles
 
       /** Paper dissolve between acts: sketch lifts to blank paper, render path swaps, next sketch draws in. */
-      const addActHandoff = (swapAt: number, toGlobe: boolean) => {
+      const addActHandoff = (
+        swapAt: number,
+        toGlobe: boolean,
+        timing: { outLead: number; outDuration: number; inDuration: number } = ACT_HANDOFF
+      ) => {
         tl.to(
           handoffState,
-          { paper: 1, duration: ACT_HANDOFF.outDuration, ease: "power2.in" },
-          swapAt - ACT_HANDOFF.outLead
+          { paper: 1, duration: timing.outDuration, ease: "power2.in" },
+          swapAt - timing.outLead
         )
           .set(actState, { globe: toGlobe ? 1 : 0 }, swapAt)
           .to(
             handoffState,
-            { paper: 0, duration: ACT_HANDOFF.inDuration, ease: "power2.out" },
+            { paper: 0, duration: timing.inDuration, ease: "power2.out" },
             swapAt
           );
       };
@@ -555,6 +648,7 @@ export function useHeroScene() {
 
         globeGroup.scale.setScalar(scale);
         globeGroup.position.copy(hubTarget).addScaledVector(hubWorldDir, -GLOBE_RADIUS * scale);
+        globe.setDive(t);
       };
 
       tl.to(
@@ -563,13 +657,14 @@ export function useHeroScene() {
         GLOBE_DIVE.start
       ).to(
         diveState,
-        { t: 1, ease: "none", duration: L - GLOBE_DIVE.start, onUpdate: applyDive },
+        // Ease in so most of the dive is a clear approach; the cloud punch is only a brief rush at the end
+        { t: 1, ease: "power3.in", duration: L - GLOBE_DIVE.start, onUpdate: applyDive },
         GLOBE_DIVE.start
       );
 
-      // HANDOFF: ground dissolves to paper → airplane draws in, already in motion.
-      // The globe is hidden from here on so nothing of it can intrude on the handover act.
-      addActHandoff(L, false);
+      // HANDOFF: cloud bank dissolves to paper → airplane draws in quickly.
+      // Starts while still inside the clouds so land never fills the frame as a brown plate.
+      addActHandoff(L, false, GLOBE_TO_AIR_HANDOFF);
       tl.set(actState, { globeVisible: 0 }, L);
 
       // Airplane emerges with a gentle settle from a wider view, carrying the dive's momentum
@@ -581,93 +676,106 @@ export function useHeroScene() {
       );
 
       /* ============================================================
-         ACT II — AIR → SEA → LAND (8.0 → 23.1)
+         ACT II — AIR → SEA → LAND (times authored at base pace, stretched by LOGISTICS_TIME_SCALE)
          ============================================================ */
-      // STAGE 4: Airplane bank & initial descent
+      const at = logisticsAt;
+      const dur = (seconds: number) => seconds * LOGISTICS_TIME_SCALE;
+
+      // STAGE 4: Airplane bank above the deck (clear air — no lingering in clouds)
       tl.to(
         airplaneGroup.position,
-        { x: -52, y: 770, z: -155, ease: "power1.inOut", duration: 3.5 },
-        L
+        { x: -52, y: 770, z: -155, ease: "power1.inOut", duration: dur(2.6) },
+        at(0)
       )
         .to(
           airplaneGroup.rotation,
-          { x: -0.26, y: 0.45, z: 0.55, ease: "power1.inOut", duration: 3.5 },
-          L
+          { x: -0.26, y: 0.45, z: 0.55, ease: "power1.inOut", duration: dur(2.6) },
+          at(0)
         )
         .to(
           camera.position,
-          { x: -22, y: 810, z: -35, ease: "power1.inOut", duration: 3.5 },
-          L
+          { x: -22, y: 810, z: -35, ease: "power1.inOut", duration: dur(2.6) },
+          at(0)
         )
         .to(
           camLookTarget,
-          { x: -35, y: 670, z: -175, ease: "power1.inOut", duration: 3.5 },
-          L
+          { x: -35, y: 670, z: -175, ease: "power1.inOut", duration: dur(2.6) },
+          at(0)
         )
 
-        // STAGE 5: Diving through the cloud deck toward the ocean
+        // STAGE 5: Brief punch through the cloud deck — then clear ocean, no idle in the mist
         .to(
           airplaneGroup.position,
-          { x: -230, y: 410, z: -500, ease: "none", duration: 3.3 },
-          L + 3.5
+          { x: -230, y: 280, z: -500, ease: "power2.in", duration: dur(1.25) },
+          at(2.6)
         )
         .to(
           airplaneGroup.rotation,
-          { x: -0.04, y: 0.72, z: 0.14, ease: "power1.out", duration: 3.3 },
-          L + 3.5
+          { x: -0.04, y: 0.72, z: 0.14, ease: "power1.out", duration: dur(1.25) },
+          at(2.6)
         )
         .to(
           camera.position,
-          { x: 62, y: 230, z: -12, ease: "none", duration: 3.3 },
-          L + 3.5
+          { x: 68, y: 88, z: -24, ease: "power2.in", duration: dur(1.25) },
+          at(2.6)
         )
         .to(
           camLookTarget,
-          { x: 10, y: 42, z: -140, ease: "none", duration: 3.3 },
-          L + 3.5
+          { x: 6, y: 28, z: -136, ease: "power2.in", duration: dur(1.25) },
+          at(2.6)
         )
-        .to(mist, { opacity: 0.85, duration: 1.1, ease: "power2.in" }, L + 3.8)
-        .to(mist, { opacity: 0, duration: 1.4, ease: "power2.out" }, L + 4.9)
+        .to(mist, { opacity: 0.7, duration: dur(0.35), ease: "power2.in" }, at(2.7))
+        .to(mist, { opacity: 0, duration: dur(0.7), ease: "power2.out" }, at(3.05))
+        .to(
+          cloudFade,
+          {
+            t: 0,
+            duration: dur(1.1),
+            ease: "power2.in",
+            onUpdate: applyCloudFade,
+          },
+          at(2.65)
+        )
 
-        // STAGE 6: Showcasing the Container Ship on the ocean (Elevated 3/4 perspective revealing full container stacks, bays, and lashing)
+        // STAGE 6: Clear ship showcase (clouds already gone)
         .to(
           airplaneGroup.position,
-          { x: -520, y: 330, z: -1050, ease: "none", duration: 3.2 },
-          L + 6.8
+          { x: -520, y: 330, z: -1050, ease: "none", duration: dur(3.4) },
+          at(3.85)
         )
         .to(
           camera.position,
-          { x: 78, y: 46, z: -52, ease: "power2.out", duration: 3.2 },
-          L + 6.8
+          { x: 78, y: 46, z: -52, ease: "power2.out", duration: dur(3.4) },
+          at(3.85)
         )
         .to(
           camLookTarget,
-          { x: -4, y: 17, z: -136, ease: "power2.out", duration: 3.2 },
-          L + 6.8
+          { x: -4, y: 17, z: -136, ease: "power2.out", duration: dur(3.4) },
+          at(3.85)
         )
 
-        // STAGE 7: Smooth Drone Arc rising slightly over the channel toward the Truck
+        // STAGE 7: Smooth Drone Arc toward the Truck
         .to(
           camera.position,
-          { x: 122, y: 31, z: -105, ease: "sine.inOut", duration: 2.3 },
-          L + 10.0
+          { x: 122, y: 31, z: -105, ease: "sine.inOut", duration: dur(1.5) },
+          at(7.25)
         )
         .to(
           camLookTarget,
-          { x: 162, y: 22.5, z: -162, ease: "sine.inOut", duration: 2.3 },
-          L + 10.0
+          { x: 162, y: 22.5, z: -162, ease: "sine.inOut", duration: dur(1.5) },
+          at(7.25)
         )
 
-        // STAGE 8: Seamless Glide onto the Boulevard into a Low-Angle Hero Shot (Showcasing Cab Face & Persian Container Branding)
+        // STAGE 8: Boulevard hero shot (cab + Persian container branding)
         .to(
           camera.position,
-          { x: 151.8, y: 21.9, z: -146.2, ease: "power2.out", duration: 2.8 },
-          L + 12.3
+          { x: 151.8, y: 21.9, z: -146.2, ease: "power2.out", duration: dur(2.4) },
+          at(8.75)
         )
         .to(
           camLookTarget,
-          { x: 167.0, y: 21.5, z: -168.5, ease: "power2.out", duration: 2.8 },
-          L + 12.3
+          { x: 167.0, y: 21.5, z: -168.5, ease: "power2.out", duration: dur(2.4) },
+          at(8.75)
         );
 
       // HANDOFF: truck hero shot → paper → the client's door
@@ -831,22 +939,34 @@ export function useHeroScene() {
         }
       }
 
-      // ── Globe / handover act: render the small-scale scene through its own graphite pass ──
+      // ── Globe / handover act: photoreal Earth composited onto paper; the handover goes through graphite ──
       if (actState.globe >= 0.5) {
-        globe.globeGroup.visible = actState.globeVisible >= 0.5;
-        if (globe.globeGroup.visible) {
-          globe.surfaceMaterial.uniforms.uTime.value = elapsed;
-          globe.cloudMaterial.uniforms.uTime.value = elapsed;
-          updateGlobeTravelers(globe.travelers, elapsed);
-        }
+        const showEarth = actState.globeVisible >= 0.5;
+        globe.globeGroup.visible = showEarth;
+        globeScene.background = showEarth ? null : globePaper;
+        if (showEarth) globe.update(elapsed);
         globeCamera.lookAt(globeLookTarget);
 
         renderer.setRenderTarget(sceneRenderTarget);
         renderer.render(globeScene, globeCamera);
 
-        globeGraphiteMat.uniforms.uTime.value = elapsed;
-        globeGraphiteMat.uniforms.uPaperFade.value = handoffState.paper;
-        postQuad.material = globeGraphiteMat;
+        const postMat = showEarth ? earthCompositeMat : globeGraphiteMat;
+        if (showEarth) {
+          const u = earthCompositeMat.uniforms;
+          if (earthReady) u.uReady.value = Math.min(1, u.uReady.value + delta * 1.6);
+
+          const group = globe.globeGroup;
+          earthScreenPos.copy(group.position).project(globeCamera);
+          u.uGlobeCenter.value.set(earthScreenPos.x * 0.5 + 0.5, earthScreenPos.y * 0.5 + 0.5);
+          const camDist = globeCamera.position.distanceTo(group.position);
+          const angular = Math.asin(Math.min((GLOBE_RADIUS * group.scale.x) / camDist, 0.999));
+          u.uGlobeRadius.value =
+            (0.5 * Math.tan(angular)) / Math.tan(THREE.MathUtils.degToRad(globeCamera.fov / 2));
+          u.uStarDrift.value.set(group.rotation.y * 90, group.rotation.x * -60);
+        }
+        postMat.uniforms.uTime.value = elapsed;
+        postMat.uniforms.uPaperFade.value = handoffState.paper;
+        postQuad.material = postMat;
         renderer.setRenderTarget(null);
         renderer.render(postScene, postCamera);
         return;
@@ -934,6 +1054,8 @@ export function useHeroScene() {
       graphiteShaderMat.uniforms.uResolution.value.set(rtWidth, rtHeight);
       globeGraphiteMat.uniforms.uResolution.value.set(rtWidth, rtHeight);
       globeGraphiteMat.uniforms.uDpr.value = dpr;
+      earthCompositeMat.uniforms.uDpr.value = dpr;
+      earthCompositeMat.uniforms.uResolution.value.set(rtWidth, rtHeight);
 
       // Only refresh ScrollTrigger when width changes (rotation/resize), avoiding mobile URL bar jitter
       const curW = typeof window !== "undefined" ? window.innerWidth : w;
@@ -947,28 +1069,35 @@ export function useHeroScene() {
       const isDark = document.documentElement.classList.contains("dark");
       graphiteShaderMat.uniforms.uDark.value = isDark ? 1.0 : 0.0;
       globeGraphiteMat.uniforms.uDark.value = isDark ? 1.0 : 0.0;
+      earthCompositeMat.uniforms.uDark.value = isDark ? 1.0 : 0.0;
     };
 
     window.addEventListener("resize", handleResize);
     window.addEventListener("themechange", handleThemeChange);
     handleResize();
 
-    const loadingTimeout1 = setTimeout(() => {
+    // Hidden once the Earth maps are ready; the fallback keeps a slow network from blocking the page
+    let loadingHidden = false;
+    let loadingRemoveTimer: ReturnType<typeof setTimeout> | undefined;
+    function hideLoadingScreen() {
+      if (loadingHidden) return;
+      loadingHidden = true;
       const ls = loadingScreenRef.current;
-      if (ls) {
-        ls.classList.add("opacity-0", "invisible", "pointer-events-none");
-        const loadingTimeout2 = setTimeout(() => {
-          if (ls) ls.style.display = "none";
-        }, 700);
-        return () => clearTimeout(loadingTimeout2);
-      }
-    }, 400);
+      if (!ls) return;
+      ls.classList.add("opacity-0", "invisible", "pointer-events-none");
+      loadingRemoveTimer = setTimeout(() => {
+        ls.style.display = "none";
+      }, 700);
+    }
+    const loadingFallbackTimer = setTimeout(hideLoadingScreen, 6000);
 
     /* ============================================================
        CLEANUP
        ============================================================ */
     return () => {
-      clearTimeout(loadingTimeout1);
+      clearTimeout(loadingFallbackTimer);
+      clearTimeout(loadingRemoveTimer);
+      earthMapsAbort.abort();
       clearTimeout(refreshTimer);
       visibilityObserver?.disconnect();
       window.removeEventListener("resize", handleResize);
@@ -980,7 +1109,8 @@ export function useHeroScene() {
       disposeObject3D(globeScene);
       disposeObject3D(postScene);
       globeGraphiteMat.dispose();
-      globe.mapTexture.dispose();
+      earthCompositeMat.dispose();
+      globe.dispose();
       handover.boxTexture.dispose();
       sceneRenderTarget.dispose();
       envTexture.dispose();
@@ -1010,7 +1140,7 @@ export function useHeroScene() {
     isAutoPlaying,
     toggleAutoPlay,
     activePhase,
-    scrollProgress,
+    scrollProgressRef,
     scrollToPhase,
   };
 }

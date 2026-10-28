@@ -196,20 +196,22 @@ export function buildClouds(): THREE.Group {
     const variantIdx = i % 3;
     const tex = cloudTextures[variantIdx];
 
+    const baseOpacity = 0.5 + random() * 0.32;
     const cMat = new THREE.SpriteMaterial({
       map: tex,
       color: 0xffffff,
       transparent: true,
-      opacity: 0.55 + random() * 0.35,
+      opacity: baseOpacity,
       depthWrite: false,
     });
+    cMat.userData.baseOpacity = baseOpacity;
 
     const sprite = new THREE.Sprite(cMat);
 
-    // Spread along flight corridor
+    // Thin flight-level deck — dense enough to read, short enough to dive through
     const spread = i < 45 ? 1000 : 4400;
     const x = (random() - 0.5) * spread;
-    const y = 420 + (random() - 0.5) * 160;
+    const y = 480 + (random() - 0.5) * 90;
     const z = -200 + (random() - 0.5) * spread;
 
     sprite.position.set(x, y, z);
